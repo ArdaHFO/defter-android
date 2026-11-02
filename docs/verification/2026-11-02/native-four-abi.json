@@ -1,0 +1,209 @@
+{
+  "dateUtc": "2026-11-02T20:13:44Z",
+  "build": "Gradle :app:externalNativeBuildDebug",
+  "buildSuccessful": true,
+  "variant": "Debug",
+  "ndk": "28.2.13676358",
+  "cmake": "3.22.1",
+  "buildLogSha256": "4b93ff4f127590dc0f8129984309ec824520534aa28c4a22d8fbb4e98d02a1cf",
+  "abiCount": 4,
+  "libraryCount": 8,
+  "allMachinesMatch": true,
+  "allLibrariesHave16KiBLoadAlignment": false,
+  "allJniLibrariesHave16KiBLoadAlignment": true,
+  "all64BitLibrariesHave16KiBLoadAlignment": true,
+  "allDebugCompilationRecordsUseO2": true,
+  "note": "ELF inspection and cross-compilation only. No APK was built, so APK ZIP alignment was not tested. Actual Android runtime evidence is separate and x86_64 only.",
+  "alignmentScope": "All JNI libraries and both 64-bit C++ runtimes use 16 KiB LOAD alignment. NDK-provided 32-bit C++ runtimes use 4 KiB alignment, preserved explicitly in this report. Official Android alignment guidance identifies arm64-v8a and x86_64 libraries for the 16 KiB check.",
+  "alignmentReference": "https://developer.android.com/guide/practices/page-sizes#elf-alignment",
+  "abis": [
+    {
+      "abi": "arm64-v8a",
+      "libraries": [
+        {
+          "file": "libc++_shared.so",
+          "bytes": 9236352,
+          "sha256": "ab4e6c71b96b851de45a8a9bd86369e7dbc2130a44b3b4520564be94847910f2",
+          "machine": "AArch64",
+          "expectedMachine": "AArch64",
+          "machineMatches": true,
+          "elfClass": "ELF64",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        },
+        {
+          "file": "libdefter_whisper.so",
+          "bytes": 15315848,
+          "sha256": "ecb368e81777b3fec822a3975a13f3378ef6d07826bf7aa5d737c1e4751c16fb",
+          "machine": "AArch64",
+          "expectedMachine": "AArch64",
+          "machineMatches": true,
+          "elfClass": "ELF64",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        }
+      ],
+      "debugOptimization": {
+        "compileCommandsSha256": "28d93a3789ac58f6da1287768cc8e5ba4f1b2a1bd4a3b9a42edcf86ad57eba5b",
+        "recordedTranslationUnits": 31,
+        "allRecordedUnitsUseO2": true,
+        "evidenceSources": [
+          "whisper_jni.cpp",
+          "ggml.c",
+          "ggml-cpu.c",
+          "whisper.cpp"
+        ]
+      }
+    },
+    {
+      "abi": "armeabi-v7a",
+      "libraries": [
+        {
+          "file": "libc++_shared.so",
+          "bytes": 7126916,
+          "sha256": "10ee48131d6742899619f7cfb3b8df150ad787d723c766a3fb80d4bb275711ff",
+          "machine": "ARM",
+          "expectedMachine": "ARM",
+          "machineMatches": true,
+          "elfClass": "ELF32",
+          "loadSegmentAlignmentBytes": [
+            4096,
+            4096,
+            4096,
+            4096
+          ],
+          "allLoadSegmentsAtLeast16KiB": false
+        },
+        {
+          "file": "libdefter_whisper.so",
+          "bytes": 12468696,
+          "sha256": "6b0be4ca9f768e25fe86d95b84b4d817a2871ffc785a8cfe739f61ac2ae0db5b",
+          "machine": "ARM",
+          "expectedMachine": "ARM",
+          "machineMatches": true,
+          "elfClass": "ELF32",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        }
+      ],
+      "debugOptimization": {
+        "compileCommandsSha256": "9834607c7e0b3f2275ce303279b35e1b11f6e381cc6902dfa15c088f63e1f5bc",
+        "recordedTranslationUnits": 31,
+        "allRecordedUnitsUseO2": true,
+        "evidenceSources": [
+          "whisper_jni.cpp",
+          "ggml.c",
+          "ggml-cpu.c",
+          "whisper.cpp"
+        ]
+      }
+    },
+    {
+      "abi": "x86_64",
+      "libraries": [
+        {
+          "file": "libc++_shared.so",
+          "bytes": 8808664,
+          "sha256": "e4cd73c8a3607269f3be58d15c21f78bff112e27f9398d6261e5f965668f8746",
+          "machine": "Advanced Micro Devices X86-64",
+          "expectedMachine": "Advanced Micro Devices X86-64",
+          "machineMatches": true,
+          "elfClass": "ELF64",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        },
+        {
+          "file": "libdefter_whisper.so",
+          "bytes": 15017704,
+          "sha256": "34873ebb57898f49bd54ac427c39c2296bb9e87ca18806414c040ff691567608",
+          "machine": "Advanced Micro Devices X86-64",
+          "expectedMachine": "Advanced Micro Devices X86-64",
+          "machineMatches": true,
+          "elfClass": "ELF64",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        }
+      ],
+      "debugOptimization": {
+        "compileCommandsSha256": "48d51218a8b3880b1dc6d7e40533a38025fc4495fddc68ea71b4716b1b8beeaa",
+        "recordedTranslationUnits": 31,
+        "allRecordedUnitsUseO2": true,
+        "evidenceSources": [
+          "whisper_jni.cpp",
+          "ggml.c",
+          "ggml-cpu.c",
+          "whisper.cpp"
+        ]
+      }
+    },
+    {
+      "abi": "x86",
+      "libraries": [
+        {
+          "file": "libc++_shared.so",
+          "bytes": 7082684,
+          "sha256": "0d3760e528242389388893f46de419ebf80870d08fa73732dc2b1e9b69a793c1",
+          "machine": "Intel 80386",
+          "expectedMachine": "Intel 80386",
+          "machineMatches": true,
+          "elfClass": "ELF32",
+          "loadSegmentAlignmentBytes": [
+            4096,
+            4096,
+            4096,
+            4096
+          ],
+          "allLoadSegmentsAtLeast16KiB": false
+        },
+        {
+          "file": "libdefter_whisper.so",
+          "bytes": 12895992,
+          "sha256": "79617d63b8b549d2e8cb47364b1b59d2a77f371c900d7651d6ec910548c3419f",
+          "machine": "Intel 80386",
+          "expectedMachine": "Intel 80386",
+          "machineMatches": true,
+          "elfClass": "ELF32",
+          "loadSegmentAlignmentBytes": [
+            16384,
+            16384,
+            16384
+          ],
+          "allLoadSegmentsAtLeast16KiB": true
+        }
+      ],
+      "debugOptimization": {
+        "compileCommandsSha256": "b58140bb4ab3af02f0bb37c78194e5f27a3ddae292197487f8074a0c8bc57edb",
+        "recordedTranslationUnits": 31,
+        "allRecordedUnitsUseO2": true,
+        "evidenceSources": [
+          "whisper_jni.cpp",
+          "ggml.c",
+          "ggml-cpu.c",
+          "whisper.cpp"
+        ]
+      }
+    }
+  ]
+}

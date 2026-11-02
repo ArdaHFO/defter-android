@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-02",
+  "platform": "Android 15 emulator-5556 x86_64",
+  "sourceVersion": "whisper.cpp v1.9.5 d1be6fde11ac6e0407606b4e42fe72d34add8037",
+  "model": "multilingual base",
+  "distinctScenariosPassed": 10,
+  "unresolvedFailures": 0,
+  "separateRuns": true,
+  "engineCases": [
+    "native JNI loads pinned version and rejects missing/corrupt model without crash",
+    "actual codec WAV decoding emits bounded 30s chunks and resumes exact file timestamps",
+    "decoder cancellation releases resources; invalid media is rejected",
+    "native 48kHz stereo decoder plus production resampler yields 16kHz mono with correct duration",
+    "native MediaCodec AAC encoding/muxing and production M4A decoding succeed without microphone",
+    "actual model manager verifies full pinned multilingual base locally, with no download request",
+    "real production decoder + model manager + JNI Whisper base transcribe official JFK speech with timestamps",
+    "coroutine cancellation reaches real native abort callback and frees context safely"
+  ],
+  "correctedStorageCases": [
+    "actual repository imports WAV/M4A metadata and exact bytes; corrupt audio leaves library unchanged",
+    "actual backup round trip preserves audio, real transcript, bookmarks and rebound notebook/page/asset links"
+  ],
+  "historicalFailures": [
+    "Harness hard-link restriction resolved with sandbox copy",
+    "Actual WAV import HAS_AUDIO metadata assumption fixed using MediaExtractor audio track validation"
+  ],
+  "engineClassCount": 32,
+  "engineClassesChanged": 0,
+  "sourceFileCount": 21,
+  "sourceStageMismatches": 0,
+  "apkProduced": false,
+  "microphoneUsed": false,
+  "applicationDataAccessed": false,
+  "physicalDeviceBenchmark": false,
+  "turkishAccuracyMeasured": false,
+  "emulatorStopped": true,
+  "isolatedAdbPort": 5038
+}

@@ -1,0 +1,23 @@
+# Local tools, IDE state, build output and signing material
+.gradle/
+.kotlin/
+.cxx/
+.local/
+.idea/
+**/build/
+*.iml
+local.properties
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+.env
+.env.*
+!.env.example
+
+# Runtime recordings, backups and downloadable model weights
+*.defter
+ggml-*.bin
+*.apk
+*.aab

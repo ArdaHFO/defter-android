@@ -1,0 +1,21 @@
+{
+  "version": "0.3.0-alpha",
+  "recordedUtc": "2026-11-02T20:19:57.4419340Z",
+  "tests": 244,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "lintErrors": 0,
+  "lintWarnings": 19,
+  "sourceFiles": 1545,
+  "checkLog": "check-4.log",
+  "nativeLog": "native-2.log",
+  "apkBuilt": false,
+  "nativeAbis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64",
+    "x86"
+  ],
+  "physicalSamsungValidated": false
+}

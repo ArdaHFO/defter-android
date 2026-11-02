@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="defter_launcher_background">#30295F</color>
+    <color name="defter_canvas">#F5F6FA</color>
+    <color name="defter_accent">#5B50D6</color>
+</resources>

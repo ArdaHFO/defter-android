@@ -1,0 +1,30 @@
+{
+  "version": "0.4.0-alpha",
+  "generated_utc": "2026-11-02T21:10:41.696406+00:00",
+  "junit_suites": 39,
+  "junit": {
+    "tests": 244,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Fatal": 0,
+    "Error": 0,
+    "Warning": 22,
+    "Information": 0
+  },
+  "matching_source_files": 1555,
+  "screenshots": [
+    "modern-library-tablet.png",
+    "modern-library-phone.png",
+    "modern-editor-tablet.png",
+    "modern-editor-phone.png",
+    "audio-phone-library.png",
+    "audio-phone-transcript.png",
+    "audio-tablet-transcript.png",
+    "pro-editor-split.png",
+    "pro-editor-phone.png"
+  ],
+  "screenshot_kind": "Robolectric native Compose renders, synthetic data; not physical device screenshots"
+}

@@ -1,0 +1,50 @@
+{
+  "source_version": "0.4.0-alpha",
+  "publication_checks": "Static file, hash and privacy checks only. No application or tests executed.",
+  "copied_evidence": [
+    {
+      "source": "Defter/verification/visual-refresh/checks.json",
+      "target": "docs/verification/0.4.0-alpha/checks.json",
+      "source_sha256": "a51e09d3d11f395e774b5659f5908b10b013576146631955ff028c7bc6fcf3ab",
+      "staged_sha256": "a51e09d3d11f395e774b5659f5908b10b013576146631955ff028c7bc6fcf3ab",
+      "transformation": "none"
+    },
+    {
+      "source": "Defter/verification/visual-refresh/source.sha256",
+      "target": "docs/verification/0.4.0-alpha/source.sha256",
+      "source_sha256": "4357901bcd14e99d093e99bcb3fb37a0cb492e61160654562bf59503fce80f35",
+      "staged_sha256": "4357901bcd14e99d093e99bcb3fb37a0cb492e61160654562bf59503fce80f35",
+      "transformation": "none"
+    },
+    {
+      "source": "Defter/verification/visual-refresh/pro-editor-split.png",
+      "target": "docs/images/editor-split.png",
+      "source_sha256": "b5b6e92e7c883b22d99c8daaf3e2ece473af162236884f2142ece29e49251dd5",
+      "staged_sha256": "b5b6e92e7c883b22d99c8daaf3e2ece473af162236884f2142ece29e49251dd5",
+      "transformation": "none"
+    },
+    {
+      "source": "Defter/verification/visual-refresh/modern-library-tablet.png",
+      "target": "docs/images/library-tablet.png",
+      "source_sha256": "0ad56b7529975223d59356edaafc6c47edb24a6a692ecea5e98ef949bcf08f2e",
+      "staged_sha256": "0ad56b7529975223d59356edaafc6c47edb24a6a692ecea5e98ef949bcf08f2e",
+      "transformation": "none"
+    },
+    {
+      "source": "Defter/verification/visual-refresh/audio-phone-library.png",
+      "target": "docs/images/audio-phone-library.png",
+      "source_sha256": "cb2af2c7c1c2eb6f83a39c32e57ba28432a1b1cc7e0f34655b6bae707ac19c95",
+      "staged_sha256": "cb2af2c7c1c2eb6f83a39c32e57ba28432a1b1cc7e0f34655b6bae707ac19c95",
+      "transformation": "none"
+    },
+    {
+      "source": "Defter/verification/visual-refresh/audio-tablet-transcript.png",
+      "target": "docs/images/audio-tablet-transcript.png",
+      "source_sha256": "4bfb5e87ba4450d9360f79b8fcabce290ab6ae183bf598c8da286a311ada0d17",
+      "staged_sha256": "4bfb5e87ba4450d9360f79b8fcabce290ab6ae183bf598c8da286a311ada0d17",
+      "transformation": "none"
+    }
+  ],
+  "original_readme_sha256": "597df20048e0a11c3b0644ee526ed46d82152e48e7367cb4e023da3edfc3631e",
+  "original_visual_report_sha256": "c503c64e90afb4425b5c63fe0dcbd2e3ce8a26f9130a4fc779b855b092257040"
+}

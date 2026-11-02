@@ -1,0 +1,254 @@
+{
+  "version": "0.4.0-alpha",
+  "source_sha256": "0e910b1ed560e418070ae2a38ebf4700c1aed19b76cdcddea5bba677b91a9537",
+  "counts": {
+    "Fatal": 0,
+    "Error": 0,
+    "Warning": 22,
+    "Information": 0
+  },
+  "issues": [
+    {
+      "id": "OldTargetApi",
+      "severity": "Warning",
+      "message": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details.",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "14"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.compose:compose-bom than 2025.04.01 is available: 2026.09.00",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "54"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.core:core-ktx than 1.16.0 is available: 1.19.1",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "55"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.activity:activity-compose than 1.10.1 is available: 1.13.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "56"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "57"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "58"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.test:core than 1.6.1 is available: 1.7.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "69"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.test:runner than 1.6.2 is available: 1.7.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "73"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.test:rules than 1.6.1 is available: 1.7.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "74"
+        }
+      ]
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0",
+      "locations": [
+        {
+          "file": "app/build.gradle.kts",
+          "line": "75"
+        }
+      ]
+    },
+    {
+      "id": "ObsoleteSdkInt",
+      "severity": "Warning",
+      "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.",
+      "locations": [
+        {
+          "file": "app/src/main/res/mipmap-anydpi-v26",
+          "line": null
+        }
+      ]
+    },
+    {
+      "id": "UsableSpace",
+      "severity": "Warning",
+      "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+          "line": "164"
+        }
+      ]
+    },
+    {
+      "id": "UsableSpace",
+      "severity": "Warning",
+      "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+          "line": "270"
+        }
+      ]
+    },
+    {
+      "id": "UsableSpace",
+      "severity": "Warning",
+      "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+          "line": "306"
+        }
+      ]
+    },
+    {
+      "id": "MonochromeLauncherIcon",
+      "severity": "Warning",
+      "message": "The application adaptive icon is missing a monochrome tag",
+      "locations": [
+        {
+          "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+          "line": "2"
+        }
+      ]
+    },
+    {
+      "id": "MonochromeLauncherIcon",
+      "severity": "Warning",
+      "message": "The application adaptive roundIcon is missing a monochrome tag",
+      "locations": [
+        {
+          "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+          "line": "2"
+        }
+      ]
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX function `createBitmap` instead?",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/DefterViewModel.kt",
+          "line": "519"
+        }
+      ]
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX function `createBitmap` instead?",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+          "line": "499"
+        }
+      ]
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX extension function `Bitmap.scale` instead?",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+          "line": "538"
+        }
+      ]
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX extension function `Canvas.withClip` instead?",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+          "line": "156"
+        }
+      ]
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX extension function `Canvas.withClip` instead?",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/ink/PageRenderer.kt",
+          "line": "36"
+        }
+      ]
+    },
+    {
+      "id": "ClickableViewAccessibility",
+      "severity": "Warning",
+      "message": "`NotebookCanvas#onTouchEvent` should call `NotebookCanvas#performClick` when a click is detected",
+      "locations": [
+        {
+          "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+          "line": "188"
+        }
+      ]
+    }
+  ]
+}

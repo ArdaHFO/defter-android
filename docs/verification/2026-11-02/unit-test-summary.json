@@ -1,0 +1,402 @@
+{
+  "date": "2026-11-02",
+  "scope": "Historical JUnit XML extraction; tests not rerun for repository preparation; machine hostname and local paths omitted.",
+  "totals": {
+    "tests": 244,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "dev.defter.app.audio.AudioCaptureRecoveryTest",
+      "timestamp": "2026-11-02T20:15:01.638Z",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioCaptureRecoveryTest.xml",
+      "source_report_sha256": "e93f57575a21886737f5acaa511ae4e769b1c7f45eb7163e3bb2e1da15e1d348"
+    },
+    {
+      "name": "dev.defter.app.audio.AudioDecoderTest",
+      "timestamp": "2026-11-02T20:15:02.574Z",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioDecoderTest.xml",
+      "source_report_sha256": "c53219d782e1050b0bc93e97067bab9750426a8a4e7772848965be38f3a7422d"
+    },
+    {
+      "name": "dev.defter.app.audio.AudioPlaybackControllerTest",
+      "timestamp": "2026-11-02T20:15:02.716Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioPlaybackControllerTest.xml",
+      "source_report_sha256": "24a5474c9a87df7c8f9df308208ca7a0765c49f3fababc0068436a5112439c3a"
+    },
+    {
+      "name": "dev.defter.app.audio.AudioRecorderServiceTest",
+      "timestamp": "2026-11-02T20:14:32.196Z",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioRecorderServiceTest.xml",
+      "source_report_sha256": "af6950c866aba2bda8a11cd99a4456cc349ce87defd6b48cd9ecdf490ddc86b5"
+    },
+    {
+      "name": "dev.defter.app.audio.AudioTimelineTest",
+      "timestamp": "2026-11-02T20:15:03.143Z",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioTimelineTest.xml",
+      "source_report_sha256": "b028c516a9c6e2be3635e4e314b8c4e9ea51b50a9758edd094a76685ff2a0e7c"
+    },
+    {
+      "name": "dev.defter.app.audio.AudioTranscriptionServiceTest",
+      "timestamp": "2026-11-02T20:14:40.520Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.AudioTranscriptionServiceTest.xml",
+      "source_report_sha256": "8a6df963417aa59d1125a9e9375668fcc624ae09a28d4e2264ae091f27faa1da"
+    },
+    {
+      "name": "dev.defter.app.audio.TranscriptionRunnerTest",
+      "timestamp": "2026-11-02T20:15:03.234Z",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.TranscriptionRunnerTest.xml",
+      "source_report_sha256": "bcaa6636e770f9955383cce32964060a77b9e7844144197ba09ac441ed297056"
+    },
+    {
+      "name": "dev.defter.app.audio.TranscriptToolsTest",
+      "timestamp": "2026-11-02T20:15:03.158Z",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.TranscriptToolsTest.xml",
+      "source_report_sha256": "bd871f71737940f1ff0f102be7a8fbb2eabcb76e394af4a5fec2806ebcef3102"
+    },
+    {
+      "name": "dev.defter.app.audio.WhisperModelManagerTest",
+      "timestamp": "2026-11-02T20:15:11.724Z",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.WhisperModelManagerTest.xml",
+      "source_report_sha256": "4673175e1a57b222129b112856b3ad8494ceeb97f6e0dfbd4e009cc5b3b0bee4"
+    },
+    {
+      "name": "dev.defter.app.audio.WhisperTranscriberTest",
+      "timestamp": "2026-11-02T20:15:12.370Z",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.audio.WhisperTranscriberTest.xml",
+      "source_report_sha256": "dde4149bd017071f61493ba1040b76e318a218fbfa9ba973d2c404fe16875026"
+    },
+    {
+      "name": "dev.defter.app.data.AudioImportTest",
+      "timestamp": "2026-11-02T20:15:16.782Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.AudioImportTest.xml",
+      "source_report_sha256": "5b0fe54b8a66a446c2d92123ba0796d8e8537021e7d0dee7ef61519e7e33d1fa"
+    },
+    {
+      "name": "dev.defter.app.data.AudioStorageTest",
+      "timestamp": "2026-11-02T20:15:17.479Z",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.AudioStorageTest.xml",
+      "source_report_sha256": "b1453a6207c1066b05a28b9f041d41d1c014b6239d22818526f09e1d3acc74ca"
+    },
+    {
+      "name": "dev.defter.app.data.DocumentRepositoryTest",
+      "timestamp": "2026-11-02T20:15:26.591Z",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.DocumentRepositoryTest.xml",
+      "source_report_sha256": "99e84daf35319ea2b1f721319ada8910bc083a6ca59b8469e5cf7de18532e8cd"
+    },
+    {
+      "name": "dev.defter.app.data.ProStorageTest",
+      "timestamp": "2026-11-02T20:15:30.592Z",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.ProStorageTest.xml",
+      "source_report_sha256": "f21c454b2da97ae6fb7b01b99d3d6037ef32df5b0f6207ed80bc28685aeaf891"
+    },
+    {
+      "name": "dev.defter.app.data.StrictJsonTest",
+      "timestamp": "2026-11-02T20:15:35.417Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.StrictJsonTest.xml",
+      "source_report_sha256": "3d3f7068796e26b80eadce1860c64a091757e7ae123659a45ff302b27aa95397"
+    },
+    {
+      "name": "dev.defter.app.data.SyncRepositoryTest",
+      "timestamp": "2026-11-02T20:15:35.610Z",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.data.SyncRepositoryTest.xml",
+      "source_report_sha256": "a37aad5fa5c69dd0fb1a8e7de30819e3766a66273faf532545a997e37c1ec111"
+    },
+    {
+      "name": "dev.defter.app.DefterViewModelTest",
+      "timestamp": "2026-11-02T20:14:41.590Z",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.DefterViewModelTest.xml",
+      "source_report_sha256": "4327ebe3866d5222458d4d82e2af8b00f07bec5fb2811f28d1644dd30ff64d30"
+    },
+    {
+      "name": "dev.defter.app.ink.AdvancedCanvasTest",
+      "timestamp": "2026-11-02T20:15:42.476Z",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.AdvancedCanvasTest.xml",
+      "source_report_sha256": "06531da0627b8000ccc159f26f40fa90725c26661f81892d382e10bec90f9012"
+    },
+    {
+      "name": "dev.defter.app.ink.AdvancedInkEditingTest",
+      "timestamp": "2026-11-02T20:15:43.670Z",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.AdvancedInkEditingTest.xml",
+      "source_report_sha256": "a6dd4f2b47f8c582b6d7719cf22c7983b9bc5c1e3d13772cc4775aa002116db7"
+    },
+    {
+      "name": "dev.defter.app.ink.AdvancedRendererTest",
+      "timestamp": "2026-11-02T20:15:44.291Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.AdvancedRendererTest.xml",
+      "source_report_sha256": "cebd1136d21778f8af21c42473dcddaa3e7953be75a36a6c39871bda034f409b"
+    },
+    {
+      "name": "dev.defter.app.ink.ElementGeometryTest",
+      "timestamp": "2026-11-02T20:15:50.160Z",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.ElementGeometryTest.xml",
+      "source_report_sha256": "8ed2fe5d80a3dee9308726f298c709dc179258d4a0d66acf6a9fd0622e57f48d"
+    },
+    {
+      "name": "dev.defter.app.ink.GeometryBudgetTest",
+      "timestamp": "2026-11-02T20:15:50.617Z",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.GeometryBudgetTest.xml",
+      "source_report_sha256": "26824cc2bb3735326758f60a4fb6eb9e8745c1c79683dc8a06929f3c72af12b1"
+    },
+    {
+      "name": "dev.defter.app.ink.NotebookCanvasTest",
+      "timestamp": "2026-11-02T20:15:50.892Z",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.NotebookCanvasTest.xml",
+      "source_report_sha256": "e25cd3ba5481d635a53356e44eef09c24c7b6beabc8a8c13a29381f578e9ecdb"
+    },
+    {
+      "name": "dev.defter.app.ink.PageRendererTest",
+      "timestamp": "2026-11-02T20:15:51.766Z",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.PageRendererTest.xml",
+      "source_report_sha256": "285e6abdd53ab779050c3828848908d6c2197f27ddca96eeb590cf5226023bb9"
+    },
+    {
+      "name": "dev.defter.app.ink.SmoothedHitGeometryTest",
+      "timestamp": "2026-11-02T20:15:52.321Z",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.SmoothedHitGeometryTest.xml",
+      "source_report_sha256": "269defdbfe7a60af9d7fb5cc97658c07d2866e172f4637059b21e02b5405980b"
+    },
+    {
+      "name": "dev.defter.app.ink.StylusButtonTest",
+      "timestamp": "2026-11-02T20:15:52.818Z",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ink.StylusButtonTest.xml",
+      "source_report_sha256": "0e389606d6cc52c2803b0a71ba41b0162cec49a611c352a367610bccb20480b1"
+    },
+    {
+      "name": "dev.defter.app.ProViewModelMemoryTest",
+      "timestamp": "2026-11-02T20:14:53.018Z",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ProViewModelMemoryTest.xml",
+      "source_report_sha256": "662f91d598bbe9ef9555790cf3a0c54d39215f002fdd6d52b1d3d83f2b3b9c4f"
+    },
+    {
+      "name": "dev.defter.app.ProViewModelTest",
+      "timestamp": "2026-11-02T20:14:56.123Z",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ProViewModelTest.xml",
+      "source_report_sha256": "031cdd7f2ed5317e5b2e214e8c2d2435796a22ea8c6d94b3bf2fd7d98997272b"
+    },
+    {
+      "name": "dev.defter.app.recognition.HandwritingRecognizerTest",
+      "timestamp": "2026-11-02T20:15:53.858Z",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.recognition.HandwritingRecognizerTest.xml",
+      "source_report_sha256": "8f48daafaeb30e748f129e84730a04771e59ae485cba436324a309f04fab6393"
+    },
+    {
+      "name": "dev.defter.app.ui.AudioWorkspaceTest",
+      "timestamp": "2026-11-02T20:15:54.016Z",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.AudioWorkspaceTest.xml",
+      "source_report_sha256": "e18967ab4d526289063d29e59ae4ef2c172bd3d47cf6990eaf2667d945895f4f"
+    },
+    {
+      "name": "dev.defter.app.ui.DefterUiTest",
+      "timestamp": "2026-11-02T20:16:11.514Z",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.DefterUiTest.xml",
+      "source_report_sha256": "b4e55c569591deb99e9993228d2d9d3ccb7edefdfc820e91c93d29afab16999e"
+    },
+    {
+      "name": "dev.defter.app.ui.FolderWorkflowTest",
+      "timestamp": "2026-11-02T20:16:12.832Z",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.FolderWorkflowTest.xml",
+      "source_report_sha256": "d2de28f10b7d657641890a3b06fa38003108f490226ead661512771f38fc97be"
+    },
+    {
+      "name": "dev.defter.app.ui.HistoryControlsTest",
+      "timestamp": "2026-11-02T20:16:15.053Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.HistoryControlsTest.xml",
+      "source_report_sha256": "2b53a5cd40b2e6509bcfbd0e424d37be48d74c63fa0fcb27169e9db7b8210fc4"
+    },
+    {
+      "name": "dev.defter.app.ui.ModernPreviewTest",
+      "timestamp": "2026-11-02T20:16:18.525Z",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ModernPreviewTest.xml",
+      "source_report_sha256": "488a35dc8b478ebc4bc8b14218b3679ce89bf6bd0160439c21014e5dc8d9cb75"
+    },
+    {
+      "name": "dev.defter.app.ui.ModernUiStateTest",
+      "timestamp": "2026-11-02T20:16:21.597Z",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ModernUiStateTest.xml",
+      "source_report_sha256": "bfdd080de13d2fb546136a550c596a5c34369a8636c957b224b4ab6cccf06b42"
+    },
+    {
+      "name": "dev.defter.app.ui.ProEditorDialogsTest",
+      "timestamp": "2026-11-02T20:16:24.212Z",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ProEditorDialogsTest.xml",
+      "source_report_sha256": "3761a4df1834cf94b4be2227c4cbd24c649a52815995196caaf42e877eba9f7e"
+    },
+    {
+      "name": "dev.defter.app.ui.ProPageManagerTest",
+      "timestamp": "2026-11-02T20:16:25.535Z",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ProPageManagerTest.xml",
+      "source_report_sha256": "f150b5882ac211594413dfa841fc3cc628330c12b138448a570f6d38e07e5b2a"
+    },
+    {
+      "name": "dev.defter.app.ui.ProSelectionStateTest",
+      "timestamp": "2026-11-02T20:16:28.285Z",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ProSelectionStateTest.xml",
+      "source_report_sha256": "73bc43959085cb3e0544c732c2da82a707e99e41cc40439921fb7f18fc4edb6e"
+    },
+    {
+      "name": "dev.defter.app.ui.ProWorkspaceUiTest",
+      "timestamp": "2026-11-02T20:16:29.981Z",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_report": "TEST-dev.defter.app.ui.ProWorkspaceUiTest.xml",
+      "source_report_sha256": "df2e56b2e7bb27a380c9e9a449985e2b0c5565f69422b76e7868308a5248ecb9"
+    }
+  ]
+}

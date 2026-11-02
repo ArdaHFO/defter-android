@@ -1,0 +1,41 @@
+{
+  "recordedUtc": "2026-11-02T21:19:59.706696+00:00",
+  "apk": "Defter-0.4.0-alpha.apk",
+  "apkSha256": "5b02c8fc60343d08f7b5a3cc52fe69f3884c7a5f0a1858de38703b37eb4afd6f",
+  "device": "Dedicated Defter35 emulator",
+  "previousVersionName": "0.3.0-alpha",
+  "previousVersionCode": 3,
+  "installedVersionName": "0.4.0-alpha",
+  "installedVersionCode": 4,
+  "installSucceeded": true,
+  "launchSucceeded": true,
+  "navigationVerified": [
+    "Library",
+    "Independent Sesler archive",
+    "Return to library",
+    "Existing Matematik notebook editor"
+  ],
+  "notebookAudioEntryPresentInHierarchy": true,
+  "nestedNotebookAudioNavigationPerformed": false,
+  "existingFilesHashed": 9,
+  "unchangedContentAndTestFiles": 8,
+  "allExistingContentAndTestHashesPreserved": true,
+  "changedFiles": [
+    "files/profileInstalled"
+  ],
+  "missingFiles": [],
+  "addedFiles": [],
+  "dataScopeNote": "All six files under files/defter and both pre-existing verification exports are byte-identical. The separate files/profileInstalled marker changed during update/launch; the report does not claim all nine files unchanged.",
+  "finalAppProcessAliveBeforeCleanup": true,
+  "crashBufferEmptyBeforeAndAfter": true,
+  "microphoneAppOpsAfter": "Uid mode: RECORD_AUDIO: ignore",
+  "recordingStarted": false,
+  "modelDownloadActionPerformed": false,
+  "inferenceActionPerformed": false,
+  "visualScreenshotPassClaimed": false,
+  "screenshotCaptureAttempted": false,
+  "physicalTabletTestPerformed": false,
+  "dedicatedEmulatorStopped": true,
+  "source_report_sha256": "23786f4848008f057e698102d903f3b1c66108015c55cf0633fbdfaa71073310",
+  "publication_note": "Existing report with ephemeral process, emulator-port and serial fields omitted. No emulator checks rerun for publication."
+}
