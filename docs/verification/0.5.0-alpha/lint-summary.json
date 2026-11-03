@@ -1,0 +1,137 @@
+[
+  {
+    "id": "OldTargetApi",
+    "severity": "Warning",
+    "message": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+  },
+  {
+    "id": "AppBundleLocaleChanges",
+    "severity": "Warning",
+    "message": "Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the `bundle` configuration"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.compose:compose-bom than 2025.04.01 is available: 2026.09.00"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.core:core-ktx than 1.16.0 is available: 1.19.1"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.activity:activity-compose than 1.10.1 is available: 1.13.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.test:core than 1.6.1 is available: 1.7.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.test:runner than 1.6.2 is available: 1.7.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.test:rules than 1.6.1 is available: 1.7.0"
+  },
+  {
+    "id": "GradleDependency",
+    "severity": "Warning",
+    "message": "A newer version of androidx.test.ext:junit than 1.2.1 is available: 1.3.0"
+  },
+  {
+    "id": "ObsoleteSdkInt",
+    "severity": "Warning",
+    "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`."
+  },
+  {
+    "id": "StaticFieldLeak",
+    "severity": "Warning",
+    "message": "Do not place Android context classes in static fields (static reference to `AppLanguage` which has field `localized` pointing to `Context`); this is a memory leak"
+  },
+  {
+    "id": "StaticFieldLeak",
+    "severity": "Warning",
+    "message": "Do not place Android context classes in static fields; this is a memory leak"
+  },
+  {
+    "id": "UsableSpace",
+    "severity": "Warning",
+    "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data"
+  },
+  {
+    "id": "UsableSpace",
+    "severity": "Warning",
+    "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data"
+  },
+  {
+    "id": "UsableSpace",
+    "severity": "Warning",
+    "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data"
+  },
+  {
+    "id": "MonochromeLauncherIcon",
+    "severity": "Warning",
+    "message": "The application adaptive icon is missing a monochrome tag"
+  },
+  {
+    "id": "MonochromeLauncherIcon",
+    "severity": "Warning",
+    "message": "The application adaptive roundIcon is missing a monochrome tag"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX extension function `SharedPreferences.edit` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX extension function `SharedPreferences.edit` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX function `createBitmap` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX function `createBitmap` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX extension function `Bitmap.scale` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX extension function `Canvas.withClip` instead?"
+  },
+  {
+    "id": "UseKtx",
+    "severity": "Warning",
+    "message": "Use the KTX extension function `Canvas.withClip` instead?"
+  },
+  {
+    "id": "ClickableViewAccessibility",
+    "severity": "Warning",
+    "message": "`NotebookCanvas#onTouchEvent` should call `NotebookCanvas#performClick` when a click is detected"
+  }
+]

@@ -13,7 +13,7 @@ import org.robolectric.annotation.GraphicsMode
 
 /** Native rendered pixels are the oracle, independently of the segment visitor. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class SmoothedHitGeometryTest {
     private fun curvedStroke(kind: InkKind) = StrokeElement(points = listOf(

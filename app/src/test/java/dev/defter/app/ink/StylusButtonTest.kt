@@ -14,7 +14,7 @@ import org.robolectric.util.ReflectionHelpers
 import org.robolectric.util.ReflectionHelpers.ClassParameter
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE, qualifiers = "mdpi")
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE, qualifiers = "mdpi")
 class StylusButtonTest {
     private lateinit var view: NotebookCanvas
     private val commits = mutableListOf<PageDocument>()

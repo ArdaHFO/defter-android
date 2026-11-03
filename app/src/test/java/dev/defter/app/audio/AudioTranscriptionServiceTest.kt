@@ -38,7 +38,7 @@ import java.util.concurrent.Executor
 
 /** Actual service lifecycle. Hold model verification before any decoder or native inference runs. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE, shadows = [AudioTranscriptionServiceTest.FailableForegroundServiceShadow::class,
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE, shadows = [AudioTranscriptionServiceTest.FailableForegroundServiceShadow::class,
     AudioTranscriptionServiceTest.ThermalExecutorShadow::class])
 @LooperMode(LooperMode.Mode.PAUSED)
 class AudioTranscriptionServiceTest {

@@ -1,21 +1,24 @@
 package dev.defter.app.model
 
 import java.util.UUID
+import dev.defter.app.localization.tr
 
 fun newId(): String = UUID.randomUUID().toString()
 
-enum class PaperTemplate(val label: String) {
-    BLANK("Boş"), LINED("Çizgili"), GRID("Kareli"), DOTS("Noktalı"), CORNELL("Cornell")
+enum class PaperTemplate(private val labelKey: String) {
+    BLANK("Boş"), LINED("Çizgili"), GRID("Kareli"), DOTS("Noktalı"), CORNELL("Cornell");
+    val label: String get() = tr(labelKey)
 }
 
 enum class InkKind { PEN, HIGHLIGHTER }
 enum class ShapeKind { LINE, ARROW, RECTANGLE, ELLIPSE }
 enum class EraserMode { STROKE, PARTIAL }
 enum class EraserFilter { ALL, PEN, HIGHLIGHTER, SHAPES }
-enum class DrawingTool(val label: String) {
+enum class DrawingTool(private val labelKey: String) {
     PEN("Kalem"), HIGHLIGHTER("Fosforlu"), ERASER("Çizgi silgisi"),
     LINE("Çizgi"), ARROW("Ok"), RECTANGLE("Dikdörtgen"), ELLIPSE("Elips"),
-    SELECT("Seç / taşı"), LASSO("Kement"), HAND("Gezin")
+    SELECT("Seç / taşı"), LASSO("Kement"), HAND("Gezin");
+    val label: String get() = tr(labelKey)
 }
 
 data class InkPoint(val x: Float, val y: Float, val pressure: Float = 1f)

@@ -23,7 +23,7 @@ import java.io.File
 
 /** Real service lifecycle and repository, with denied permission so no physical microphone is opened. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 @LooperMode(LooperMode.Mode.PAUSED)
 class AudioRecorderServiceTest {
     @After fun cleanup() {

@@ -1,0 +1,52 @@
+{
+  "version": "0.5.0-alpha",
+  "capture_date": "2026-11-03",
+  "locale": "en-US",
+  "renderer": "Actual MainActivity and Jetpack Compose UI; Robolectric 4.14.1 SDK 33 NATIVE graphics; native decorView.draw(Canvas(bitmap)).",
+  "synthetic_data": "English demo notebooks, vector lesson drawings, generated 60-second silent WAV fixtures, and manually seeded English transcript text.",
+  "limitations": [
+    "Not physical-device or emulator screenshots.",
+    "Not microphone recording, handwriting recognition, or speech transcription accuracy evidence."
+  ],
+  "production_source_unchanged": true,
+  "source_matches_capture_stage": true,
+  "capture_test_sha256": "58c30c31dd4a587ae4886f6809a4a34f504e542167fae0c55712b2638d7c9b59",
+  "tests": {
+    "initial_capture_executed": 4,
+    "transcript_refinement_executed": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  "gradle_task": ":app:testDebugUnitTest --tests dev.defter.app.ui.GithubEnglishPreviewTest",
+  "apk_built_or_installed": false,
+  "images": [
+    {
+      "file": "library-tablet.png",
+      "width": 1280,
+      "height": 800,
+      "bytes": 177549,
+      "sha256": "5f8d473e7b20a084a8c13e87f5cb300e2340b39c098e6dfee76170f2a24d8209"
+    },
+    {
+      "file": "editor-split.png",
+      "width": 1280,
+      "height": 800,
+      "bytes": 102061,
+      "sha256": "14879a75d1da2b1becd8895f0ea3141570f615e395daafa3bcc74518e5adf90a"
+    },
+    {
+      "file": "audio-phone-library.png",
+      "width": 393,
+      "height": 851,
+      "bytes": 36242,
+      "sha256": "21a6513eb5ec9c7decf7aed164512d297348ef019d01be8deebec31105ee747d"
+    },
+    {
+      "file": "audio-tablet-transcript.png",
+      "width": 1280,
+      "height": 900,
+      "bytes": 64377,
+      "sha256": "94aaa5dca454d0152638a9d9554ab1b61f2defecd7ec51a5bd021273fa46c35d"
+    }
+  ]
+}

@@ -28,7 +28,7 @@ import org.robolectric.annotation.LooperMode
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], qualifiers = "w1280dp-h900dp-land-mdpi")
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], qualifiers = "w1280dp-h900dp-land-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @LooperMode(LooperMode.Mode.PAUSED)
 class ProSelectionStateTest {

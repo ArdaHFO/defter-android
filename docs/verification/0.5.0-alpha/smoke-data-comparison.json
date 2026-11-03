@@ -1,0 +1,15 @@
+{
+  "existingFiles": 9,
+  "unchangedFiles": 8,
+  "existingContentAndTestFiles": 8,
+  "allExistingContentAndTestHashesPreserved": true,
+  "changedFiles": [
+    "files/profileInstalled"
+  ],
+  "missingFiles": [],
+  "addedFiles": [],
+  "finalAppPidBeforeForceStop": "2921",
+  "crashBufferEmpty": true,
+  "microphoneAppOps": "Uid mode: RECORD_AUDIO: ignore",
+  "scope": "Files under the app private files directory; excludes shared_prefs and cache."
+}

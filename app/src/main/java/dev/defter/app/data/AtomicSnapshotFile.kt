@@ -1,5 +1,7 @@
 package dev.defter.app.data
 
+import dev.defter.app.localization.tr
+
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -23,14 +25,14 @@ internal class AtomicSnapshotFile(val baseFile: File) {
     }
 
     fun startWrite(): FileOutputStream {
-        val parent = baseFile.parentFile ?: throw IOException("Kayıt yolu geçersiz.")
-        if (!parent.isDirectory && !parent.mkdirs()) throw IOException("Kayıt klasörü oluşturulamadı.")
+        val parent = baseFile.parentFile ?: throw IOException(tr("Kayıt yolu geçersiz."))
+        if (!parent.isDirectory && !parent.mkdirs()) throw IOException(tr("Kayıt klasörü oluşturulamadı."))
         recoverLegacyBackup()
         return FileOutputStream(pendingFile)
     }
 
     fun finishWrite(stream: FileOutputStream?) {
-        requireNotNull(stream) { "Kayıt akışı açılmadı." }
+        requireNotNull(stream) { tr("Kayıt akışı açılmadı.") }
         stream.flush()
         stream.fd.sync()
         stream.close()

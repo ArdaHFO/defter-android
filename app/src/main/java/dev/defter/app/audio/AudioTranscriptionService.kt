@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -44,7 +46,7 @@ class AudioTranscriptionController(context: Context) {
                 .setAction(AudioTranscriptionService.START).putExtra("id", id).putExtra("language", language).putExtra("restart", restart).putExtra("token", token))
             true
         } catch (failure: Exception) {
-            if (state.value.token == token) AudioRuntime.transcription.value = TranscriptionWorkState(id, error = failure.message ?: "Metne çevirme başlatılamadı.", token = token)
+            if (state.value.token == token) AudioRuntime.transcription.value = TranscriptionWorkState(id, error = failure.message ?: tr("Metne çevirme başlatılamadı."), token = token)
             false
         }
     }
@@ -69,11 +71,11 @@ class AudioTranscriptionService : Service() {
     override fun onCreate() {
         super.onCreate()
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL, "Ses metne çevirme", NotificationManager.IMPORTANCE_LOW))
+            NotificationChannel(CHANNEL, tr("Ses metne çevirme"), NotificationManager.IMPORTANCE_LOW))
         if (Build.VERSION.SDK_INT >= 29) {
             val listener = PowerManager.OnThermalStatusChangedListener { status ->
                 if (status >= PowerManager.THERMAL_STATUS_SEVERE) {
-                    pausedReason = "Cihaz ısındığı için metne çevirme duraklatıldı. Soğuduktan sonra devam edebilirsin."
+                    pausedReason = tr("Cihaz ısındığı için metne çevirme duraklatıldı. Soğuduktan sonra devam edebilirsin.")
                     job?.cancel()
                 }
             }
@@ -94,12 +96,12 @@ class AudioTranscriptionService : Service() {
         pausedReason = null
         lastNotifiedPercent = -1
         try {
-            if (Build.VERSION.SDK_INT >= 29) startForeground(NOTIFICATION, notification("Hazırlanıyor…"), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
-            else startForeground(NOTIFICATION, notification("Hazırlanıyor…"))
+            if (Build.VERSION.SDK_INT >= 29) startForeground(NOTIFICATION, notification(tr("Hazırlanıyor…")), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            else startForeground(NOTIFICATION, notification(tr("Hazırlanıyor…")))
         } catch (failure: Exception) {
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelfResult(latestStartId)
-            if (AudioRuntime.transcription.value.token == token) AudioRuntime.transcription.value = TranscriptionWorkState(id, error = "Arka plan işlemi başlatılamadı. ${failure.message.orEmpty()}", token = token)
+            if (AudioRuntime.transcription.value.token == token) AudioRuntime.transcription.value = TranscriptionWorkState(id, error = tr("Arka plan işlemi başlatılamadı. %1\$s", failure.message.orEmpty()), token = token)
             return START_NOT_STICKY
         }
         job = scope.launch {
@@ -107,15 +109,15 @@ class AudioTranscriptionService : Service() {
             try {
                 val power = getSystemService(PowerManager::class.java)
                 if (isDeviceHot())
-                    throw IllegalStateException("Cihazın sıcaklığı yüksek. Soğuduktan sonra metne çevirmeyi başlat.")
+                    throw IllegalStateException(tr("Cihazın sıcaklığı yüksek. Soğuduktan sonra metne çevirmeyi başlat."))
                 // Bound the lock by the foreground job's Android 15 time budget.
                 wakeLock = power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Defter:Transcription").apply { setReferenceCounted(false); acquire(6 * 60 * 60 * 1000L) }
                 val manager = AudioRuntime.models(applicationContext)
-                check(manager.refresh()) { "Önce konuşma modelini indir." }
+                check(manager.refresh()) { tr("Önce konuşma modelini indir.") }
                 val runner = TranscriptionRunner(DocumentRepository(applicationContext), WhisperTranscriber(manager))
                 runner.run(id, intent.getStringExtra("language") ?: "tr", intent.getBooleanExtra("restart", false)) { done, total ->
                     if (done < total && isDeviceHot()) {
-                        pausedReason = "Cihaz ısındığı için metne çevirme duraklatıldı. Soğuduktan sonra devam edebilirsin."
+                        pausedReason = tr("Cihaz ısındığı için metne çevirme duraklatıldı. Soğuduktan sonra devam edebilirsin.")
                         throw CancellationException(pausedReason)
                     }
                     if (AudioRuntime.transcription.value.token == token) AudioRuntime.transcription.value = TranscriptionWorkState(id, true, done, total, token = token)
@@ -128,7 +130,7 @@ class AudioTranscriptionService : Service() {
             } catch (_: CancellationException) {
                 // The runner has persisted the last completed checkpoint.
                 error = pausedReason
-            } catch (failure: Exception) { error = failure.message?.take(350) ?: "Ses metne çevrilemedi." }
+            } catch (failure: Exception) { error = failure.message?.take(350) ?: tr("Ses metne çevrilemedi.") }
             finally {
                 releaseWakeLock()
                 if (AudioRuntime.transcription.value.token == token) {
@@ -147,12 +149,12 @@ class AudioTranscriptionService : Service() {
         val open = PendingIntent.getActivity(this, 80, Intent(this, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val pause = PendingIntent.getService(this, 81, Intent(this, AudioTranscriptionService::class.java).setAction(PAUSE), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return Notification.Builder(this, CHANNEL).setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setContentTitle("Ses metne çevriliyor").setContentText(progress).setContentIntent(open)
-            .setOnlyAlertOnce(true).setOngoing(true).addAction(Notification.Action.Builder(null, "Duraklat", pause).build()).build()
+            .setContentTitle(tr("Ses metne çevriliyor")).setContentText(progress).setContentIntent(open)
+            .setOnlyAlertOnce(true).setOngoing(true).addAction(Notification.Action.Builder(null, tr("Duraklat"), pause).build()).build()
     }
 
     override fun onTimeout(startId: Int, fgsType: Int) {
-        pausedReason = "Android arka plan işlem süresi dolduğu için çeviri duraklatıldı. Tamamlanan bölümler korundu."
+        pausedReason = tr("Android arka plan işlem süresi dolduğu için çeviri duraklatıldı. Tamamlanan bölümler korundu.")
         job?.cancel(); releaseWakeLock(); stopForeground(STOP_FOREGROUND_REMOVE); stopSelf()
     }
     override fun onDestroy() {

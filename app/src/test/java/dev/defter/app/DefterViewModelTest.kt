@@ -26,7 +26,7 @@ import java.io.File
 /** Real repository IO + deterministic Main dispatcher: these exercise the actual editor save queue. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class DefterViewModelTest {
     private val scheduler = TestCoroutineScheduler()

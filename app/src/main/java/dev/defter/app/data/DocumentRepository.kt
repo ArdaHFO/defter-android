@@ -1,5 +1,7 @@
 package dev.defter.app.data
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -63,16 +65,16 @@ class DocumentRepository(context: Context) {
     suspend fun commitAudioPart(id: String, source: File, durationMs: Long, mimeType: String = "audio/mp4"): AudioRecording = locked {
         val library = readLibrary()
         val old = readAudio(library, id)
-        require(old.deletedAt == null) { "Silinmiş ses kaydına parça eklenemez." }
+        require(old.deletedAt == null) { tr("Silinmiş ses kaydına parça eklenemez.") }
         if (old.parts.any { it.sourceKey == source.name }) return@locked old
-        require(source.isFile && source.length() in 1..MAX_ENTRY_BYTES) { "Ses parçası boş veya 64 MB sınırını aşıyor." }
+        require(source.isFile && source.length() in 1..MAX_ENTRY_BYTES) { tr("Ses parçası boş veya 64 MB sınırını aşıyor.") }
         val part = AudioPart(assetId = newId(), mimeType = mimeType, durationMs = durationMs,
             offsetMs = old.durationMs, bytes = source.length(), sourceKey = source.name)
         val next = nextAudio(old).copy(parts = old.parts + part)
         AudioJson.validate(next)
         validateAudioContainer(source, mimeType)
         atomicWrite(AtomicSnapshotFile(audioPartFile(part))) { output -> source.inputStream().use { copyBounded(it, output, MAX_ENTRY_BYTES) } }
-        require(audioPartFile(part).length() == part.bytes) { "Ses kaynağı kayıt sırasında değişti." }
+        require(audioPartFile(part).length() == part.bytes) { tr("Ses kaynağı kayıt sırasında değişti.") }
         publishAudio(library, next)
     }
 
@@ -90,7 +92,7 @@ class DocumentRepository(context: Context) {
         try {
             val source = File(staging, "import.audio")
             appContext.contentResolver.openInputStream(uri)?.use { input -> source.outputStream().use { copyBounded(input, it, AudioJson.MAX_AUDIO_BYTES) } }
-                ?: throw IOException("Ses dosyası açılamadı.")
+                ?: throw IOException(tr("Ses dosyası açılamadı."))
             currentCoroutineContext().ensureActive()
             val metadata = inspectAudio(source)
             validateAudioContainer(source, metadata.second)
@@ -130,7 +132,7 @@ class DocumentRepository(context: Context) {
     suspend fun removeAudioBookmark(id: String, bookmarkId: String): AudioRecording = locked {
         val library = readLibrary()
         val old = readAudio(library, id)
-        require(old.bookmarks.any { it.id == bookmarkId }) { "Ses işareti bulunamadı." }
+        require(old.bookmarks.any { it.id == bookmarkId }) { tr("Ses işareti bulunamadı.") }
         publishAudio(library, nextAudio(old).copy(bookmarks = old.bookmarks.filterNot { it.id == bookmarkId }))
     }
 
@@ -138,8 +140,32 @@ class DocumentRepository(context: Context) {
     suspend fun moveAudio(id: String, folderId: String?): LibraryData = mutateAudioIndex(id) { it.copy(folderId = folderId) }
     suspend fun linkAudio(id: String, notebookId: String?): LibraryData = mutateAudioIndex(id) { it.copy(notebookId = notebookId) }
     suspend fun setAudioDeleted(id: String, deleted: Boolean): LibraryData = mutateAudioIndex(id) {
-        require(!deleted || it.state !in setOf(AudioRecordingState.RECORDING, AudioRecordingState.PAUSED)) { "Önce ses kaydını durdurun." }
+        require(!deleted || it.state !in setOf(AudioRecordingState.RECORDING, AudioRecordingState.PAUSED)) { tr("Önce ses kaydını durdurun.") }
         it.copy(deletedAt = if (deleted) System.currentTimeMillis() else null)
+    }
+
+    /** Publish removal before reclaiming files. No active or unselected recording is removed. */
+    suspend fun permanentlyDeleteAudio(ids: Set<String>): LibraryData = locked {
+        val library = readLibrary()
+        val selection = ids.toSet()
+        if (selection.isEmpty()) return@locked library
+        require(selection.all { id -> library.audioItems.any { it.id == id && it.deletedAt != null } }) {
+            tr("Yalnızca çöp kutusundaki ses kayıtları kalıcı silinebilir. Listeyi yenileyin.")
+        }
+        val recordings = library.audioItems.map { readAudio(library, it.id) }
+        require(recordings.filter { it.id in selection }.none {
+            it.state == AudioRecordingState.RECORDING || it.state == AudioRecordingState.PAUSED ||
+                it.transcriptionStatus == TranscriptionStatus.RUNNING
+        }) { tr("Önce ses kaydını ve metne dönüştürmeyi durdurun.") }
+        val removedAssets = recordings.filter { it.id in selection }.flatMap { it.parts }.map { it.assetId }.toSet()
+        val retainedAssets = recordings.filterNot { it.id in selection }.flatMap { it.parts }.map { it.assetId }.toSet()
+        val updated = library.copy(audioItems = library.audioItems.filterNot { it.id in selection })
+        writeLibrary(updated)
+        // Cleanup is deliberately best effort after the single commit. A failed delete may
+        // leave an unreferenced blob, but must never undo a committed index or damage a survivor.
+        removeObsoleteAudioSnapshots(selection.associateWith { null })
+        (removedAssets - retainedAssets).forEach { removeSnapshotFiles(audioAssetFile(it)) }
+        updated
     }
 
     private suspend fun mutateAudioIndex(id: String, transform: (AudioRecording) -> AudioRecording): LibraryData = locked {
@@ -150,16 +176,16 @@ class DocumentRepository(context: Context) {
 
     private fun nextAudio(old: AudioRecording): AudioRecording = old.copy(revision = Math.addExact(old.revision, 1), updatedAt = System.currentTimeMillis())
     private fun checkAudioRevision(old: AudioRecording, expectedRevision: Long?) {
-        require(expectedRevision == null || expectedRevision == old.revision) { "Ses kaydı başka bir işlem tarafından değiştirildi. Yenileyip tekrar deneyin." }
-        require(old.deletedAt == null) { "Silinmiş ses kaydı düzenlenemez." }
+        require(expectedRevision == null || expectedRevision == old.revision) { tr("Ses kaydı başka bir işlem tarafından değiştirildi. Yenileyip tekrar deneyin.") }
+        require(old.deletedAt == null) { tr("Silinmiş ses kaydı düzenlenemez.") }
     }
 
     private fun validateAudioLinks(recording: AudioRecording, library: LibraryData) {
         AudioJson.validate(recording)
-        require(recording.folderId == null || library.folders.any { it.id == recording.folderId }) { "Ses kaydının klasörü bulunamadı." }
-        require(recording.notebookId == null || library.notebooks.any { it.id == recording.notebookId }) { "Ses kaydının defteri bulunamadı." }
+        require(recording.folderId == null || library.folders.any { it.id == recording.folderId }) { tr("Ses kaydının klasörü bulunamadı.") }
+        require(recording.notebookId == null || library.notebooks.any { it.id == recording.notebookId }) { tr("Ses kaydının defteri bulunamadı.") }
         val pages = library.notebooks.flatMap { it.pageIds + it.trashedPageIds }.toSet()
-        require(recording.bookmarks.all { it.pageId == null || it.pageId in pages }) { "Ses işaretinin sayfası bulunamadı." }
+        require(recording.bookmarks.all { it.pageId == null || it.pageId in pages }) { tr("Ses işaretinin sayfası bulunamadı.") }
     }
 
     /** Immutable metadata + one atomic index publication prevents cross-file partial updates. */
@@ -173,25 +199,25 @@ class DocumentRepository(context: Context) {
 
     private fun writeAudio(recording: AudioRecording) {
         val bytes = AudioJson.toJson(recording).toString().toByteArray(Charsets.UTF_8)
-        require(bytes.size <= MAX_JSON_BYTES) { "Ses metni bu sürüm için çok büyük." }
+        require(bytes.size <= MAX_JSON_BYTES) { tr("Ses metni bu sürüm için çok büyük.") }
         atomicWrite(AtomicSnapshotFile(recordingFile(recording.id, recording.revision))) { it.write(bytes) }
     }
 
     private fun readAudio(library: LibraryData, id: String): AudioRecording {
-        val item = library.audioItems.firstOrNull { it.id == id } ?: throw IOException("Ses kaydı bulunamadı.")
+        val item = library.audioItems.firstOrNull { it.id == id } ?: throw IOException(tr("Ses kaydı bulunamadı."))
         return AtomicSnapshotFile(recordingFile(id, item.revision)).openRead().use { AudioJson.fromJson(readJson(it, MAX_JSON_BYTES)) }.also {
-            require(it.toItem() == item) { "Ses kaydı dizini uyuşmuyor." }
+            require(it.toItem() == item) { tr("Ses kaydı dizini uyuşmuyor.") }
         }
     }
 
     private fun recordingFile(id: String, revision: Long): File = File(recordingDirectory, "${DocumentJson.validId(id)}_$revision.json")
     private fun audioAssetFile(id: String): File = File(assetDirectory, "${DocumentJson.validId(id)}.audio")
     private fun validateAudioAssets(recording: AudioRecording) = recording.parts.forEach {
-        require(audioPartFile(it).isFile && audioPartFile(it).length() == it.bytes) { "Ses parçası eksik veya boyutu değişmiş." }
+        require(audioPartFile(it).isFile && audioPartFile(it).length() == it.bytes) { tr("Ses parçası eksik veya boyutu değişmiş.") }
     }
 
     private fun inspectAudio(file: File): Pair<Long, String> {
-        require(file.isFile && file.length() in 1..AudioJson.MAX_AUDIO_BYTES) { "Ses dosyası boş veya 256 MB sınırını aşıyor." }
+        require(file.isFile && file.length() in 1..AudioJson.MAX_AUDIO_BYTES) { tr("Ses dosyası boş veya 256 MB sınırını aşıyor.") }
         val extractor = MediaExtractor()
         return try {
             extractor.setDataSource(file.path)
@@ -200,33 +226,33 @@ class DocumentRepository(context: Context) {
                 val format = extractor.getTrackFormat(index)
                 if (format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true) { audioFormat = format; break }
             }
-            val format = requireNotNull(audioFormat) { "Dosyada desteklenen ses izi bulunamadı." }
+            val format = requireNotNull(audioFormat) { tr("Dosyada desteklenen ses izi bulunamadı.") }
             // HAS_AUDIO and container MIME are optional on valid WAV/FLAC inputs. Track metadata
             // is the same source used by the decoder, while the file header identifies its container.
             val durationUs = if (format.containsKey(MediaFormat.KEY_DURATION)) format.getLong(MediaFormat.KEY_DURATION) else null
             val duration = if (durationUs != null && durationUs > 0) {
-                require(durationUs <= AudioJson.MAX_DURATION_MS * 1000) { "Ses süresi desteklenmiyor." }
+                require(durationUs <= AudioJson.MAX_DURATION_MS * 1000) { tr("Ses süresi desteklenmiyor.") }
                 (durationUs + 999) / 1000
             } else {
                 val retriever = MediaMetadataRetriever()
                 try {
                     retriever.setDataSource(file.path)
                     retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
-                        ?: throw IOException("Ses süresi okunamadı.")
+                        ?: throw IOException(tr("Ses süresi okunamadı."))
                 } finally { runCatching { retriever.release() } }
             }
-            require(duration in 1..AudioJson.MAX_DURATION_MS) { "Ses süresi desteklenmiyor." }
+            require(duration in 1..AudioJson.MAX_DURATION_MS) { tr("Ses süresi desteklenmiyor.") }
             val mime = detectAudioContainer(file)
             // Reuse the explicit codec allow-list rather than trusting a provider MIME label.
             AudioJson.validate(AudioRecording(title = "Kontrol", parts = listOf(AudioPart(assetId = newId(), mimeType = mime,
                 durationMs = duration, offsetMs = 0, bytes = file.length()))))
             duration to mime
-        } catch (error: Exception) { throw IOException("Ses dosyası açılamadı veya desteklenmiyor.", error) }
+        } catch (error: Exception) { throw IOException(tr("Ses dosyası açılamadı veya desteklenmiyor."), error) }
         finally { runCatching { extractor.release() } }
     }
 
     private fun detectAudioContainer(file: File): String {
-        require(file.length() >= 8) { "Ses dosyası boş veya eksik." }
+        require(file.length() >= 8) { tr("Ses dosyası boş veya eksik.") }
         val header = ByteArray(minOf(64L, file.length()).toInt())
         DataInputStream(file.inputStream()).use { it.readFully(header) }
         fun text(offset: Int, value: String): Boolean = header.size >= offset + value.length &&
@@ -241,12 +267,12 @@ class DocumentRepository(context: Context) {
             (header[0].toInt() and 0xff) == 0xff && (header[1].toInt() and 0xf6) == 0xf0 -> "audio/aac"
             (header[0].toInt() and 0xff) == 0xff && (header[1].toInt() and 0xe0) == 0xe0 -> "audio/mpeg"
             header.take(4).map { it.toInt() and 0xff } == listOf(0x1a, 0x45, 0xdf, 0xa3) -> "audio/webm"
-            else -> throw IOException("Desteklenmeyen ses kapsayıcısı.")
+            else -> throw IOException(tr("Desteklenmeyen ses kapsayıcısı."))
         }
     }
 
     private fun validateAudioContainer(file: File, mime: String) {
-        require(file.length() in 8..AudioJson.MAX_AUDIO_BYTES) { "Ses dosyası boş veya çok büyük." }
+        require(file.length() in 8..AudioJson.MAX_AUDIO_BYTES) { tr("Ses dosyası boş veya çok büyük.") }
         val header = ByteArray(minOf(64L, file.length()).toInt())
         DataInputStream(file.inputStream()).use { it.readFully(header) }
         fun text(offset: Int, value: String): Boolean = header.size >= offset + value.length &&
@@ -263,20 +289,20 @@ class DocumentRepository(context: Context) {
             "audio/webm", "audio/x-matroska" -> header.take(4).map { it.toInt() and 0xff } == listOf(0x1a, 0x45, 0xdf, 0xa3)
             else -> false
         }
-        require(valid) { "Ses dosyasının biçimi ve başlığı uyuşmuyor." }
+        require(valid) { tr("Ses dosyasının biçimi ve başlığı uyuşmuyor.") }
     }
 
     suspend fun createFolder(name: String, parentId: String?): LibraryData = locked {
         val cleanName = name.trim().also(DocumentJson::validateName)
         val library = readLibrary()
-        require(parentId == null || library.folders.any { it.id == parentId }) { "Üst klasör bulunamadı." }
+        require(parentId == null || library.folders.any { it.id == parentId }) { tr("Üst klasör bulunamadı.") }
         library.copy(folders = library.folders + Folder(name = cleanName, parentId = parentId)).also(::writeLibrary)
     }
 
     suspend fun renameFolder(id: String, name: String): LibraryData = locked {
         val cleanName = name.trim().also(DocumentJson::validateName)
         val library = readLibrary()
-        require(library.folders.any { it.id == id }) { "Klasör bulunamadı." }
+        require(library.folders.any { it.id == id }) { tr("Klasör bulunamadı.") }
         library.copy(folders = library.folders.map { if (it.id == id) it.copy(name = cleanName) else it }).also(::writeLibrary)
     }
 
@@ -285,7 +311,7 @@ class DocumentRepository(context: Context) {
     ): Notebook = locked {
         val cleanTitle = title.trim().also(DocumentJson::validateName)
         val library = readLibrary()
-        require(folderId == null || library.folders.any { it.id == folderId }) { "Klasör bulunamadı." }
+        require(folderId == null || library.folders.any { it.id == folderId }) { tr("Klasör bulunamadı.") }
         val page = PageDocument(template = template)
         writePage(page)
         val notebook = Notebook(title = cleanTitle, folderId = folderId, coverColor = coverColor, pageIds = listOf(page.id))
@@ -305,7 +331,7 @@ class DocumentRepository(context: Context) {
     suspend fun moveNotebook(id: String, folderId: String?): LibraryData = locked {
         val library = readLibrary()
         notebook(library, id)
-        require(folderId == null || library.folders.any { it.id == folderId }) { "Klasör bulunamadı." }
+        require(folderId == null || library.folders.any { it.id == folderId }) { tr("Klasör bulunamadı.") }
         library.copy(notebooks = library.notebooks.map {
             if (it.id == id) it.copy(folderId = folderId, updatedAt = System.currentTimeMillis()) else it
         }).also(::writeLibrary)
@@ -320,19 +346,97 @@ class DocumentRepository(context: Context) {
         }).also(::writeLibrary)
     }
 
+    /**
+     * Remove already-trashed notebooks as one index transaction. Recordings are independent
+     * documents: preserve their media, text and bookmark times, detaching only removed links.
+     */
+    suspend fun permanentlyDeleteNotebooks(ids: Set<String>): LibraryData = locked {
+        val library = readLibrary()
+        val selection = ids.toSet()
+        if (selection.isEmpty()) return@locked library
+        require(selection.all { id -> library.notebooks.any { it.id == id && it.deletedAt != null } }) {
+            tr("Yalnızca çöp kutusundaki defterler kalıcı silinebilir. Listeyi yenileyin.")
+        }
+        val removedPageIds = library.notebooks.filter { it.id in selection }
+            .flatMap { it.pageIds + it.trashedPageIds }.toSet()
+        val removedAssets = mutableSetOf<File>()
+        val retainedAssets = mutableSetOf<File>()
+        // Read every referenced page before publishing. If any reference cannot be checked,
+        // abort without deleting files rather than guess which shared assets are safe to remove.
+        library.notebooks.forEach { book -> (book.pageIds + book.trashedPageIds).forEach { id ->
+            val page = readPage(id)
+            val assets = if (id in removedPageIds) removedAssets else retainedAssets
+            page.elements.filterIsInstance<ImageElement>().forEach { assets.add(assetFile(it.assetId)) }
+            page.pdfBackground?.let { assets.add(pdfAssetFile(it.assetId)) }
+        } }
+        val detached = library.audioItems.mapNotNull { item ->
+            val old = readAudio(library, item.id)
+            val bookmarks = old.bookmarks.map {
+                if (it.pageId != null && it.pageId in removedPageIds) it.copy(pageId = null) else it
+            }
+            if ((old.notebookId == null || old.notebookId !in selection) && bookmarks == old.bookmarks) null else
+                nextAudio(old).copy(notebookId = old.notebookId?.takeUnless { it in selection }, bookmarks = bookmarks)
+        }.associateBy { it.id }
+        require(detached.values.none {
+            it.state == AudioRecordingState.RECORDING || it.state == AudioRecordingState.PAUSED ||
+                it.transcriptionStatus == TranscriptionStatus.RUNNING
+        }) { tr("Önce ses kaydını ve metne dönüştürmeyi durdurun.") }
+        val updated = library.copy(notebooks = library.notebooks.filterNot { it.id in selection },
+            audioItems = library.audioItems.map { detached[it.id]?.toItem() ?: it })
+        DocumentJson.validateLibrary(updated)
+        detached.values.forEach { validateAudioLinks(it, updated); validateAudioAssets(it) }
+        // Immutable audio revisions remain invisible until this one library write succeeds.
+        detached.values.forEach(::writeAudio)
+        writeLibrary(updated)
+        removedPageIds.forEach { removeSnapshotFiles(pageFile(it)) }
+        (removedAssets - retainedAssets).forEach(::removeSnapshotFiles)
+        removeObsoleteAudioSnapshots(detached.mapValues { it.value.revision })
+        updated
+    }
+
+    private fun removeSnapshotFiles(file: File) {
+        listOf(file, File(file.path + ".new"), File(file.path + ".bak")).forEach(::removeUnreferencedFile)
+    }
+
+    private fun removeUnreferencedFile(file: File) {
+        try {
+            val allowedParents = setOf(pageDirectory.canonicalFile, assetDirectory.canonicalFile, recordingDirectory.canonicalFile)
+            val parent = file.parentFile?.canonicalFile ?: return
+            if (parent in allowedParents && file.isFile &&
+                !java.nio.file.Files.isSymbolicLink(file.toPath())) file.delete()
+        } catch (_: IOException) { /* The index is already committed; retain an orphan on cleanup failure. */
+        } catch (_: SecurityException) { /* Never widen access or recursively delete a failed candidate. */ }
+    }
+
+    /** Null means purge every revision; otherwise retain the newly published revision. */
+    private fun removeObsoleteAudioSnapshots(retainedRevision: Map<String, Long?>) {
+        if (retainedRevision.isEmpty()) return
+        val files = try { recordingDirectory.listFiles().orEmpty() } catch (_: SecurityException) { return }
+        files.forEach { file ->
+            val name = file.name.removeSuffix(".new").removeSuffix(".bak")
+            if (!name.endsWith(".json")) return@forEach
+            val stem = name.removeSuffix(".json")
+            val split = stem.lastIndexOf('_')
+            if (split <= 0) return@forEach
+            val id = stem.substring(0, split)
+            val revision = stem.substring(split + 1).toLongOrNull() ?: return@forEach
+            if (id in retainedRevision && revision != retainedRevision[id]) removeUnreferencedFile(file)
+        }
+    }
+
     suspend fun loadPage(id: String): PageDocument = locked { readPage(id) }
 
     suspend fun savePage(page: PageDocument, expectedRevision: Long? = null): Unit = locked {
         DocumentJson.validatePage(page)
         val library = readLibrary()
         val owner = library.notebooks.find { page.id in it.pageIds }
-            ?: throw IOException("Sayfa bir deftere ait değil.")
-        require(owner.deletedAt == null) { "Defter çöp kutusunda." }
+            ?: throw IOException(tr("Sayfa bir deftere ait değil."))
+        require(owner.deletedAt == null) { tr("Defter çöp kutusunda.") }
         val previous = readPage(page.id)
         // An identical retry is safe even when the page write succeeded but metadata did not.
         if (page != previous) {
-            require(expectedRevision == null || previous.revision == expectedRevision) { "Sayfa başka bir oturumda değişti. Çakışan not korunuyor; sayfayı yeniden aç." }
-            require(page.revision > previous.revision) { "Eski veya çakışan sayfa sürümü kaydedilemez." }
+            require(expectedRevision == null || previous.revision == expectedRevision) { tr("Sayfa başka bir oturumda değişti. Çakışan not korunuyor; sayfayı yeniden aç.") }
+            require(page.revision > previous.revision) { tr("Eski veya çakışan sayfa sürümü kaydedilemez.") }
         }
         validateAssetsExist(page)
         writePage(page)
@@ -345,8 +449,8 @@ class DocumentRepository(context: Context) {
     suspend fun addPage(notebookId: String, template: PaperTemplate, afterPageId: String? = null): PageDocument = locked {
         val library = readLibrary()
         val owner = notebook(library, notebookId)
-        require(owner.deletedAt == null) { "Defter çöp kutusunda." }
-        require(afterPageId == null || afterPageId in owner.pageIds) { "Eklenecek konum bulunamadı." }
+        require(owner.deletedAt == null) { tr("Defter çöp kutusunda.") }
+        require(afterPageId == null || afterPageId in owner.pageIds) { tr("Eklenecek konum bulunamadı.") }
         val page = PageDocument(template = template)
         writePage(page)
         val ids = owner.pageIds.toMutableList().apply {
@@ -361,7 +465,7 @@ class DocumentRepository(context: Context) {
     suspend fun duplicatePage(notebookId: String, pageId: String): PageDocument = locked {
         val library = readLibrary()
         val owner = notebook(library, notebookId)
-        require(owner.deletedAt == null && pageId in owner.pageIds) { "Sayfa bulunamadı." }
+        require(owner.deletedAt == null && pageId in owner.pageIds) { tr("Sayfa bulunamadı.") }
         val source = readPage(pageId)
         val page = source.copy(id = newId(), revision = 0, recognitionRevision = if (source.recognitionRevision == source.revision) 0 else null,
             elements = source.elements.map { reidentifyElement(it) })
@@ -393,7 +497,7 @@ class DocumentRepository(context: Context) {
             }))
             RecoveryCopy(owner.id, copy)
         } else {
-            val recoveredBook = Notebook(title = owner?.title?.take(175)?.plus(" · kurtarılan") ?: "Kurtarılan notlar",
+            val recoveredBook = Notebook(title = owner?.title?.take(175)?.plus(tr(" · kurtarılan")) ?: tr("Kurtarılan notlar"),
                 folderId = owner?.folderId, coverColor = owner?.coverColor ?: 0xFF6254D9.toInt(), pageIds = listOf(copy.id))
             writeLibrary(library.copy(notebooks = library.notebooks + recoveredBook))
             RecoveryCopy(recoveredBook.id, copy)
@@ -403,8 +507,8 @@ class DocumentRepository(context: Context) {
     suspend fun reorderPages(notebookId: String, orderedIds: List<String>): LibraryData = locked {
         val library = readLibrary()
         val owner = notebook(library, notebookId)
-        require(owner.deletedAt == null) { "Defter çöp kutusunda." }
-        require(orderedIds.size == owner.pageIds.size && orderedIds.toSet() == owner.pageIds.toSet()) { "Sayfa sıralaması tüm sayfaları bir kez içermeli." }
+        require(owner.deletedAt == null) { tr("Defter çöp kutusunda.") }
+        require(orderedIds.size == owner.pageIds.size && orderedIds.toSet() == owner.pageIds.toSet()) { tr("Sayfa sıralaması tüm sayfaları bir kez içermeli.") }
         library.copy(notebooks = library.notebooks.map {
             if (it.id == notebookId) it.copy(pageIds = orderedIds.toList(), updatedAt = System.currentTimeMillis()) else it
         }).also(::writeLibrary)
@@ -413,8 +517,8 @@ class DocumentRepository(context: Context) {
     suspend fun deletePage(notebookId: String, pageId: String): LibraryData = locked {
         val library = readLibrary()
         val owner = notebook(library, notebookId)
-        require(owner.deletedAt == null && pageId in owner.pageIds) { "Sayfa bulunamadı." }
-        require(owner.pageIds.size > 1) { "Son sayfa silinemez. Önce yeni bir sayfa ekle." }
+        require(owner.deletedAt == null && pageId in owner.pageIds) { tr("Sayfa bulunamadı.") }
+        require(owner.pageIds.size > 1) { tr("Son sayfa silinemez. Önce yeni bir sayfa ekle.") }
         library.copy(notebooks = library.notebooks.map {
             if (it.id == notebookId) it.copy(pageIds = it.pageIds - pageId,
                 trashedPageIds = it.trashedPageIds + pageId, updatedAt = System.currentTimeMillis()) else it
@@ -424,8 +528,8 @@ class DocumentRepository(context: Context) {
     suspend fun restorePage(notebookId: String, pageId: String, afterPageId: String? = null): LibraryData = locked {
         val library = readLibrary()
         val owner = notebook(library, notebookId)
-        require(owner.deletedAt == null && pageId in owner.trashedPageIds) { "Silinen sayfa bulunamadı." }
-        require(afterPageId == null || afterPageId in owner.pageIds) { "Eklenecek konum bulunamadı." }
+        require(owner.deletedAt == null && pageId in owner.trashedPageIds) { tr("Silinen sayfa bulunamadı.") }
+        require(afterPageId == null || afterPageId in owner.pageIds) { tr("Eklenecek konum bulunamadı.") }
         val ids = owner.pageIds.toMutableList().apply { add(if (afterPageId == null) size else indexOf(afterPageId) + 1, pageId) }
         library.copy(notebooks = library.notebooks.map {
             if (it.id == notebookId) it.copy(pageIds = ids, trashedPageIds = it.trashedPageIds - pageId,
@@ -438,10 +542,10 @@ class DocumentRepository(context: Context) {
         val library = readLibrary()
         val source = notebook(library, sourceNotebookId)
         val destination = notebook(library, destinationNotebookId)
-        require(source.deletedAt == null && destination.deletedAt == null && pageId in source.pageIds) { "Sayfa veya hedef defter bulunamadı." }
-        require(afterPageId == null || afterPageId in destination.pageIds) { "Eklenecek konum bulunamadı." }
-        require(copy || source.id == destination.id || source.pageIds.size > 1) { "Son sayfa taşınamaz. Önce yeni bir sayfa ekle veya sayfayı kopyala." }
-        require(copy || afterPageId != pageId) { "Sayfa kendi arkasına taşınamaz." }
+        require(source.deletedAt == null && destination.deletedAt == null && pageId in source.pageIds) { tr("Sayfa veya hedef defter bulunamadı.") }
+        require(afterPageId == null || afterPageId in destination.pageIds) { tr("Eklenecek konum bulunamadı.") }
+        require(copy || source.id == destination.id || source.pageIds.size > 1) { tr("Son sayfa taşınamaz. Önce yeni bir sayfa ekle veya sayfayı kopyala.") }
+        require(copy || afterPageId != pageId) { tr("Sayfa kendi arkasına taşınamaz.") }
         val original = readPage(pageId)
         val result = if (copy) original.copy(id = newId(), revision = 0, recognitionRevision = if (original.recognitionRevision == original.revision) 0 else null,
             elements = original.elements.map { reidentifyElement(it) }).also(::writePage) else original
@@ -462,11 +566,11 @@ class DocumentRepository(context: Context) {
     suspend fun importPdf(uri: Uri, title: String, folderId: String?): Notebook = locked {
         val cleanTitle = title.trim().also(DocumentJson::validateName)
         val library = readLibrary()
-        require(folderId == null || library.folders.any { it.id == folderId }) { "Klasör bulunamadı." }
+        require(folderId == null || library.folders.any { it.id == folderId }) { tr("Klasör bulunamadı.") }
         val staging = stagingDirectory()
         try {
             val source = File(staging, "source.pdf")
-            val input = appContext.contentResolver.openInputStream(uri) ?: throw IOException("PDF açılamadı.")
+            val input = appContext.contentResolver.openInputStream(uri) ?: throw IOException(tr("PDF açılamadı."))
             input.use { stream -> source.outputStream().use { copyBounded(stream, it, MAX_ENTRY_BYTES) } }
             val dimensions = validatePdfFile(source)
             currentCoroutineContext().ensureActive()
@@ -489,9 +593,9 @@ class DocumentRepository(context: Context) {
     fun pdfAssetFile(assetId: String): File = File(assetDirectory, "${DocumentJson.validId(assetId)}.pdf")
 
     suspend fun renderPdfBackground(background: PdfBackground, maxDimension: Int = 2048): Bitmap = locked {
-        require(maxDimension in 64..4096) { "PDF önizleme boyutu geçersiz." }
+        require(maxDimension in 64..4096) { tr("PDF önizleme boyutu geçersiz.") }
         openPdf(pdfAssetFile(background.assetId)).use { renderer ->
-            require(background.pageIndex in 0 until renderer.pageCount) { "PDF sayfası bulunamadı." }
+            require(background.pageIndex in 0 until renderer.pageCount) { tr("PDF sayfası bulunamadı.") }
             renderer.openPage(background.pageIndex).use { page ->
                 val scale = maxDimension.toFloat() / maxOf(page.width, page.height)
                 val width = (page.width * scale).roundToInt().coerceAtLeast(1)
@@ -513,11 +617,11 @@ class DocumentRepository(context: Context) {
         var scaled: Bitmap? = null
         try {
             val source = File(staging, "source")
-            val input = appContext.contentResolver.openInputStream(uri) ?: throw IOException("Görsel açılamadı.")
+            val input = appContext.contentResolver.openInputStream(uri) ?: throw IOException(tr("Görsel açılamadı."))
             input.use { stream -> source.outputStream().use { copyBounded(stream, it, MAX_ENTRY_BYTES) } }
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeFile(source.path, bounds)
-            require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Desteklenmeyen görsel." }
+            require(bounds.outWidth > 0 && bounds.outHeight > 0) { tr("Desteklenmeyen görsel.") }
             // Decode at a sampled size first; never materialize an unbounded source bitmap.
             var sample = 1
             while (bounds.outWidth / sample > MAX_IMAGE_EDGE || bounds.outHeight / sample > MAX_IMAGE_EDGE ||
@@ -525,7 +629,7 @@ class DocumentRepository(context: Context) {
             decoded = BitmapFactory.decodeFile(source.path, BitmapFactory.Options().apply {
                 inSampleSize = sample
                 inPreferredConfig = Bitmap.Config.ARGB_8888
-            }) ?: throw IOException("Görsel çözümlenemedi.")
+            }) ?: throw IOException(tr("Görsel çözümlenemedi."))
             val original = decoded
             val orientation = try { ExifInterface(source.path).getAttributeInt(ExifInterface.TAG_ORIENTATION,
                 ExifInterface.ORIENTATION_NORMAL) } catch (_: IOException) { ExifInterface.ORIENTATION_NORMAL }
@@ -542,7 +646,7 @@ class DocumentRepository(context: Context) {
             val assetId = newId()
             val output = AtomicSnapshotFile(assetFile(assetId))
             atomicWrite(output) { stream ->
-                if (!ready.compress(Bitmap.CompressFormat.PNG, 100, stream)) throw IOException("Görsel kaydedilemedi.")
+                if (!ready.compress(Bitmap.CompressFormat.PNG, 100, stream)) throw IOException(tr("Görsel kaydedilemedi."))
             }
             ImageAsset(assetId, ready.width, ready.height)
         } finally {
@@ -599,19 +703,19 @@ class DocumentRepository(context: Context) {
                 files["recordings/${item.id}.json"] = snapshot
                 recording.parts.forEach { files["assets/${it.assetId}.audio"] = audioPartFile(it) }
             }
-            require(files.size + 1 <= MAX_ARCHIVE_ENTRIES) { "Yedekte çok fazla dosya var." }
+            require(files.size + 1 <= MAX_ARCHIVE_ENTRIES) { tr("Yedekte çok fazla dosya var.") }
             val entries = JSONObject()
             var total = 0L
             files.forEach { (name, file) ->
-                require(file.length() <= if (name.endsWith(".audio")) AudioJson.MAX_AUDIO_BYTES else MAX_ENTRY_BYTES) { "Yedek için bir dosya çok büyük." }
+                require(file.length() <= if (name.endsWith(".audio")) AudioJson.MAX_AUDIO_BYTES else MAX_ENTRY_BYTES) { tr("Yedek için bir dosya çok büyük.") }
                 total += file.length()
-                require(total <= MAX_ARCHIVE_BYTES) { "Bu alfa sürümünde yedek en fazla 512 MB olabilir." }
+                require(total <= MAX_ARCHIVE_BYTES) { tr("Bu alfa sürümünde yedek en fazla 512 MB olabilir.") }
                 entries.put(name, JSONObject().put("bytes", file.length()).put("sha256", sha256(file)))
             }
             val manifest = JSONObject().put("format", "defter-backup").put("version", 3)
                 .put("createdAt", System.currentTimeMillis()).put("entries", entries).toString().toByteArray(Charsets.UTF_8)
             require(manifest.size <= MAX_JSON_BYTES && total + manifest.size <= MAX_ARCHIVE_BYTES) {
-                "Bu alfa sürümünde yedek en fazla 512 MB olabilir."
+                tr("Bu alfa sürümünde yedek en fazla 512 MB olabilir.")
             }
             ZipOutputStream(BufferedOutputStream(output)).use { zip ->
                 zip.putNextEntry(ZipEntry("manifest.json")); zip.write(manifest); zip.closeEntry()
@@ -637,69 +741,72 @@ class DocumentRepository(context: Context) {
         val staging = stagingDirectory()
         return try {
             val extracted = extractArchive(input, staging)
-            val manifestFile = extracted["manifest.json"] ?: throw IOException("Yedek bildirimi eksik.")
+            val manifestFile = extracted["manifest.json"] ?: throw IOException(tr("Yedek bildirimi eksik."))
             val manifest = readJson(manifestFile, MAX_JSON_BYTES)
             require(manifest.getString("format") == "defter-backup" && manifest.getInt("version") in 1..3) {
-                "Desteklenmeyen yedek biçimi."
+                tr("Desteklenmeyen yedek biçimi.")
             }
             val entries = manifest.getJSONObject("entries")
             val declared = entries.keys().asSequence().toSet()
-            require(declared == extracted.keys - "manifest.json") { "Yedekteki dosya listesi eşleşmiyor." }
+            require(declared == extracted.keys - "manifest.json") { tr("Yedekteki dosya listesi eşleşmiyor.") }
             declared.forEach { name ->
                 val descriptor = entries.getJSONObject(name)
                 val file = extracted.getValue(name)
                 require(descriptor.getLong("bytes") == file.length() &&
                     descriptor.getString("sha256").matches(Regex("[a-f0-9]{64}")) &&
-                    descriptor.getString("sha256") == sha256(file)) { "Yedek dosyası bozuk: $name" }
+                    descriptor.getString("sha256") == sha256(file)) { tr("Yedek dosyası bozuk: %1\$s", name) }
             }
             val library = DocumentJson.libraryFromJson(readJson(extracted["library.json"]
-                ?: throw IOException("Kütüphane eksik."), MAX_JSON_BYTES))
-            require(!sync || library.notebooks.size == 1) { "Eşitleme dosyası tek defter içermeli." }
-            require(!sync || expectedNotebookId == null || library.notebooks.single().id == expectedNotebookId) { "Eşitleme defter kimliği eşleşmiyor." }
+                ?: throw IOException(tr("Kütüphane eksik.")), MAX_JSON_BYTES))
+            require(!sync || library.notebooks.size == 1) { tr("Eşitleme dosyası tek defter içermeli.") }
+            require(!sync || expectedNotebookId == null || library.notebooks.single().id == expectedNotebookId) { tr("Eşitleme defter kimliği eşleşmiyor.") }
             val pageIds = linkedSetOf<String>()
             val assetIds = linkedSetOf<String>()
             val pdfIds = linkedSetOf<String>()
             val pages = linkedMapOf<String, PageDocument>()
             library.notebooks.forEach { owner -> (owner.pageIds + owner.trashedPageIds).forEach { id ->
-                val file = extracted["pages/$id.json"] ?: throw IOException("Yedekte sayfa eksik.")
+                val file = extracted["pages/$id.json"] ?: throw IOException(tr("Yedekte sayfa eksik."))
                 val page = DocumentJson.pageFromJson(readJson(file, MAX_JSON_BYTES))
-                require(page.id == id) { "Sayfa kimliği eşleşmiyor." }
+                require(page.id == id) { tr("Sayfa kimliği eşleşmiyor.") }
                 pageIds.add(id)
                 pages[id] = page
                 page.elements.filterIsInstance<ImageElement>().forEach { assetIds.add(it.assetId) }
                 page.pdfBackground?.let { pdfIds.add(it.assetId) }
             } }
             assetIds.forEach { id ->
-                validateImageFile(extracted["assets/$id.png"] ?: throw IOException("Yedekte görsel eksik."))
+                validateImageFile(extracted["assets/$id.png"] ?: throw IOException(tr("Yedekte görsel eksik.")))
             }
             pdfIds.forEach { id ->
-                val dimensions = validatePdfFile(extracted["assets/$id.pdf"] ?: throw IOException("Yedekte PDF eksik."))
+                val dimensions = validatePdfFile(extracted["assets/$id.pdf"] ?: throw IOException(tr("Yedekte PDF eksik.")))
                 pages.values.mapNotNull { it.pdfBackground }.filter { it.assetId == id }.forEach { background ->
-                    val size = dimensions.getOrNull(background.pageIndex) ?: throw IOException("PDF sayfası eksik.")
-                    require(size.first == background.widthPoints && size.second == background.heightPoints) { "PDF sayfa ölçüleri eşleşmiyor." }
+                    val size = dimensions.getOrNull(background.pageIndex) ?: throw IOException(tr("PDF sayfası eksik."))
+                    require(size.first == background.widthPoints && size.second == background.heightPoints) { tr("PDF sayfa ölçüleri eşleşmiyor.") }
                 }
             }
             val recordings = linkedMapOf<String, AudioRecording>()
             val audioIds = linkedSetOf<String>()
             library.audioItems.forEach { item ->
-                val recording = AudioJson.fromJson(readJson(extracted["recordings/${item.id}.json"] ?: throw IOException("Yedekte ses belgesi eksik."), MAX_JSON_BYTES))
-                require(recording.toItem() == item) { "Yedekte ses dizini uyuşmuyor." }
+                val recording = AudioJson.fromJson(readJson(extracted["recordings/${item.id}.json"] ?: throw IOException(tr("Yedekte ses belgesi eksik.")), MAX_JSON_BYTES))
+                require(recording.toItem() == item) { tr("Yedekte ses dizini uyuşmuyor.") }
                 validateAudioLinks(recording, library)
                 recording.parts.forEach { part ->
-                    val file = extracted["assets/${part.assetId}.audio"] ?: throw IOException("Yedekte ses parçası eksik.")
-                    require(file.length() == part.bytes) { "Yedekte ses parçası boyutu uyuşmuyor." }
+                    val file = extracted["assets/${part.assetId}.audio"] ?: throw IOException(tr("Yedekte ses parçası eksik."))
+                    require(file.length() == part.bytes) { tr("Yedekte ses parçası boyutu uyuşmuyor.") }
                     validateAudioContainer(file, part.mimeType)
                     audioIds.add(part.assetId)
                 }
                 recordings[item.id] = recording
             }
-            require(!sync || library.audioItems.all { it.notebookId == library.notebooks.single().id }) { "Eşitleme dosyasında ilişkisiz ses var." }
+            require(!sync || library.audioItems.all { it.notebookId == library.notebooks.single().id }) { tr("Eşitleme dosyasında ilişkisiz ses var.") }
             val referenced = setOf("library.json") + pageIds.map { "pages/$it.json" } + assetIds.map { "assets/$it.png" } + pdfIds.map { "assets/$it.pdf" } +
                 recordings.keys.map { "recordings/$it.json" } + audioIds.map { "assets/$it.audio" }
-            require(declared == referenced) { "Yedekte ilişkisiz dosyalar var." }
+            require(declared == referenced) { tr("Yedekte ilişkisiz dosyalar var.") }
             // Validate the entire archive before committing any new visible library entry.
             val remoteBook = if (sync) library.notebooks.single() else null
             val localBook = remoteBook?.let { incoming -> existing.notebooks.firstOrNull { it.id == incoming.id } }
+            require(!sync || expectedLocalFingerprint == null || localBook != null) {
+                tr("Eşitlenen defter artık bu cihazda yok. Eski işlem geri yükleyemez.")
+            }
             val conflict = sync && if (localBook == null) expectedLocalFingerprint != null
                 else fingerprint(existing, localBook) != expectedLocalFingerprint
             val replaceId = localBook?.id?.takeIf { !conflict }
@@ -709,7 +816,7 @@ class DocumentRepository(context: Context) {
             val pdfMap = pdfIds.associateWith { newId() }
             val audioMap = audioIds.associateWith { newId() }
             val importedNotebooks = library.notebooks.map { it.copy(id = if (sync && !conflict) it.id else newId(),
-                title = if (conflict) it.title.take(174) + " (eşitleme çakışması)" else it.title,
+                title = if (conflict) it.title.take(174) + tr(" (eşitleme çakışması)") else it.title,
                 deletedAt = if (conflict) null else it.deletedAt,
                 folderId = it.folderId?.let(folderMap::getValue), pageIds = it.pageIds.map(pageMap::getValue),
                 trashedPageIds = it.trashedPageIds.map(pageMap::getValue)) }
@@ -745,7 +852,7 @@ class DocumentRepository(context: Context) {
                 val active = prior.pageIds.filter { it in retainedPageIds }.ifEmpty {
                     listOf(PageDocument().also { recoveryBlank = it }.id)
                 }
-                Notebook(title = "Ses işaretleri · ${prior.title.take(180)}", folderId = prior.folderId,
+                Notebook(title = tr("Ses işaretleri · %1\$s", prior.title.take(180)), folderId = prior.folderId,
                     coverColor = prior.coverColor, pageIds = active, deletedAt = prior.deletedAt,
                     trashedPageIds = prior.trashedPageIds.filter { it in retainedPageIds })
             }
@@ -784,7 +891,7 @@ class DocumentRepository(context: Context) {
             merged to syncResult
         } catch (error: Exception) {
             if (error is IOException) throw error
-            throw IOException("Yedek içe aktarılamadı. Mevcut defterler korunuyor.", error)
+            throw IOException(tr("Yedek içe aktarılamadı. Mevcut defterler korunuyor."), error)
         } finally {
             staging.deleteRecursively()
         }
@@ -800,20 +907,20 @@ class DocumentRepository(context: Context) {
 
     private fun writeLibrary(library: LibraryData) {
         val bytes = DocumentJson.libraryToJson(library).toString().toByteArray(Charsets.UTF_8)
-        require(bytes.size <= MAX_JSON_BYTES) { "Kütüphane dosyası çok büyük." }
+        require(bytes.size <= MAX_JSON_BYTES) { tr("Kütüphane dosyası çok büyük.") }
         atomicWrite(libraryFile) { it.write(bytes) }
     }
 
     private fun readPage(id: String): PageDocument {
         val file = AtomicSnapshotFile(pageFile(id))
         return file.openRead().use { DocumentJson.pageFromJson(readJson(it, MAX_JSON_BYTES)) }.also {
-            require(it.id == id) { "Sayfa kimliği eşleşmiyor." }
+            require(it.id == id) { tr("Sayfa kimliği eşleşmiyor.") }
         }
     }
 
     private fun writePage(page: PageDocument) {
         val bytes = DocumentJson.pageToJson(page).toString().toByteArray(Charsets.UTF_8)
-        require(bytes.size <= MAX_JSON_BYTES) { "Sayfa dosyası bu sürüm için çok büyük." }
+        require(bytes.size <= MAX_JSON_BYTES) { tr("Sayfa dosyası bu sürüm için çok büyük.") }
         atomicWrite(AtomicSnapshotFile(pageFile(page.id))) { it.write(bytes) }
     }
 
@@ -821,9 +928,9 @@ class DocumentRepository(context: Context) {
 
     private fun validateAssetsExist(page: PageDocument) {
         page.elements.filterIsInstance<ImageElement>().forEach {
-            require(assetFile(it.assetId).isFile) { "Sayfaya ait görsel bulunamadı." }
+            require(assetFile(it.assetId).isFile) { tr("Sayfaya ait görsel bulunamadı.") }
         }
-        page.pdfBackground?.let { require(pdfAssetFile(it.assetId).isFile) { "Sayfaya ait PDF bulunamadı." } }
+        page.pdfBackground?.let { require(pdfAssetFile(it.assetId).isFile) { tr("Sayfaya ait PDF bulunamadı.") } }
     }
 
     private fun notebookLibrary(library: LibraryData, owner: Notebook): LibraryData {
@@ -884,7 +991,7 @@ class DocumentRepository(context: Context) {
             map[folder.id] = matched.id
             queue.addAll(children[folder.id].orEmpty())
         }
-        require(map.size == incoming.folders.size) { "Klasör ağacı çözümlenemedi." }
+        require(map.size == incoming.folders.size) { tr("Klasör ağacı çözümlenemedi.") }
         return map to added
     }
 
@@ -894,25 +1001,25 @@ class DocumentRepository(context: Context) {
     }
 
     private fun validatePdfFile(file: File): List<Pair<Float, Float>> {
-        require(file.length() in 5..MAX_ENTRY_BYTES) { "PDF boş veya çok büyük." }
+        require(file.length() in 5..MAX_ENTRY_BYTES) { tr("PDF boş veya çok büyük.") }
         val header = ByteArray(minOf(1024, file.length().toInt()))
-        file.inputStream().use { input -> require(input.read(header) == header.size) { "PDF okunamadı." } }
-        require(header.toString(Charsets.ISO_8859_1).contains("%PDF-")) { "Dosya PDF biçiminde değil." }
+        file.inputStream().use { input -> require(input.read(header) == header.size) { tr("PDF okunamadı.") } }
+        require(header.toString(Charsets.ISO_8859_1).contains("%PDF-")) { tr("Dosya PDF biçiminde değil.") }
         return try {
             openPdf(file).use { renderer ->
-                require(renderer.pageCount in 1..2000) { "PDF 1–2000 sayfa içermeli." }
+                require(renderer.pageCount in 1..2000) { tr("PDF 1–2000 sayfa içermeli.") }
                 List(renderer.pageCount) { index ->
                     renderer.openPage(index).use { page ->
-                        require(page.width in 1..50_000 && page.height in 1..50_000) { "PDF sayfası desteklenen boyutu aşıyor." }
+                        require(page.width in 1..50_000 && page.height in 1..50_000) { tr("PDF sayfası desteklenen boyutu aşıyor.") }
                         page.width.toFloat() to page.height.toFloat()
                     }
                 }
             }
-        } catch (error: Exception) { throw IOException("PDF açılamadı. Dosya bozuk veya parola korumalı olabilir.", error) }
+        } catch (error: Exception) { throw IOException(tr("PDF açılamadı. Dosya bozuk veya parola korumalı olabilir."), error) }
     }
 
     private fun notebook(library: LibraryData, id: String): Notebook =
-        library.notebooks.find { it.id == id } ?: throw IOException("Defter bulunamadı.")
+        library.notebooks.find { it.id == id } ?: throw IOException(tr("Defter bulunamadı."))
 
     private suspend fun <T> locked(block: suspend () -> T): T = withContext(Dispatchers.IO) {
         storeMutex.withLock {
@@ -933,11 +1040,11 @@ class DocumentRepository(context: Context) {
                 require(!entry.isDirectory && (name == "manifest.json" || name == "library.json" ||
                     name.matches(Regex("pages/[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}\\.json")) ||
                     name.matches(Regex("recordings/[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}\\.json")) ||
-                    name.matches(Regex("assets/[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}\\.(png|pdf|audio)")))) { "Güvenli olmayan yedek yolu." }
-                require(name !in result && result.size < MAX_ARCHIVE_ENTRIES) { "Geçersiz yedek dosya listesi." }
+                    name.matches(Regex("assets/[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}\\.(png|pdf|audio)")))) { tr("Güvenli olmayan yedek yolu.") }
+                require(name !in result && result.size < MAX_ARCHIVE_ENTRIES) { tr("Geçersiz yedek dosya listesi.") }
                 val target = File(staging, name)
-                require(target.canonicalPath.startsWith(staging.canonicalPath + File.separator)) { "Geçersiz yedek yolu." }
-                ensureDirectory(target.parentFile ?: throw IOException("Yedek yolu bulunamadı."))
+                require(target.canonicalPath.startsWith(staging.canonicalPath + File.separator)) { tr("Geçersiz yedek yolu.") }
+                ensureDirectory(target.parentFile ?: throw IOException(tr("Yedek yolu bulunamadı.")))
                 val remaining = (MAX_ARCHIVE_BYTES - total).coerceAtLeast(0)
                 val limit = minOf(when { name.endsWith(".json") -> MAX_JSON_BYTES.toLong(); name.endsWith(".audio") -> AudioJson.MAX_AUDIO_BYTES; else -> MAX_ENTRY_BYTES }, remaining)
                 total += target.outputStream().use { copyBounded(zip, it, limit) }
@@ -950,18 +1057,18 @@ class DocumentRepository(context: Context) {
 
     private fun validateImageFile(file: File) {
         val signature = ByteArray(8)
-        file.inputStream().use { require(it.read(signature) == 8) { "Görsel dosyası bozuk." } }
+        file.inputStream().use { require(it.read(signature) == 8) { tr("Görsel dosyası bozuk.") } }
         require(signature.contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))) {
-            "Görsel PNG biçiminde değil."
+            tr("Görsel PNG biçiminde değil.")
         }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.path, bounds)
         require(bounds.outWidth in 1..MAX_IMAGE_EDGE && bounds.outHeight in 1..MAX_IMAGE_EDGE &&
-            bounds.outWidth.toLong() * bounds.outHeight <= MAX_IMAGE_PIXELS) { "Geçersiz yedek görseli." }
+            bounds.outWidth.toLong() * bounds.outHeight <= MAX_IMAGE_PIXELS) { tr("Geçersiz yedek görseli.") }
         var sample = 1
         while (bounds.outWidth / sample > 256 || bounds.outHeight / sample > 256) sample *= 2
         val check = BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample })
-            ?: throw IOException("Yedekteki görsel çözümlenemedi.")
+            ?: throw IOException(tr("Yedekteki görsel çözümlenemedi."))
         check.recycle()
     }
 
@@ -982,7 +1089,7 @@ class DocumentRepository(context: Context) {
         private const val MAX_IMAGE_PIXELS = 8_388_608L
 
         private fun ensureDirectory(directory: File) {
-            if (!directory.isDirectory && !directory.mkdirs()) throw IOException("Kayıt klasörü oluşturulamadı.")
+            if (!directory.isDirectory && !directory.mkdirs()) throw IOException(tr("Kayıt klasörü oluşturulamadı."))
         }
 
         private inline fun atomicWrite(file: AtomicSnapshotFile, block: (FileOutputStream) -> Unit) {
@@ -1004,7 +1111,7 @@ class DocumentRepository(context: Context) {
                 val read = input.read(buffer)
                 if (read == -1) return count
                 count += read
-                if (count > limit) throw IOException("Dosya izin verilen boyutu aşıyor.")
+                if (count > limit) throw IOException(tr("Dosya izin verilen boyutu aşıyor."))
                 output.write(buffer, 0, read)
             }
         }

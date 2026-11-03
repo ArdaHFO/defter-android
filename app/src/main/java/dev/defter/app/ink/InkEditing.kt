@@ -1,10 +1,12 @@
 package dev.defter.app.ink
 
+import dev.defter.app.localization.tr
+
 import android.graphics.RectF
 import dev.defter.app.model.*
 import kotlin.math.*
 
-class GeometryLimitException : IllegalArgumentException("Bu işlemde çok fazla çizgi ayrıntısı var. Daha küçük bir alanla yeniden dene. Değişiklik yapılmadı.")
+class GeometryLimitException : IllegalArgumentException(tr("Bu işlemde çok fazla çizgi ayrıntısı var. Daha küçük bir alanla yeniden dene. Değişiklik yapılmadı."))
 
 /** Document-space editing shared by gestures and regression tests. */
 object InkEditing {

@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_784a555dd7ab" formatted="false">" (eşitleme çakışması)"</string>
+    <string name="text_c5e0e1869031" formatted="false">" · kurtarılan"</string>
+    <string name="text_cac7bfc1ed77" formatted="false">"%1$d defter kalıcı olarak silindi."</string>
+    <string name="text_3a03e32bc875" formatted="false">"%1$d defter ve sayfaları kalıcı olarak silinecek. Bağlı ses kayıtları korunur, silinen sayfalara bağlantıları kaldırılır. Bu işlem geri alınamaz."</string>
+    <string name="text_1d716f1bc739" formatted="false">"%1$d ses kaydı kalıcı olarak silindi."</string>
+    <string name="text_66f2a7173bfc" formatted="false">"%1$d ses kaydı ve transkripti kalıcı olarak silinecek. Bu işlem geri alınamaz."</string>
+    <string name="text_e5a70fde14cc" formatted="false">"%1$d seçildi"</string>
+    <string name="text_c1d1ba580107" formatted="false">"%1$s defter"</string>
+    <string name="text_1e0dc4f1aea2" formatted="false">"%1$s defter · %2$s klasör"</string>
+    <string name="text_2a4742722ee8" formatted="false">"%1$s konumuna işaret eklendi."</string>
+    <string name="text_c931cb5cff3b" formatted="false">"%1$s kırpma sınırı"</string>
+    <string name="text_8e3e10f58f55" formatted="false">"%1$s nesne"</string>
+    <string name="text_326d33034da8" formatted="false">"%1$s renk"</string>
+    <string name="text_b1591a79a9da" formatted="false">"%1$s sayfa"</string>
+    <string name="text_3f1c2e17e99e" formatted="false">"%1$s sayfa · %2$s"</string>
+    <string name="text_1c571d73d338" formatted="false">"%1$s sekmesini kapat"</string>
+    <string name="text_4b002c6c348a" formatted="false">"%1$s seçenekleri"</string>
+    <string name="text_bff642835d52" formatted="false">"%1$s · %2$s. sayfa"</string>
+    <string name="text_28566c033735" formatted="false">"ANAHTAR NOTLAR"</string>
+    <string name="text_27801417db4b" formatted="false">"Ad 1–200 karakter olmalı."</string>
+    <string name="text_461536dbe838" formatted="false">"Adaçayı"</string>
+    <string name="text_3827cba582d2" formatted="false">"Adını değiştir"</string>
+    <string name="text_c91da2e0203b" formatted="false">"Alt"</string>
+    <string name="text_1805bf33db71" formatted="false">"Ana klasör"</string>
+    <string name="text_a3dbe5686ef1" formatted="false">"Android arka plan işlem süresi dolduğu için çeviri duraklatıldı. Tamamlanan bölümler korundu."</string>
+    <string name="text_5a3f99c5c09d" formatted="false">"Aramayı temizle"</string>
+    <string name="text_26df28d024a6" formatted="false">"Arduvaz"</string>
+    <string name="text_2d65dc965961" formatted="false">"Arka plan işlemi başlatılamadı. %1$s"</string>
+    <string name="text_0193e6cd3139" formatted="false">"Açı aralığı"</string>
+    <string name="text_32cc8825f59e" formatted="false">"Açıkken çizgi ve oklar seçilen açılara oturur. Dikdörtgen aracı kare, elips aracı çember çizer."</string>
+    <string name="text_0d26bf5f2e68" formatted="false">"Aşırı büyük yazıya dökme sonucu."</string>
+    <string name="text_b490ea62c38b" formatted="false">"Bağlı sayfa kullanılamıyor"</string>
+    <string name="text_394359385a56" formatted="false">"Bağımsız kayıtlar ve ses dosyaları"</string>
+    <string name="text_ba9d21172de9" formatted="false">"Bağımsız ses"</string>
+    <string name="text_1f6f56656f4c" formatted="false">"Bağımsız ses olarak tut"</string>
+    <string name="text_9e66a1b0b5a9" formatted="false">"Başka bir adla aramayı dene."</string>
+    <string name="text_b4a48bcca201" formatted="false">"Başka bir ses zaten işleniyor veya işlem başlatılamadı."</string>
+    <string name="text_0f5a95e22d93" formatted="false">"Başka deftere kopyala"</string>
+    <string name="text_8e39a14c847b" formatted="false">"Başka deftere taşı"</string>
+    <string name="text_80027849422e" formatted="false">"Başlangıç zamanı geçersiz."</string>
+    <string name="text_dc556201b977" formatted="false">"Belge bir JSON nesnesi olmalı."</string>
+    <string name="text_b16bc0e596e9" formatted="false">"Belge dosyası bozuk. Mevcut dosya korunuyor."</string>
+    <string name="text_8a1b1417e17d" formatted="false">"Belge okunamadı. Mevcut dosya korunuyor."</string>
+    <string name="text_a7d1e47b8f9e" formatted="false">"Belge tamamlanmamış."</string>
+    <string name="text_b1af6f518a92" formatted="false">"Belge yapısı geçersiz."</string>
+    <string name="text_6e7a60fa9b20" formatted="false">"Belge yapısı çok derin."</string>
+    <string name="text_47ea7a179b1e" formatted="false">"Beyaz"</string>
+    <string name="text_d8e1ce802374" formatted="false">"Boş"</string>
+    <string name="text_86366438b6fd" formatted="false">"Bu alfa sürümünde yedek en fazla 512 MB olabilir."</string>
+    <string name="text_532553a0a5f0" formatted="false">"Bu cihazda Android dosya seçicisi bulunamadı. Defterlerini kullanmaya devam edebilirsin; dosya alışverişi için sistem dosya seçicisi gerekir."</string>
+    <string name="text_11cdbbb7fdd5" formatted="false">"Bu cihazda dosya seçicisi bulunamadı."</string>
+    <string name="text_270dbe94929c" formatted="false">"Bu dil için el yazısı modeli bulunamadı."</string>
+    <string name="text_c112b54b62a6" formatted="false">"Bu içerik yapıştırılamıyor. Görseli Paylaş menüsünden veya dosyadan ekleyebilirsin."</string>
+    <string name="text_cd730db2a9ff" formatted="false">"Bu işlemde çok fazla çizgi ayrıntısı var. Daha küçük bir alanla yeniden dene. Değişiklik yapılmadı."</string>
+    <string name="text_f1513a5d6792" formatted="false">"Bu kayıtta henüz oynatılabilir ses yok."</string>
+    <string name="text_98a4ce31f669" formatted="false">"Bu kayıtta tanınan konuşma bulunamadı."</string>
+    <string name="text_9af4321250dc" formatted="false">"Bu nesne türü desteklenmiyor."</string>
+    <string name="text_3fcd7bb47e19" formatted="false">"Bu oynatma hızı uygulanamadı."</string>
+    <string name="text_45179f18c1e0" formatted="false">"Bu ses kaydı silinmiş."</string>
+    <string name="text_73cffa3df286" formatted="false">"Cihaz ısındığı için metne çevirme duraklatıldı. Soğuduktan sonra devam edebilirsin."</string>
+    <string name="text_5493c425813c" formatted="false">"Cihazın sıcaklığı yüksek. Soğuduktan sonra metne çevirmeyi başlat."</string>
+    <string name="text_e3926cd27da0" formatted="false">"Cihazına kaydedildi"</string>
+    <string name="text_5b531a29e0df" formatted="false">"Cihazında saklanıyor"</string>
+    <string name="text_1aa20d0c832a" formatted="false">"Cornell"</string>
+    <string name="text_7ae17d06d727" formatted="false">"DEFTERLER"</string>
+    <string name="text_ed15b4b6a191" formatted="false">"Defter adı"</string>
+    <string name="text_f72d5e4e7444" formatted="false">"Defter bağlantısı"</string>
+    <string name="text_643cc63f6a68" formatted="false">"Defter bulunamadı"</string>
+    <string name="text_9f1d1a9a71b6" formatted="false">"Defter bulunamadı."</string>
+    <string name="text_6f644427fb39" formatted="false">"Defter menüsü"</string>
+    <string name="text_294571a9bbd9" formatted="false">"Defter sayfası. Kalemle yazın, iki parmakla yakınlaştırın."</string>
+    <string name="text_68a21dbebbd1" formatted="false">"Defter sesleri"</string>
+    <string name="text_501ab9ca2a65" formatted="false">"Defter veya içerik ara"</string>
+    <string name="text_1daf0be47a01" formatted="false">"Defter · %1$s"</string>
+    <string name="text_625e41031ae0" formatted="false">"Defter çöp kutusunda."</string>
+    <string name="text_6fa97aab22b6" formatted="false">"Defterde en az bir sayfa kalır."</string>
+    <string name="text_60c9110fdc61" formatted="false">"Defterde en az bir sayfa olmalı."</string>
+    <string name="text_f1ce60f3ebd2" formatted="false">"Defterdeki bir görsel okunamadı."</string>
+    <string name="text_3c1a51def969" formatted="false">"Deftere bağla"</string>
+    <string name="text_627ce7e41ee6" formatted="false">"Deftere bağla / ayır"</string>
+    <string name="text_4fbea97516b3" formatted="false">"Defteri oluştur"</string>
+    <string name="text_7702e56b00c8" formatted="false">"Defteri taşı"</string>
+    <string name="text_a7e6b606bf80" formatted="false">"Defteri yeniden adlandır"</string>
+    <string name="text_41c634a95098" formatted="false">"Defterin klasörü eksik."</string>
+    <string name="text_badd99cc5583" formatted="false">"Defterlerin kütüphanende güvende."</string>
+    <string name="text_4afc001697ab" formatted="false">"Deniz mavisi"</string>
+    <string name="text_5ed862fc233c" formatted="false">"Depolama alanı azaldı. Tamamlanan ses korundu ve kayıt duraklatıldı."</string>
+    <string name="text_bee222c4cb06" formatted="false">"Derslerin, çizimlerin, aklına gelenler."</string>
+    <string name="text_8bd154c0d7e0" formatted="false">"Desteklenmeyen belge sürümü."</string>
+    <string name="text_9ceff3810426" formatted="false">"Desteklenmeyen dosya adresi."</string>
+    <string name="text_0954173d73e3" formatted="false">"Desteklenmeyen el yazısı dili."</string>
+    <string name="text_aebc3f8b28ff" formatted="false">"Desteklenmeyen görsel."</string>
+    <string name="text_b8276b0aeed0" formatted="false">"Desteklenmeyen konuşma dili."</string>
+    <string name="text_2db13053156b" formatted="false">"Desteklenmeyen kütüphane sürümü."</string>
+    <string name="text_76635d5501a0" formatted="false">"Desteklenmeyen ses belgesi sürümü."</string>
+    <string name="text_235e85af3fec" formatted="false">"Desteklenmeyen ses kapsayıcısı."</string>
+    <string name="text_ce66503ec7ec" formatted="false">"Desteklenmeyen yazıya dökme dili."</string>
+    <string name="text_25633c695abe" formatted="false">"Desteklenmeyen yedek biçimi."</string>
+    <string name="text_b2459f107506" formatted="false">"Devam eden ders kaydı ve kayıt kontrolleri"</string>
+    <string name="text_26183306dcac" formatted="false">"Devam et"</string>
+    <string name="text_d0a7782b0e67" formatted="false">"Dikdörtgen"</string>
+    <string name="text_12d34675caa1" formatted="false">"Dil modeli bir kez internetten indirilir. Yazı tanıma cihaz üzerinde çalışır. Fotoğraf ve PDF içindeki basılı metin bu el yazısı modelinin kapsamı dışındadır."</string>
+    <string name="text_bd5eb5828961" formatted="false">"Dil modelini indir"</string>
+    <string name="text_9ea23ddaed2a" formatted="false">"Dili değiştirmek için transkripti yeniden oluştur."</string>
+    <string name="text_d56773c7d12a" formatted="false">"Dinlemek için önce açık kaydı durdur."</string>
+    <string name="text_47ffaefb9e84" formatted="false">"Dosya PDF biçiminde değil."</string>
+    <string name="text_649a68d11ac6" formatted="false">"Dosya izin verilen boyutu aşıyor."</string>
+    <string name="text_2834af0e2685" formatted="false">"Dosyada desteklenen bir ses izi bulunamadı."</string>
+    <string name="text_b7e87442a2d7" formatted="false">"Dosyada desteklenen ses izi bulunamadı."</string>
+    <string name="text_36e14d97cfd9" formatted="false">"Dosyalar"</string>
+    <string name="text_1cbe065a9602" formatted="false">"Dosyalar · bağımsız ses arşivi"</string>
+    <string name="text_19b6acde3303" formatted="false">"Duraklat"</string>
+    <string name="text_49730237c2a7" formatted="false">"Duraklatıldı"</string>
+    <string name="text_500d0d0a361c" formatted="false">"Durdur ve kaydet"</string>
+    <string name="text_388f030daa29" formatted="false">"DÜŞÜN. YAZ. HATIRLA."</string>
+    <string name="text_b43a86e6dae2" formatted="false">"Düzenlendi"</string>
+    <string name="text_f2c3e18ed22d" formatted="false">"Eklenecek konum bulunamadı."</string>
+    <string name="text_d11d618d52e1" formatted="false">"El yazılarını aramaya hazırla"</string>
+    <string name="text_a576861006b0" formatted="false">"El yazısı aranabilir hâle getiriliyor · %1$s/%2$s"</string>
+    <string name="text_088745896b65" formatted="false">"El yazısı dizini güncellendi. Kütüphaneden içerik arayabilirsin."</string>
+    <string name="text_36090d88f1e7" formatted="false">"El yazısı işlemi iptal edildi."</string>
+    <string name="text_57b69bade770" formatted="false">"El yazısı koordinatları geçersiz."</string>
+    <string name="text_3b38bf17b672" formatted="false">"El yazısı modeli hazır. Tanıma artık cihazında çalışabilir."</string>
+    <string name="text_e87fbfae2f76" formatted="false">"El yazısı modeli indiriliyor…"</string>
+    <string name="text_d2882996b37e" formatted="false">"El yazısı okunuyor…"</string>
+    <string name="text_8c45a42f0791" formatted="false">"El yazısı sonucu"</string>
+    <string name="text_6dc46cc73e2d" formatted="false">"El yazısı tanıyıcı kapatıldı."</string>
+    <string name="text_36e727308f62" formatted="false">"El yazısı ve arama"</string>
+    <string name="text_c81cf643153e" formatted="false">"El yazısını metne çevir"</string>
+    <string name="text_220b8926fd40" formatted="false">"Elips"</string>
+    <string name="text_0da854ad8744" formatted="false">"Eski veya çakışan sayfa sürümü kaydedilemez."</string>
+    <string name="text_45e557f9b398" formatted="false">"Eşitleme defter kimliği eşleşmiyor."</string>
+    <string name="text_69fcff163cac" formatted="false">"Eşitleme dosyası tek defter içermeli."</string>
+    <string name="text_0e941d05c729" formatted="false">"Eşitleme dosyasında ilişkisiz ses var."</string>
+    <string name="text_fc48b54d7717" formatted="false">"Eşitlenen defter artık bu cihazda yok. Eski işlem geri yükleyemez."</string>
+    <string name="text_17e3a27d9368" formatted="false">"Fosforlu"</string>
+    <string name="text_41a8c2c3bd58" formatted="false">"FİKİRLERİNE YER AÇ"</string>
+    <string name="text_96b5c13bd8b2" formatted="false">"Geometri araçları"</string>
+    <string name="text_6b65f1920bb2" formatted="false">"Geri al"</string>
+    <string name="text_8ff239c76d10" formatted="false">"Geri getir"</string>
+    <string name="text_ea46b7448108" formatted="false">"Gezin"</string>
+    <string name="text_777808338743" formatted="false">"Geçersiz PDF sayfası."</string>
+    <string name="text_93e0d0b734c5" formatted="false">"Geçersiz basınç."</string>
+    <string name="text_b06cd2f9f40b" formatted="false">"Geçersiz belge kimliği."</string>
+    <string name="text_860781d2af16" formatted="false">"Geçersiz boyut."</string>
+    <string name="text_8b49ffc1ee37" formatted="false">"Geçersiz döndürme açısı."</string>
+    <string name="text_e59fb1ad6b3b" formatted="false">"Geçersiz koordinat."</string>
+    <string name="text_5f1aabd18bce" formatted="false">"Geçersiz kırpma alanı."</string>
+    <string name="text_1f264938bb14" formatted="false">"Geçersiz sayfa sürümü."</string>
+    <string name="text_9059eee82f28" formatted="false">"Geçersiz ses dizini."</string>
+    <string name="text_e7e87066d3c6" formatted="false">"Geçersiz ses işareti."</string>
+    <string name="text_7245e8ede530" formatted="false">"Geçersiz ses kaydı kimliği."</string>
+    <string name="text_4ad1e02e9877" formatted="false">"Geçersiz ses kaynak kimliği."</string>
+    <string name="text_9bf4ac53181c" formatted="false">"Geçersiz ses parçası."</string>
+    <string name="text_d1db3155cbd6" formatted="false">"Geçersiz tanıma dili."</string>
+    <string name="text_237398f4dec1" formatted="false">"Geçersiz tanıma sürümü."</string>
+    <string name="text_60fd252fcfb1" formatted="false">"Geçersiz tarih."</string>
+    <string name="text_6a9ba1fb02de" formatted="false">"Geçersiz veya aşırı büyük ses tamponu."</string>
+    <string name="text_70621d648f5e" formatted="false">"Geçersiz yazıya çevirme bilgisi."</string>
+    <string name="text_0cccfcc23e33" formatted="false">"Geçersiz yazıya çevirme konumu."</string>
+    <string name="text_f93087893396" formatted="false">"Geçersiz yedek dosya listesi."</string>
+    <string name="text_bf197f7644fe" formatted="false">"Geçersiz yedek görseli."</string>
+    <string name="text_8b55652d2e67" formatted="false">"Geçersiz yedek yolu."</string>
+    <string name="text_48bfae25b9f9" formatted="false">"Geçersiz zamanlı metin."</string>
+    <string name="text_3b37c4936f19" formatted="false">"Geçersiz çizgi noktası."</string>
+    <string name="text_462074c0cb59" formatted="false">"Geçersiz çizgi."</string>
+    <string name="text_5694c05b1a70" formatted="false">"Görsel"</string>
+    <string name="text_139cd7934b6e" formatted="false">"Görsel PNG biçiminde değil."</string>
+    <string name="text_a94722f8e924" formatted="false">"Görsel açılamadı."</string>
+    <string name="text_9504d75aa306" formatted="false">"Görsel boyutları desteklenen sınırı aşıyor."</string>
+    <string name="text_ccb096417f30" formatted="false">"Görsel dosyası bozuk."</string>
+    <string name="text_e1ce8f155dc2" formatted="false">"Görsel kaydedilemedi."</string>
+    <string name="text_e6c8e7a37d37" formatted="false">"Görsel çözümlenemedi."</string>
+    <string name="text_2a6c3404b8a1" formatted="false">"Görseli kırp"</string>
+    <string name="text_c568d9e9f791" formatted="false">"Güvenli olmayan yedek yolu."</string>
+    <string name="text_a35c30929e0a" formatted="false">"Güvensiz model yönlendirmesi reddedildi."</string>
+    <string name="text_284bf13c7065" formatted="false">"HEX renk kodu"</string>
+    <string name="text_074e464dc790" formatted="false">"Hazırlanıyor…"</string>
+    <string name="text_6c7b891a846c" formatted="false">"Henüz ses kaydı yok"</string>
+    <string name="text_ac3277f7ef77" formatted="false">"KLASÖRLER"</string>
+    <string name="text_15e141bee057" formatted="false">"KONU / TARİH"</string>
+    <string name="text_fa95462bfacb" formatted="false">"Kalem"</string>
+    <string name="text_05c28670f092" formatted="false">"Kalemle serbest yazıyı değiştirmez."</string>
+    <string name="text_1dc7472b3156" formatted="false">"Kalıcı olarak silinsin mi?"</string>
+    <string name="text_a6269a544411" formatted="false">"Kalıcı sil"</string>
+    <string name="text_cabf8e95a514" formatted="false">"Kalınlık"</string>
+    <string name="text_34159775248b" formatted="false">"Kalınlık ayarı"</string>
+    <string name="text_7f1c8bc4a5bc" formatted="false">"Kapak rengi"</string>
+    <string name="text_7b31a9fc4816" formatted="false">"Kapat"</string>
+    <string name="text_70d332f70384" formatted="false">"Kareli"</string>
+    <string name="text_b5edd3869fa0" formatted="false">"Kaydedilemedi · yeniden dene"</string>
+    <string name="text_2eb2690fc2be" formatted="false">"Kaydedilemeyen değişiklikler ayrı sayfalarda kurtarıldı. Diğer kayıtlar korundu."</string>
+    <string name="text_3d4e94b27c3e" formatted="false">"Kaydediliyor"</string>
+    <string name="text_dd292f855cd8" formatted="false">"Kaydediliyor…"</string>
+    <string name="text_c1fe2ecdff02" formatted="false">"Kaydet"</string>
+    <string name="text_c342663261a8" formatted="false">"Kaydetme tamamlanamadı"</string>
+    <string name="text_827bd69677d1" formatted="false">"Kaydı ve transkripti Silinenler bölümünden geri getirebilirsin."</string>
+    <string name="text_9fa49cef32db" formatted="false">"Kaydır ve yakınlaştır"</string>
+    <string name="text_8676c71c5fc8" formatted="false">"Kayıt adı"</string>
+    <string name="text_af65f380df4c" formatted="false">"Kayıt akışı açılmadı."</string>
+    <string name="text_e703b5d18a9d" formatted="false">"Kayıt başlat"</string>
+    <string name="text_c95775e2f3e3" formatted="false">"Kayıt başlatmak için mikrofon izni gerekli. Ses dosyalarını içe aktarmaya devam edebilirsin."</string>
+    <string name="text_8967670619b0" formatted="false">"Kayıt duraklatıldı"</string>
+    <string name="text_06ff8ec3f503" formatted="false">"Kayıt içinde değişen ses örnekleme biçimi desteklenmiyor."</string>
+    <string name="text_77c3446c278e" formatted="false">"Kayıt klasörü oluşturulamadı."</string>
+    <string name="text_699ea13b1392" formatted="false">"Kayıt süresi geçersiz veya 24 saatten uzun."</string>
+    <string name="text_3d9990599379" formatted="false">"Kayıt süresi okunamadı."</string>
+    <string name="text_f6bdad7c7928" formatted="false">"Kayıt yolu geçersiz."</string>
+    <string name="text_cafb2d991bbe" formatted="false">"Kayıtlar"</string>
+    <string name="text_82b1c07947b1" formatted="false">"Kayıtta çözümlenebilir ses bulunamadı."</string>
+    <string name="text_af4c01624977" formatted="false">"Kement"</string>
+    <string name="text_be4542596b23" formatted="false">"Kes"</string>
+    <string name="text_aea3ab5806c9" formatted="false">"Kesilmiş PCM ses çerçevesi."</string>
+    <string name="text_a4bd7172c526" formatted="false">"Kesintiden kurtarılan kayıt"</string>
+    <string name="text_1ed109983309" formatted="false">"Kiremit"</string>
+    <string name="text_505b9693a658" formatted="false">"Klasör adı"</string>
+    <string name="text_0b927e205c5f" formatted="false">"Klasör ağacı çözümlenemedi."</string>
+    <string name="text_3f39443cc7c0" formatted="false">"Klasör bulunamadı."</string>
+    <string name="text_bd19d49ffcc8" formatted="false">"Klasör döngüsü bulundu."</string>
+    <string name="text_3790b90a64d2" formatted="false">"Klasöre taşı"</string>
+    <string name="text_8e4c6a8a7a29" formatted="false">"Klasörü yeniden adlandır"</string>
+    <string name="text_aced2bb52968" formatted="false">"Konuşma metni"</string>
+    <string name="text_863b4998080f" formatted="false">"Konuşma modeli"</string>
+    <string name="text_242eda2cfda6" formatted="false">"Konuşma modeli indirilemedi."</string>
+    <string name="text_742b0cefe350" formatted="false">"Kopya olarak kurtar"</string>
+    <string name="text_a8bcca42d9ce" formatted="false">"Kopyala"</string>
+    <string name="text_01d536187ef0" formatted="false">"Kopyalanan çizim artık bu oturumda yok. İçeriği yeniden kopyala."</string>
+    <string name="text_b24a36089466" formatted="false">"Koyu"</string>
+    <string name="text_94c742ad5e3e" formatted="false">"Krem"</string>
+    <string name="text_7a8b87a7dbe1" formatted="false">"Kum"</string>
+    <string name="text_9e5da0b2a46c" formatted="false">"Kurtarılan notlar"</string>
+    <string name="text_de8790971fde" formatted="false">"KÜTÜPHANEYİ DÜZENLE"</string>
+    <string name="text_d2c99d2503b5" formatted="false">"Kâğıt rengi"</string>
+    <string name="text_748dd3ee5905" formatted="false">"Kütüphane"</string>
+    <string name="text_d61da38bac0e" formatted="false">"Kütüphane dosyası çok büyük."</string>
+    <string name="text_138099d455e2" formatted="false">"Kütüphane eksik."</string>
+    <string name="text_ef36386aa1c1" formatted="false">"Kütüphane menüsü"</string>
+    <string name="text_2fa08e0cbe59" formatted="false">"Kütüphanen"</string>
+    <string name="text_b56ee02c62b9" formatted="false">"Kütüphaneye dön"</string>
+    <string name="text_2559af1c2fa1" formatted="false">"Kırmızı"</string>
+    <string name="text_d6883e18cead" formatted="false">"Kırık beyaz"</string>
+    <string name="text_f148c2a539a3" formatted="false">"Kısmi silgi"</string>
+    <string name="text_4e52adc41240" formatted="false">"Lacivert"</string>
+    <string name="text_97c0014c6a71" formatted="false">"Lavanta"</string>
+    <string name="text_262b943e8879" formatted="false">"Matematik araçları"</string>
+    <string name="text_be17d3159785" formatted="false">"Mavi"</string>
+    <string name="text_80422e38652c" formatted="false">"Metin"</string>
+    <string name="text_ae24e6b73192" formatted="false">"Metin boyutu"</string>
+    <string name="text_06455df7d342" formatted="false">"Metin ekle"</string>
+    <string name="text_869e99e1026f" formatted="false">"Metin çok uzun."</string>
+    <string name="text_37eaec21d3de" formatted="false">"Metne dokunarak o anı dinle. Tanıma hatalarını düzenleyebilirsin."</string>
+    <string name="text_9c62a9f2f729" formatted="false">"Metne çevir"</string>
+    <string name="text_60373245df97" formatted="false">"Metne çevirme başlatılamadı."</string>
+    <string name="text_9c290e6e6639" formatted="false">"Metne çevirmeden önce ses kaydını durdur."</string>
+    <string name="text_7d377ab2c1fb" formatted="false">"Metne çevriliyor · %1$s / %2$s"</string>
+    <string name="text_b9a3e78ad860" formatted="false">"Metni düzenle"</string>
+    <string name="text_1e2ed1538930" formatted="false">"Mevcut transkript ve yaptığın metin düzeltmeleri yeni sonuçla değiştirilecek. Ses kaydı korunur."</string>
+    <string name="text_9b317677ca9e" formatted="false">"Mikrofon başka bir işlem veya gizlilik ayarı nedeniyle susturuldu. Kayıt duraklatıldı."</string>
+    <string name="text_10f55984d300" formatted="false">"Mikrofon hazırlanıyor"</string>
+    <string name="text_9afb9735d687" formatted="false">"Mikrofon izni kaldırıldı."</string>
+    <string name="text_5fbef9eb5799" formatted="false">"Mikrofon izni verilmedi."</string>
+    <string name="text_6eb295014aae" formatted="false">"Mikrofon kaydı başlatılamadı. İzni kontrol ederek uygulamadan tekrar deneyin."</string>
+    <string name="text_d4fabbeacfbf" formatted="false">"Mikrofon kaydı kesildi."</string>
+    <string name="text_42f60bff2c96" formatted="false">"Mikrofon veya kayıt cihazı kesintiye uğradı."</string>
+    <string name="text_994a81e4d734" formatted="false">"Mikrofonla kaydet veya cihazından bir ses dosyası ekle."</string>
+    <string name="text_44af9680c508" formatted="false">"Model SHA-256 doğrulaması başarısız. Dosya kullanılmadı."</string>
+    <string name="text_5d23481719cd" formatted="false">"Model adresi HTTPS olmalı."</string>
+    <string name="text_46850c9fa699" formatted="false">"Model boyutu doğrulanamadı."</string>
+    <string name="text_5ef3f526205b" formatted="false">"Model devam indirmesi doğrulanamadı."</string>
+    <string name="text_1cfb89bdf1db" formatted="false">"Model devam indirmesinin aralığı geçersiz."</string>
+    <string name="text_367c352301e0" formatted="false">"Model dosyası beklenen boyutu aşıyor."</string>
+    <string name="text_98d12a3d36e5" formatted="false">"Model doğrulanıyor…"</string>
+    <string name="text_1dae61c2892a" formatted="false">"Model hazır · çevrimdışı kullanabilirsin"</string>
+    <string name="text_6a6380328565" formatted="false">"Model henüz indirilmedi"</string>
+    <string name="text_05f45d891127" formatted="false">"Model indirilemedi"</string>
+    <string name="text_86254f608ad3" formatted="false">"Model indirilemedi (HTTP %1$s)."</string>
+    <string name="text_e74499e42be7" formatted="false">"Model indirilemedi."</string>
+    <string name="text_0f8a4fd5e26a" formatted="false">"Model indirmesi duraklatıldı."</string>
+    <string name="text_8b0ee0038d0a" formatted="false">"Model için çok fazla yönlendirme alındı."</string>
+    <string name="text_617a83c726d7" formatted="false">"Model klasörü oluşturulamadı."</string>
+    <string name="text_4dfa634af2ec" formatted="false">"Model yönlendirme adresi eksik."</string>
+    <string name="text_c1b132eb7174" formatted="false">"Modeli indir"</string>
+    <string name="text_748e3369a213" formatted="false">"Mor"</string>
+    <string name="text_1eb3fc960548" formatted="false">"Noktalı"</string>
+    <string name="text_cbded135ac8f" formatted="false">"Not henüz kaydedilemedi. %1$s"</string>
+    <string name="text_959f1d1df29f" formatted="false">"Notlar"</string>
+    <string name="text_99c255ddfb67" formatted="false">"Notların cihazında.\nİnternetsiz çalışır."</string>
+    <string name="text_36f00a4655d7" formatted="false">"Notun"</string>
+    <string name="text_843ac01149cc" formatted="false">"Ok"</string>
+    <string name="text_ee1cd50e9422" formatted="false">"Otomatik"</string>
+    <string name="text_3b672440e886" formatted="false">"Oynatma hızı 0,5–2 arasında olmalı."</string>
+    <string name="text_0ca828852a85" formatted="false">"PCM biçimi desteklenmiyor."</string>
+    <string name="text_f5a581e9fd42" formatted="false">"PDF 1–2000 sayfa içermeli."</string>
+    <string name="text_78f89dc72812" formatted="false">"PDF açılamadı."</string>
+    <string name="text_42a7ce1451f0" formatted="false">"PDF açılamadı. Dosya bozuk veya parola korumalı olabilir."</string>
+    <string name="text_3ae9ed42655d" formatted="false">"PDF boş veya çok büyük."</string>
+    <string name="text_bc9d07cbf204" formatted="false">"PDF defteri"</string>
+    <string name="text_a90c5983e763" formatted="false">"PDF dosyası açılamadı."</string>
+    <string name="text_215546c7daf3" formatted="false">"PDF içe aktar"</string>
+    <string name="text_2481e27ae35b" formatted="false">"PDF kaydedildi."</string>
+    <string name="text_40cc87bbcc66" formatted="false">"PDF okunamadı."</string>
+    <string name="text_9db2a2f6d771" formatted="false">"PDF olarak kaydet"</string>
+    <string name="text_15cf347fa4da" formatted="false">"PDF sayfa ölçüleri eşleşmiyor."</string>
+    <string name="text_92d7174ac53b" formatted="false">"PDF sayfaları hazırlanıyor…"</string>
+    <string name="text_b04e8d5774d5" formatted="false">"PDF sayfası bulunamadı."</string>
+    <string name="text_fb212a131f68" formatted="false">"PDF sayfası desteklenen boyutu aşıyor."</string>
+    <string name="text_1ef5433d1d5d" formatted="false">"PDF sayfası eksik."</string>
+    <string name="text_9ca2b260c185" formatted="false">"PDF önizleme boyutu geçersiz."</string>
+    <string name="text_da2b28327760" formatted="false">"Panoda içerik yok."</string>
+    <string name="text_eae56e21f282" formatted="false">"Panodan yapıştır"</string>
+    <string name="text_7e19740a6bb1" formatted="false">"Parmak ve kalemle yaz. Taşıma moduna geç."</string>
+    <string name="text_54cd58a4582c" formatted="false">"Parmak: taşı"</string>
+    <string name="text_b04c5504fdbd" formatted="false">"Parmak: çiz"</string>
+    <string name="text_5e6546d70aac" formatted="false">"Parmakla taşı, kalemle yaz. Çizim moduna geç."</string>
+    <string name="text_e8a50f177686" formatted="false">"Parmakla yaz"</string>
+    <string name="text_1d7f3081de86" formatted="false">"Parmağın sayfayı taşır, kalemin seçili araçla çalışır."</string>
+    <string name="text_ad801997a4be" formatted="false">"Paylaşılan görselin dosya adresi geçersiz."</string>
+    <string name="text_2453ff92384a" formatted="false">"Paylaşılan içeriği bu sayfaya ekle"</string>
+    <string name="text_1c327e56cb71" formatted="false">"Paylaşılan içeriği eklemek için bir defter aç veya oluştur."</string>
+    <string name="text_ce0b58848012" formatted="false">"Paylaşılan metin boş."</string>
+    <string name="text_24486046779e" formatted="false">"Referans · %1$s/%2$s"</string>
+    <string name="text_908e7f81dff1" formatted="false">"Referansta sonraki sayfa"</string>
+    <string name="text_da2623d48cf7" formatted="false">"Referansta önceki sayfa"</string>
+    <string name="text_ac11a57cd0b7" formatted="false">"Referansı düzenlemeye geç"</string>
+    <string name="text_444753ae8950" formatted="false">"Referansı kapat"</string>
+    <string name="text_cc3aa5876b6a" formatted="false">"Renk kodu"</string>
+    <string name="text_e4e01eec78b5" formatted="false">"Resim ekle"</string>
+    <string name="text_fbf7d9d3d1b6" formatted="false">"Resim eklemek için bir defter aç."</string>
+    <string name="text_fce3ab8a2991" formatted="false">"Resim ve metinler silgiden etkilenmez. Bunları seçim aracıyla silebilirsin."</string>
+    <string name="text_26683453d48b" formatted="false">"SAYFA İÇERİĞİ · %1$s sonuç"</string>
+    <string name="text_8a21220051bc" formatted="false">"SRT"</string>
+    <string name="text_5b550ebb8339" formatted="false">"Sarı"</string>
+    <string name="text_3819cd1604f7" formatted="false">"Sayfa %1$s"</string>
+    <string name="text_0be2fc1447eb" formatted="false">"Sayfa %1$s işlemleri"</string>
+    <string name="text_5ba57a100dd5" formatted="false">"Sayfa %1$s sonraya taşı"</string>
+    <string name="text_24d8eef139f9" formatted="false">"Sayfa %1$s önceye taşı"</string>
+    <string name="text_06150c9fd7ea" formatted="false">"Sayfa Silinenler bölümüne taşınır. Daha sonra geri getirebilirsin."</string>
+    <string name="text_b28d72e78f51" formatted="false">"Sayfa başka bir oturumda değişti. Çakışan not korunuyor; sayfayı yeniden aç."</string>
+    <string name="text_debb2a25d063" formatted="false">"Sayfa bir deftere ait değil."</string>
+    <string name="text_ed95bb178fb3" formatted="false">"Sayfa birden fazla kez kullanılıyor."</string>
+    <string name="text_769632eebedb" formatted="false">"Sayfa bu defterde değil."</string>
+    <string name="text_f1378c53adc5" formatted="false">"Sayfa bulunamadı."</string>
+    <string name="text_5fb4160a393a" formatted="false">"Sayfa dosyası bu sürüm için çok büyük."</string>
+    <string name="text_98f756ebae5e" formatted="false">"Sayfa ekle"</string>
+    <string name="text_f4d1116e0b70" formatted="false">"Sayfa işlemleri"</string>
+    <string name="text_126b71837fcd" formatted="false">"Sayfa kendi arkasına taşınamaz."</string>
+    <string name="text_19bcde1e7bdd" formatted="false">"Sayfa kimliği eşleşmiyor."</string>
+    <string name="text_fb5e1f94506d" formatted="false">"Sayfa sıralaması tüm sayfaları bir kez içermeli."</string>
+    <string name="text_6c25d0598212" formatted="false">"Sayfa veya hedef defter bulunamadı."</string>
+    <string name="text_3b0a7f256cf2" formatted="false">"Sayfa çok büyük."</string>
+    <string name="text_888177ce800b" formatted="false">"Sayfa önizlemesi"</string>
+    <string name="text_ca1f914f6368" formatted="false">"Sayfa şablonu"</string>
+    <string name="text_e4fe8d0e28b4" formatted="false">"Sayfalar"</string>
+    <string name="text_7f9b2392b1e6" formatted="false">"Sayfalar · %1$s"</string>
+    <string name="text_6ea57821b05b" formatted="false">"Sayfaları göster"</string>
+    <string name="text_730e96626bea" formatted="false">"Sayfaya ait PDF bulunamadı."</string>
+    <string name="text_ffd3063203b6" formatted="false">"Sayfaya ait görsel bulunamadı."</string>
+    <string name="text_69e3ac96ebf1" formatted="false">"Sayfaya git"</string>
+    <string name="text_727cc8d3eeac" formatted="false">"Sayfayı geri getir"</string>
+    <string name="text_c67628fdb778" formatted="false">"Sayfayı kopyala"</string>
+    <string name="text_5fd6d6cbd914" formatted="false">"Sayfayı sil"</string>
+    <string name="text_e893c9b40ce6" formatted="false">"Sayfayı sil?"</string>
+    <string name="text_68aa29a22cf9" formatted="false">"Sayfayı taşı"</string>
+    <string name="text_5e1375aad14b" formatted="false">"Sayfayı çoğalt"</string>
+    <string name="text_a8e0e801a5b6" formatted="false">"Sağ"</string>
+    <string name="text_d2d71906e653" formatted="false">"Sekme %1$s"</string>
+    <string name="text_c9b49f72ea63" formatted="false">"Sekme aç"</string>
+    <string name="text_4450023d3d45" formatted="false">"Sekmede aç"</string>
+    <string name="text_75cfbcc9e2b0" formatted="false">"Ses adını değiştir"</string>
+    <string name="text_fd1e9355daef" formatted="false">"Ses arşivini aç"</string>
+    <string name="text_aff31b0b48b1" formatted="false">"Ses belgesi okunamadı. Mevcut kayıt korunuyor."</string>
+    <string name="text_572389a1555f" formatted="false">"Ses belgesi çok büyük."</string>
+    <string name="text_f085dddfdbf4" formatted="false">"Ses biçimi eksik."</string>
+    <string name="text_08944326d79f" formatted="false">"Ses cihazda korundu, kaydetme tamamlanamadı. Tekrar durdurarak deneyin. %1$s"</string>
+    <string name="text_9c4110470a19" formatted="false">"Ses dizini ve belge uyuşmuyor."</string>
+    <string name="text_8ad0dd59106f" formatted="false">"Ses dosyası açılamadı veya desteklenmiyor."</string>
+    <string name="text_c90914e5a1d9" formatted="false">"Ses dosyası açılamadı."</string>
+    <string name="text_8826ee74c9e1" formatted="false">"Ses dosyası açılamadı: %1$s"</string>
+    <string name="text_3a8e1a9f2af3" formatted="false">"Ses dosyası boş veya 256 MB sınırını aşıyor."</string>
+    <string name="text_c94630a49761" formatted="false">"Ses dosyası boş veya eksik."</string>
+    <string name="text_3450cca5d33a" formatted="false">"Ses dosyası boş veya çok büyük."</string>
+    <string name="text_c264b7f98ae6" formatted="false">"Ses dosyası bulunamadı veya boş."</string>
+    <string name="text_db29e1dee2d1" formatted="false">"Ses dosyası bulunamadı."</string>
+    <string name="text_86443c621367" formatted="false">"Ses dosyası okunamadı veya oynatma kesildi."</string>
+    <string name="text_bd4ba9b74cef" formatted="false">"Ses dosyasının biçimi ve başlığı uyuşmuyor."</string>
+    <string name="text_b1615c3e43df" formatted="false">"Ses giriş tamponu alınamadı."</string>
+    <string name="text_bf91419dff05" formatted="false">"Ses içe aktar"</string>
+    <string name="text_b25bce004f1e" formatted="false">"Ses işareti bulunamadı."</string>
+    <string name="text_58524a554451" formatted="false">"Ses işaretinin sayfası bulunamadı."</string>
+    <string name="text_69ddc411cb05" formatted="false">"Ses işaretleri · %1$s"</string>
+    <string name="text_fc99da7f865e" formatted="false">"Ses işlemi"</string>
+    <string name="text_5fdc2f10b27a" formatted="false">"Ses işlemi tamamlanamadı."</string>
+    <string name="text_bda21cb75f65" formatted="false">"Ses kaydediliyor"</string>
+    <string name="text_6c9830a48817" formatted="false">"Ses kaydı"</string>
+    <string name="text_0268a03f5f68" formatted="false">"Ses kaydı açılamadı: %1$s"</string>
+    <string name="text_5ecdc601b88a" formatted="false">"Ses kaydı başka bir işlem tarafından değiştirildi. Yenileyip tekrar deneyin."</string>
+    <string name="text_cdf9530fa935" formatted="false">"Ses kaydı başlatılamadı. Mikrofon iznini ve uygulamanın açık olduğunu kontrol edin."</string>
+    <string name="text_6a95609c8eb7" formatted="false">"Ses kaydı bulunamadı."</string>
+    <string name="text_58716f37f208" formatted="false">"Ses kaydı dizini uyuşmuyor."</string>
+    <string name="text_3fa6ad52529f" formatted="false">"Ses kaydı en fazla 7 gün olabilir."</string>
+    <string name="text_a390cb01672a" formatted="false">"Ses kaydı için yeterli boş alan yok."</string>
+    <string name="text_284162b9168f" formatted="false">"Ses kaydı işlemi tamamlanamadı."</string>
+    <string name="text_900b372645ee" formatted="false">"Ses kaydı kesildi. Tamamlanan parçalar cihazda korundu."</string>
+    <string name="text_e31727ad9b5b" formatted="false">"Ses kaydı seçilmedi."</string>
+    <string name="text_62656cc7a5d4" formatted="false">"Ses kaydı sürüyor"</string>
+    <string name="text_a79b370bacac" formatted="false">"Ses kaydı ve transkript"</string>
+    <string name="text_c038638ef6dc" formatted="false">"Ses kaydı çöp kutusunda."</string>
+    <string name="text_09186bac6be0" formatted="false">"Ses kaydına devam et"</string>
+    <string name="text_a5b3f26faaa3" formatted="false">"Ses kaydını bitir"</string>
+    <string name="text_d5a503a7efb9" formatted="false">"Ses kaydını duraklat"</string>
+    <string name="text_10950f9f2322" formatted="false">"Ses kaydını seç: %1$s"</string>
+    <string name="text_f262f4d2fa8d" formatted="false">"Ses kaydının defteri bulunamadı."</string>
+    <string name="text_e7603059b711" formatted="false">"Ses kaydının defteri eksik."</string>
+    <string name="text_962d69ce3d80" formatted="false">"Ses kaydının klasörü bulunamadı."</string>
+    <string name="text_9c3d55cf6aef" formatted="false">"Ses kaydının klasörü eksik."</string>
+    <string name="text_b0d24b790cfe" formatted="false">"Ses kaynağı kayıt sırasında değişti."</string>
+    <string name="text_92b121348ffa" formatted="false">"Ses kayıt klasörü oluşturulamadı."</string>
+    <string name="text_68441b3672ce" formatted="false">"Ses klasörü"</string>
+    <string name="text_1c3fbe8c6bab" formatted="false">"Ses klasörünü değiştir"</string>
+    <string name="text_35f0e9d5466b" formatted="false">"Ses konumu değiştirilemedi."</string>
+    <string name="text_bd7010558a1f" formatted="false">"Ses metne çevirme"</string>
+    <string name="text_6888b4179f8c" formatted="false">"Ses metne çevrilemedi."</string>
+    <string name="text_14f4ffab6b56" formatted="false">"Ses metne çevriliyor"</string>
+    <string name="text_19af61eb4e70" formatted="false">"Ses metni bu sürüm için çok büyük."</string>
+    <string name="text_b2a1c43ba3c9" formatted="false">"Ses oynatma başlatılamadı."</string>
+    <string name="text_97c4291008ad" formatted="false">"Ses oynatıcı kontrolleri ana iş parçacığında çağrılmalı."</string>
+    <string name="text_d4ee05cc0338" formatted="false">"Ses parçaları eksik."</string>
+    <string name="text_4e99a81e3bd7" formatted="false">"Ses parçası boş veya 64 MB sınırını aşıyor."</string>
+    <string name="text_ef7fd7763450" formatted="false">"Ses parçası eksik veya boyutu değişmiş."</string>
+    <string name="text_dd10ff99cb68" formatted="false">"Ses parçası oynatılamadı."</string>
+    <string name="text_c34bee9e6c3c" formatted="false">"Ses parçasının süresi geçersiz."</string>
+    <string name="text_cbfb1f1baab9" formatted="false">"Ses servisi kapatıldı."</string>
+    <string name="text_987795d41f6a" formatted="false">"Ses seçenekleri %1$s"</string>
+    <string name="text_ddcb44ab6ed7" formatted="false">"Ses süresi desteklenmiyor."</string>
+    <string name="text_d3279f74464e" formatted="false">"Ses süresi okunamadı."</string>
+    <string name="text_d2f489590262" formatted="false">"Ses veya transkript ara"</string>
+    <string name="text_183826a6db08" formatted="false">"Ses zaman çizelgesi geçersiz."</string>
+    <string name="text_d984e7284be2" formatted="false">"Ses zamanına işaret koy"</string>
+    <string name="text_5eb8b2e8171a" formatted="false">"Ses çöp kutusuna taşınsın mı?"</string>
+    <string name="text_be68ac5c12a6" formatted="false">"Ses çözümleyici yanıt vermiyor."</string>
+    <string name="text_570d91d94d58" formatted="false">"Ses çıkış tamponu alınamadı."</string>
+    <string name="text_11680823ab0c" formatted="false">"Ses çıkışı başka bir uygulama tarafından kullanılıyor."</string>
+    <string name="text_0f4a329676e9" formatted="false">"Ses örnekleme biçimi desteklenmiyor."</string>
+    <string name="text_d697e7fde4b9" formatted="false">"Sesi geri getir"</string>
+    <string name="text_0f63d9de4924" formatted="false">"Sesi oynat veya duraklat"</string>
+    <string name="text_17ab48f9a0a5" formatted="false">"Sesi sil"</string>
+    <string name="text_acb73e93d125" formatted="false">"Sesler"</string>
+    <string name="text_8721d1370279" formatted="false">"Seslerden geri dön"</string>
+    <string name="text_6caa06b138cc" formatted="false">"Seç"</string>
+    <string name="text_9ef0fc2e83d4" formatted="false">"Seç / taşı"</string>
+    <string name="text_f70f96abbee0" formatted="false">"Seçilen el yazısını metinle değiştir"</string>
+    <string name="text_4812fbae2300" formatted="false">"Seçileni büyüt"</string>
+    <string name="text_dd02270bddff" formatted="false">"Seçileni kopyala"</string>
+    <string name="text_d1271993664f" formatted="false">"Seçileni küçült"</string>
+    <string name="text_7cb660077737" formatted="false">"Seçileni renklendir"</string>
+    <string name="text_00480b8f2d84" formatted="false">"Seçileni sil"</string>
+    <string name="text_d7895fb22c41" formatted="false">"Seçileni çoğalt"</string>
+    <string name="text_5358eaea69a6" formatted="false">"Seçilenleri sil"</string>
+    <string name="text_9bb53775d5c4" formatted="false">"Seçili görseli döndür"</string>
+    <string name="text_a95db517d7c2" formatted="false">"Seçili görseli kırp"</string>
+    <string name="text_dd8f3ae2040d" formatted="false">"Seçili metni düzenle"</string>
+    <string name="text_aff950b58891" formatted="false">"Seçimi sil"</string>
+    <string name="text_b697bcdf5d49" formatted="false">"Seçimi temizle"</string>
+    <string name="text_f698e9b40f9f" formatted="false">"Sil"</string>
+    <string name="text_168c6681822d" formatted="false">"Silgi ayarları"</string>
+    <string name="text_e667de152f4c" formatted="false">"Silgi seçenekleri"</string>
+    <string name="text_15179112ce94" formatted="false">"Silinecek içerik"</string>
+    <string name="text_740a2eca52a6" formatted="false">"Silinen defterlerini buradan geri getirebilirsin."</string>
+    <string name="text_cb60884a4116" formatted="false">"Silinen sayfa"</string>
+    <string name="text_8bf37a70539e" formatted="false">"Silinen sayfa bulunamadı."</string>
+    <string name="text_6a443d77c107" formatted="false">"Silinen sayfa yok."</string>
+    <string name="text_f62289b4dcbe" formatted="false">"Silinen ses yok"</string>
+    <string name="text_fa6e01b70299" formatted="false">"Silinenler"</string>
+    <string name="text_653eada58bc8" formatted="false">"Silinenler (%1$s)"</string>
+    <string name="text_da0ac5a7ad25" formatted="false">"Silinmiş ses kaydı düzenlenemez."</string>
+    <string name="text_7aa3fd1f8f90" formatted="false">"Silinmiş ses kaydına parça eklenemez."</string>
+    <string name="text_6cc63ec42dbc" formatted="false">"Silme biçimi"</string>
+    <string name="text_a7d17064f226" formatted="false">"Silmek için seç: %1$s"</string>
+    <string name="text_159844990f03" formatted="false">"Siyah"</string>
+    <string name="text_361847a8cfe5" formatted="false">"Sol"</string>
+    <string name="text_8c3bbf93f5a9" formatted="false">"Son değişiklikler kaydedilemedi. Önce kaydı yeniden dene."</string>
+    <string name="text_91480e0f1eb5" formatted="false">"Son sayfa silinemez. Önce yeni bir sayfa ekle."</string>
+    <string name="text_8f3516f651e8" formatted="false">"Son sayfa taşınamaz. Önce yeni bir sayfa ekle veya sayfayı kopyala."</string>
+    <string name="text_0f05da67b868" formatted="false">"Son ses parçası tamamlanamadı. Kurtarma için cihazda korundu."</string>
+    <string name="text_765eb2f15309" formatted="false">"Sonra"</string>
+    <string name="text_4c68362c332e" formatted="false">"Sonraki sayfa"</string>
+    <string name="text_b42978623826" formatted="false">"Sonraki sayfa için biraz daha kaydır"</string>
+    <string name="text_f4c40dfbd357" formatted="false">"Sonraki sayfa için bırak"</string>
+    <string name="text_01e13d28c683" formatted="false">"Sonraki ses parçası açılamadı. Kayıt güvenli biçimde duraklatıldı."</string>
+    <string name="text_c788960f633e" formatted="false">"Sonraki ses parçası için boş alan yetersiz."</string>
+    <string name="text_679ea26039cc" formatted="false">"Sonraki ses parçası takip edilemedi."</string>
+    <string name="text_79c023ed793c" formatted="false">"Sonucu kontrol edip düzeltebilirsin."</string>
+    <string name="text_ed8d85f88b43" formatted="false">"SİLİNEN DEFTERLER"</string>
+    <string name="text_bf88451b8744" formatted="false">"Sıralamak için sayfaya basılı tutup sürükle. Oklarla da taşıyabilirsin."</string>
+    <string name="text_d3dc6ac94909" formatted="false">"TXT"</string>
+    <string name="text_5ee6c5bf0705" formatted="false">"Tam görsele dön"</string>
+    <string name="text_e7a7d3779c5a" formatted="false">"Tam yedek al"</string>
+    <string name="text_bf07e603c6b1" formatted="false">"Tam yedek kaydedildi. Dosyayı cihazının dışında da saklayabilirsin."</string>
+    <string name="text_79c4b04b6ee8" formatted="false">"Tamam"</string>
+    <string name="text_3d5a87c56ac9" formatted="false">"Tanımak için kalemle yazılmış bir alan seç veya sayfaya yaz."</string>
+    <string name="text_44acfb772011" formatted="false">"Tanınabilecek kalem yazısı yok."</string>
+    <string name="text_b08fff32ecfb" formatted="false">"Tanınan metin"</string>
+    <string name="text_0893ae5fdb88" formatted="false">"Tanınan metin çok uzun."</string>
+    <string name="text_3c36f881f2ff" formatted="false">"Tek seferde daha küçük bir yazı alanı seç."</string>
+    <string name="text_eadd16c7b549" formatted="false">"Tekrarlanan JSON alanı."</string>
+    <string name="text_498c79ec3eed" formatted="false">"Tekrarlanan defter kimliği."</string>
+    <string name="text_df05d88c86ad" formatted="false">"Tekrarlanan klasör kimliği."</string>
+    <string name="text_825ffa3b3920" formatted="false">"Tekrarlanan nesne kimliği."</string>
+    <string name="text_4e17ba857e9c" formatted="false">"Tekrarlanan ses kimliği."</string>
+    <string name="text_611b9d099303" formatted="false">"Transkript"</string>
+    <string name="text_7a3e657e25f8" formatted="false">"Transkript başka bir işlemde değişti."</string>
+    <string name="text_9c2f300a6315" formatted="false">"Transkript başka bir işlemde değişti. Kaydedilmiş metin korundu."</string>
+    <string name="text_b83e1b32df86" formatted="false">"Transkript bölümünü düzenle"</string>
+    <string name="text_2fbc2e52fbc0" formatted="false">"Transkript işlemi başka bir oturumda değişti."</string>
+    <string name="text_750c4332170e" formatted="false">"Transkript kaydedildi."</string>
+    <string name="text_107aa25d5d8e" formatted="false">"Transkript metni boş olamaz."</string>
+    <string name="text_dcd031bd17dc" formatted="false">"Transkript yeniden oluşturulsun mu?"</string>
+    <string name="text_49d3304adccc" formatted="false">"Transkripti açık sayfaya ekle"</string>
+    <string name="text_59e63895d43a" formatted="false">"Transkripti düzenle"</string>
+    <string name="text_5a77365b2692" formatted="false">"Turuncu"</string>
+    <string name="text_5f410aa966a6" formatted="false">"Tüm sesler"</string>
+    <string name="text_e0b4b1ee86ff" formatted="false">"Tüm çizimler"</string>
+    <string name="text_ef0b6d89aaa3" formatted="false">"Tümünü seç"</string>
+    <string name="text_0f8b5cb2e84b" formatted="false">"Türkçe"</string>
+    <string name="text_5311ef9a5c7f" formatted="false">"Türkçe ve İngilizce konuşmayı cihazında metne çevirir. Ses kayıtların gönderilmez. Model yaklaşık 148 MB indirilir."</string>
+    <string name="text_08a24723d591" formatted="false">"Uygula"</string>
+    <string name="text_dd5e4953a6ff" formatted="false">"Uygulama dili"</string>
+    <string name="text_39a8d28c1c6b" formatted="false">"Vazgeç"</string>
+    <string name="text_d3f2efa1a2cb" formatted="false">"Whisper modeli açılamadı."</string>
+    <string name="text_73327a1c6193" formatted="false">"Whisper modeli bulunamadı."</string>
+    <string name="text_99cc131c1b0b" formatted="false">"Yalnız dokunulan bölüm"</string>
+    <string name="text_9307f6bd1915" formatted="false">"Yalnız fosforlu"</string>
+    <string name="text_d40b8a9bfbd4" formatted="false">"Yalnız kalem"</string>
+    <string name="text_a47b45e2aa6d" formatted="false">"Yalnız şekiller"</string>
+    <string name="text_40d4b6c06a38" formatted="false">"Yalnızca çöp kutusundaki defterler kalıcı silinebilir. Listeyi yenileyin."</string>
+    <string name="text_cf1f73306fad" formatted="false">"Yalnızca çöp kutusundaki ses kayıtları kalıcı silinebilir. Listeyi yenileyin."</string>
+    <string name="text_0f25142f7fb4" formatted="false">"Yan düğme · Silgi"</string>
+    <string name="text_cad8b48c3e5f" formatted="false">"Yan yana aç"</string>
+    <string name="text_172b43747c76" formatted="false">"Yapıştır"</string>
+    <string name="text_91de72ebf2d1" formatted="false">"Yazı boyutu · %1$s"</string>
+    <string name="text_bdb3bcbb1cf0" formatted="false">"Yazı tanınamadı. Daha küçük bir bölge seçmeyi dene."</string>
+    <string name="text_741c7b620444" formatted="false">"Yedek al"</string>
+    <string name="text_6406deda4ab9" formatted="false">"Yedek almadan önce ses kaydını durdur ve kaydedilmesini bekle."</string>
+    <string name="text_c4d05a350dc5" formatted="false">"Yedek bildirimi eksik."</string>
+    <string name="text_a894ec9fcd70" formatted="false">"Yedek dosyası açılamadı."</string>
+    <string name="text_0f98d657ced3" formatted="false">"Yedek dosyası bozuk: %1$s"</string>
+    <string name="text_86117a817abe" formatted="false">"Yedek içe aktarılamadı. Mevcut defterler korunuyor."</string>
+    <string name="text_33b39ece2e11" formatted="false">"Yedek içe aktarıldı. Mevcut defterlerin korundu."</string>
+    <string name="text_e4ea148fc06c" formatted="false">"Yedek için bir dosya çok büyük."</string>
+    <string name="text_bce0deba08b1" formatted="false">"Yedek yolu bulunamadı."</string>
+    <string name="text_e0a2a3f3f0ba" formatted="false">"Yedek yüklemeden önce ses kaydını durdur."</string>
+    <string name="text_e27541f14a8d" formatted="false">"Yedekte PDF eksik."</string>
+    <string name="text_31cb5fa81461" formatted="false">"Yedekte görsel eksik."</string>
+    <string name="text_a91f13aeae6e" formatted="false">"Yedekte ilişkisiz dosyalar var."</string>
+    <string name="text_d95b6a982ac3" formatted="false">"Yedekte sayfa eksik."</string>
+    <string name="text_4c1fed90b39c" formatted="false">"Yedekte ses belgesi eksik."</string>
+    <string name="text_fe87bed5eb71" formatted="false">"Yedekte ses dizini uyuşmuyor."</string>
+    <string name="text_e2ff9cc59b2d" formatted="false">"Yedekte ses parçası boyutu uyuşmuyor."</string>
+    <string name="text_cd56dd9bff2d" formatted="false">"Yedekte ses parçası eksik."</string>
+    <string name="text_b5fb8a95508a" formatted="false">"Yedekte çok fazla dosya var."</string>
+    <string name="text_4c2ce6705bb3" formatted="false">"Yedekteki dosya listesi eşleşmiyor."</string>
+    <string name="text_4a63652c2242" formatted="false">"Yedekteki görsel çözümlenemedi."</string>
+    <string name="text_09b400dc31cd" formatted="false">"Yedekten yükle"</string>
+    <string name="text_a984408141aa" formatted="false">"Yeni bir sayfa aç."</string>
+    <string name="text_0566f7c42267" formatted="false">"Yeni defter"</string>
+    <string name="text_8d62dd79b534" formatted="false">"Yeni klasör"</string>
+    <string name="text_28042b224c01" formatted="false">"Yeni sayfa"</string>
+    <string name="text_e2e00d346a1c" formatted="false">"Yeni sayfa eklemek için bırak"</string>
+    <string name="text_e8e9c9de6ab9" formatted="false">"Yeni sayfa için biraz daha kaydır"</string>
+    <string name="text_5799341342e5" formatted="false">"Yeni ses kaydı"</string>
+    <string name="text_2087da620c0f" formatted="false">"Yeni yazı eklediğinde dizini yeniden güncelleyebilirsin. Dönüştürmek için editör menüsündeki El yazısını metne çevir seçeneğini kullan."</string>
+    <string name="text_2de7525d280c" formatted="false">"Yeniden adlandır"</string>
+    <string name="text_1f30ff52f9d5" formatted="false">"Yeniden dene"</string>
+    <string name="text_92cd7ed75753" formatted="false">"Yeniden metne çevir"</string>
+    <string name="text_a80e947bda14" formatted="false">"Yeniden oluştur"</string>
+    <string name="text_0ec69b318fc3" formatted="false">"Yerel konuşma modeli"</string>
+    <string name="text_7c0bc10dd2e7" formatted="false">"Yeşil"</string>
+    <string name="text_7b3b9d65c024" formatted="false">"Yinele"</string>
+    <string name="text_c754452f77e1" formatted="false">"Zaman işaretleri"</string>
+    <string name="text_55a5dc0bd5b2" formatted="false">"ÇALIŞMA ALANIN"</string>
+    <string name="text_d6130d3f0ea7" formatted="false">"Çevirmeye devam et"</string>
+    <string name="text_409a84ec9d79" formatted="false">"Çevrilecek ses kaydı bulunamadı."</string>
+    <string name="text_759aab337542" formatted="false">"Çizgi"</string>
+    <string name="text_6780b255dc39" formatted="false">"Çizgi silgisi"</string>
+    <string name="text_4080890dc3e2" formatted="false">"Çizgi çok büyük."</string>
+    <string name="text_e29b5cec2697" formatted="false">"Çizgili"</string>
+    <string name="text_6989221ef94c" formatted="false">"Çizginin tamamı"</string>
+    <string name="text_628af20b485a" formatted="false">"Çizim işlemi tamamlanamadı."</string>
+    <string name="text_d00225b3aa1a" formatted="false">"Çöp kutusu"</string>
+    <string name="text_49001f91c775" formatted="false">"Çöp kutusu boş"</string>
+    <string name="text_c4055d494a9f" formatted="false">"Çöp kutusuna taşı"</string>
+    <string name="text_258b410c8931" formatted="false">"Çöp kutusuna taşı?"</string>
+    <string name="text_47a077377fca" formatted="false">"Çıktı dosyası açılamadı."</string>
+    <string name="text_4dc4c654bbed" formatted="false">"ÖZET"</string>
+    <string name="text_75b0690622cc" formatted="false">"Önce Whisper dil modelini indirip doğrula."</string>
+    <string name="text_30bde66616ca" formatted="false">"Önce açık kaydı durdur."</string>
+    <string name="text_c5fec5bdf9ef" formatted="false">"Önce başka bir defter oluştur."</string>
+    <string name="text_b9a0b7080a50" formatted="false">"Önce bir defter aç."</string>
+    <string name="text_52f23fe33a01" formatted="false">"Önce bir ses kaydı aç."</string>
+    <string name="text_78ede1028688" formatted="false">"Önce el yazısı dil modelini indir."</string>
+    <string name="text_85bc769ffa15" formatted="false">"Önce konuşma modelini indir."</string>
+    <string name="text_b8db1b6328e1" formatted="false">"Önce metne çevirmeyi duraklat."</string>
+    <string name="text_1485aeb12f8a" formatted="false">"Önce ses kaydını durdur."</string>
+    <string name="text_f16d1b4ef69b" formatted="false">"Önce ses kaydını durdurun."</string>
+    <string name="text_f70c5ddde663" formatted="false">"Önce ses kaydını ve metne dönüştürmeyi durdurun."</string>
+    <string name="text_6a89ec3b7e3c" formatted="false">"Önce seçili dilin el yazısı modelini indir."</string>
+    <string name="text_297eee23f531" formatted="false">"Önce yerel konuşma modelini indir."</string>
+    <string name="text_b74566b03eea" formatted="false">"Önceki sayfa"</string>
+    <string name="text_16ad5962d77b" formatted="false">"Önceki sayfa için biraz daha kaydır"</string>
+    <string name="text_760beff57030" formatted="false">"Önceki sayfa için bırak"</string>
+    <string name="text_411216556168" formatted="false">"Öneri %1$s"</string>
+    <string name="text_897455a18823" formatted="false">"Önizleme açılamadı"</string>
+    <string name="text_d6e93c4a0a1e" formatted="false">"Örneğin 356859 · 6 karakter"</string>
+    <string name="text_ea73fb08aa76" formatted="false">"Örneğin, Matematik"</string>
+    <string name="text_bfaca8828655" formatted="false">"Özel renk"</string>
+    <string name="text_16781ad96dcf" formatted="false">"Özgün el yazısı korunur, metin ayrıca eklenir."</string>
+    <string name="text_6304e1af7664" formatted="false">"Özgün görselde kalacak bölgeyi seç. Kırpma geri alınabilir, asıl görsel korunur."</string>
+    <string name="text_3e5948ae79f7" formatted="false">"Özgün mürekkep kaldırılır. İşlemi Geri al ile geri çevirebilirsin."</string>
+    <string name="text_9d0ccf19ae87" formatted="false">"Üst"</string>
+    <string name="text_f6f3ed550d20" formatted="false">"Üst klasör"</string>
+    <string name="text_9e6597d0a6cc" formatted="false">"Üst klasör bulunamadı."</string>
+    <string name="text_d1f16e64f2dd" formatted="false">"Üst klasör eksik."</string>
+    <string name="text_d3c09f865c75" formatted="false">"İlk defterini oluştur"</string>
+    <string name="text_f713d7b770ee" formatted="false">"İlk sayfanın şablonu"</string>
+    <string name="text_89749d7b82bc" formatted="false">"İndiriliyor · %1$s / %2$s MB"</string>
+    <string name="text_dead9f31f24f" formatted="false">"İndirme duraklatıldı. Yeniden başlatarak sürdürebilirsin."</string>
+    <string name="text_8eb627b2c5ce" formatted="false">"İndirme yarım kaldı. Yeniden başlatarak sürdürebilirsin."</string>
+    <string name="text_a5ed911611d2" formatted="false">"İndirmeyi iptal et"</string>
+    <string name="text_861dd128f74f" formatted="false">"İngilizce"</string>
+    <string name="text_72278748133a" formatted="false">"İptal"</string>
+    <string name="text_2b6c4c4227f4" formatted="false">"İçe aktarılan ses"</string>
+    <string name="text_9359a4f1606b" formatted="false">"İşaret"</string>
+    <string name="text_5e45b34845c3" formatted="false">"İşaret koy"</string>
+    <string name="text_c3e13b03dc99" formatted="false">"İşlem tamamlanamadı"</string>
+    <string name="text_d89d434aafa3" formatted="false">"İşlem tamamlanamadı. Lütfen yeniden dene."</string>
+    <string name="text_51eff8265248" formatted="false">"Şekil hizalama"</string>
+    <string name="text_9dee3f205dbb" formatted="false">"Şekilleri hizala"</string>
+    <string name="text_e000f7a00edb" formatted="false">"“%1$s” defterini daha sonra geri getirebilirsin."</string>
+</resources>

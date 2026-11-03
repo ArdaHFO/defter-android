@@ -11,7 +11,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class GeometryBudgetTest {
     private val smallLasso = listOf(InkPoint(0f, 0f), InkPoint(100f, 0f), InkPoint(100f, 100f), InkPoint(0f, 100f))
 

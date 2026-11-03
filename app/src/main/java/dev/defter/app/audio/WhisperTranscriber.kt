@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -36,9 +38,9 @@ class WhisperTranscriber(
         language: String,
         onChunk: suspend (WhisperChunk) -> Unit,
     ): Unit = withContext(Dispatchers.IO) {
-        require(language in setOf("tr", "en", "auto")) { "Desteklenmeyen yazıya dökme dili." }
+        require(language in setOf("tr", "en", "auto")) { tr("Desteklenmeyen yazıya dökme dili.") }
         require(startMs >= 0)
-        val model = modelManager.verifiedModelFile() ?: throw IOException("Önce Whisper dil modelini indirip doğrula.")
+        val model = modelManager.verifiedModelFile() ?: throw IOException(tr("Önce Whisper dil modelini indirip doğrula."))
         // Validate media before allocating a model context.
         if (startMs >= decoder.durationMs(audioFile)) return@withContext
         currentCoroutineContext().ensureActive()
@@ -60,7 +62,7 @@ class WhisperTranscriber(
         fun parseSegments(bytes: ByteArray, startMs: Long, endMs: Long): List<WhisperSegment> {
             require(startMs >= 0 && endMs >= startMs)
             val array = JSONArray(bytes.toString(Charsets.UTF_8))
-            require(array.length() <= 10_000) { "Aşırı büyük yazıya dökme sonucu." }
+            require(array.length() <= 10_000) { tr("Aşırı büyük yazıya dökme sonucu.") }
             return buildList {
                 for (index in 0 until array.length()) {
                     val item = array.getJSONObject(index)
@@ -113,9 +115,9 @@ internal class WhisperNativeSession private constructor(private val handle: Long
     companion object {
         private val worker = Executors.newSingleThreadExecutor { task -> Thread(task, "Defter-Whisper").apply { isDaemon = true } }
         fun open(model: File): WhisperNativeSession {
-            require(model.isFile && model.length() > 0) { "Whisper modeli bulunamadı." }
+            require(model.isFile && model.length() > 0) { tr("Whisper modeli bulunamadı.") }
             val handle = WhisperNative.create(model.absolutePath, Runtime.getRuntime().availableProcessors().coerceIn(1, 4))
-            if (handle == 0L) throw IOException("Whisper modeli açılamadı.")
+            if (handle == 0L) throw IOException(tr("Whisper modeli açılamadı."))
             return WhisperNativeSession(handle)
         }
     }

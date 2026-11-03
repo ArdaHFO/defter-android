@@ -9,7 +9,7 @@ import org.robolectric.annotation.Config
 import kotlin.math.atan2
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class AdvancedInkEditingTest {
     @Test fun partialEraserCutsSparseStrokeIntoTwoIndependentFragments() {
         val original = StrokeElement(id = "line", points = listOf(InkPoint(0f, 100f), InkPoint(200f, 100f)), width = 4f)

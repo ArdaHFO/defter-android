@@ -7,9 +7,13 @@ import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.view.ViewConfiguration
+import dev.defter.app.localization.tr
 import dev.defter.app.model.*
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -40,9 +44,11 @@ class NotebookCanvas(context: Context) : View(context) {
 
     var config: DrawingConfig = DrawingConfig()
         set(value) {
-            if (field != value) cancelGesture()
+            val changed = field != value
+            if (changed) cancelGesture()
             field = value
-            if (value.tool != DrawingTool.SELECT && value.tool != DrawingTool.LASSO) select(null)
+            // Equivalent AndroidView updates must not clear a finger long-press selection.
+            if (changed && value.tool != DrawingTool.SELECT && value.tool != DrawingTool.LASSO) select(null)
             invalidate()
         }
 
@@ -63,6 +69,18 @@ class NotebookCanvas(context: Context) : View(context) {
     var onSelectionIdsChanged: ((Set<String>) -> Unit)? = null
     var onEditingError: ((String) -> Unit)? = null
     var onTemporaryEraserChanged: ((Boolean) -> Unit)? = null
+    /** Coordinates are logical page coordinates, not screen/window coordinates. */
+    var onContextMenuRequested: ((Float, Float) -> Unit)? = null
+    var onPageEdgeGesture: ((PageEdgeDirection) -> Unit)? = null
+    var onPageEdgeProgress: ((PageEdgeProgress?) -> Unit)? = null
+    var edgeNavigationEnabled: Boolean = false
+        set(value) { if (field != value) resetEdgePull(); field = value }
+    var canNavigatePrevious: Boolean = false
+        set(value) { if (field != value) resetEdgePull(); field = value }
+    var canNavigateNext: Boolean = false
+        set(value) { if (field != value) resetEdgePull(); field = value }
+    var canAddPageAtEnd: Boolean = false
+        set(value) { if (field != value) resetEdgePull(); field = value }
 
     val selectedElementId: String? get() = selectionId
     val selectedIds: Set<String> get() = selection.toSet()
@@ -75,6 +93,17 @@ class NotebookCanvas(context: Context) : View(context) {
     private var pointerId = -1
     private var stylusActive = false
     private var multiTouch = false
+    private val gestureHandler = Handler(Looper.getMainLooper())
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
+    private val edgePull = PageEdgePull(96f * resources.displayMetrics.density)
+    private var publishedEdgeProgress: PageEdgeProgress? = null
+    private var longPressTask: Runnable? = null
+    private var gestureSequence = 0L
+    private var fingerPanEligible = false
+    private var fingerPanMoved = false
+    private var contextMenuShown = false
+    private var panStartScreenX = 0f
+    private var panStartScreenY = 0f
     private var baseScale = 1f
     private var zoom = 1f
     private var offsetX = 0f
@@ -125,7 +154,7 @@ class NotebookCanvas(context: Context) : View(context) {
 
     init {
         isFocusable = true
-        contentDescription = "Defter sayfası. Kalemle yazın, iki parmakla yakınlaştırın."
+        contentDescription = tr("Defter sayfası. Kalemle yazın, iki parmakla yakınlaştırın.")
         setBackgroundColor(0xFFEEF1F6.toInt())
         setDefaultFocusHighlightEnabled(false)
     }
@@ -136,7 +165,8 @@ class NotebookCanvas(context: Context) : View(context) {
         resetViewport()
     }
 
-    fun resetViewport() {
+    fun resetViewport(atBottom: Boolean = false) {
+        cancelGesture()
         val page = document ?: return
         if (width <= 0 || height <= 0) return
         val padding = 16f * resources.displayMetrics.density
@@ -145,7 +175,9 @@ class NotebookCanvas(context: Context) : View(context) {
         baseScale = ((width - padding * 2f) / page.width).coerceAtLeast(0.01f)
         zoom = 1f
         offsetX = (width - page.width * scale) / 2f
-        offsetY = padding
+        val margin = 24f * resources.displayMetrics.density
+        val pageHeight = page.height * scale
+        offsetY = if (atBottom && pageHeight > height - margin * 2f) height - pageHeight - margin else padding
         onZoomChanged?.invoke(zoom)
         invalidate()
     }
@@ -168,7 +200,7 @@ class NotebookCanvas(context: Context) : View(context) {
         previewStroke?.let { PageRenderer.drawElement(canvas, it, assets) }
         previewShape?.let { PageRenderer.drawElement(canvas, it, assets) }
         val selectedBounds = if (selection.isEmpty()) null else InkEditing.groupBounds(previewPage.elements.filter { it.id in selection })
-        if (selectedBounds != null && (config.tool == DrawingTool.SELECT || config.tool == DrawingTool.LASSO) && !isTemporaryEraserActive) {
+        if (selectedBounds != null && !isTemporaryEraserActive) {
             val bounds = selectedBounds
             bounds.inset(-8f / scale, -8f / scale)
             selectionPaint.strokeWidth = 1.5f / scale
@@ -191,7 +223,7 @@ class NotebookCanvas(context: Context) : View(context) {
         action()
     } catch (error: GeometryLimitException) {
         cancelGesture()
-        onEditingError?.invoke(error.message ?: "Çizim işlemi tamamlanamadı.")
+        onEditingError?.invoke(error.message ?: tr("Çizim işlemi tamamlanamadı."))
         invalidate()
         true
     }
@@ -273,6 +305,8 @@ class NotebookCanvas(context: Context) : View(context) {
         pointerId = event.getPointerId(index)
         stylusActive = isStylus
         gestureConfig = config
+        panStartScreenX = event.getX(index)
+        panStartScreenY = event.getY(index)
         beginSegment(event, index, allowsTap = true)
     }
 
@@ -288,6 +322,8 @@ class NotebookCanvas(context: Context) : View(context) {
         lastInkY = startY
         if (gestureTool == DrawingTool.HAND || (!stylusActive && !gestureConfig.touchDrawing)) {
             mode = Mode.PAN
+            fingerPanEligible = !stylusActive && event.getToolType(index) == MotionEvent.TOOL_TYPE_FINGER && event.pointerCount == 1
+            if (fingerPanEligible) scheduleLongPress()
             return
         }
         val page = document ?: return
@@ -363,15 +399,24 @@ class NotebookCanvas(context: Context) : View(context) {
             MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP -> {
                 if (event.getPointerId(event.actionIndex) != pointerId) return
                 val canceled = Build.VERSION.SDK_INT >= 33 && event.flags and MotionEvent.FLAG_CANCELED != 0
+                var edgeDirection: PageEdgeDirection? = null
+                val wasContextMenuShown = contextMenuShown
                 if (!canceled) {
                     // A release reported only on UP must not create a new pen dot or
                     // connect ink across the preceding eraser segment.
                     if (effectiveTool(event, index) == gestureTool) updateGesture(event, index)
+                    if (mode == Mode.PAN && fingerPanEligible && !contextMenuShown && edgeNavigationEnabled) {
+                        edgeDirection = edgePull.finish()?.takeIf {
+                            if (it == PageEdgeDirection.PREVIOUS) canNavigatePrevious else canNavigateNext || canAddPageAtEnd
+                        }
+                    }
                     finishGesture()
-                    performClick()
                 }
                 cancelGesture()
                 invalidate()
+                // Clear the contact before external code can switch pages or open a dialog.
+                if (!canceled && !wasContextMenuShown) performClick()
+                edgeDirection?.let { onPageEdgeGesture?.invoke(it) }
             }
         }
     }
@@ -449,6 +494,7 @@ class NotebookCanvas(context: Context) : View(context) {
     private fun updateGesture(event: MotionEvent, index: Int) {
         val screenX = event.getX(index)
         val screenY = event.getY(index)
+        if (!screenX.isFinite() || !screenY.isFinite()) { cancelGesture(); return }
         val x = (screenX - offsetX) / scale
         val y = (screenY - offsetY) / scale
         when (mode) {
@@ -477,15 +523,85 @@ class NotebookCanvas(context: Context) : View(context) {
                 appendPoint(x, y, 1f)
             }
             Mode.PAN -> {
-                offsetX += screenX - lastFocusX
-                offsetY += screenY - lastFocusY
-                constrainViewport()
+                panTo(screenX, screenY)
             }
             Mode.NONE -> Unit
         }
         lastFocusX = screenX
         lastFocusY = screenY
         invalidate()
+    }
+
+    private fun panTo(screenX: Float, screenY: Float) {
+        var deltaY = screenY - lastFocusY
+        val deltaX = screenX - lastFocusX
+        val totalX = screenX - panStartScreenX
+        val totalY = screenY - panStartScreenY
+        if (fingerPanEligible && !fingerPanMoved) {
+            if (hypot(totalX, totalY) <= touchSlop) return
+            fingerPanMoved = true
+            cancelContextLongPress()
+        }
+        val trackEdge = fingerPanEligible && edgeNavigationEnabled &&
+            abs(totalY) > abs(totalX) * 1.2f
+        if (trackEdge) deltaY = edgePull.consumeReversal(deltaY) else resetEdgePull()
+        val beforeY = offsetY
+        offsetX += deltaX
+        offsetY += deltaY
+        constrainViewport()
+        if (trackEdge) {
+            val unconsumed = deltaY - (offsetY - beforeY)
+            // Normal panning consumes the delta completely and cannot arm navigation.
+            if (abs(unconsumed) > 0.01f) {
+                edgePull.addUnconsumed(unconsumed, canNavigatePrevious, canNavigateNext || canAddPageAtEnd)
+            }
+            publishEdgeProgress()
+        }
+    }
+
+    private fun scheduleLongPress() {
+        cancelContextLongPress()
+        val page = document ?: return
+        if (isReadOnly || onContextMenuRequested == null || startX !in 0f..page.width || startY !in 0f..page.height) return
+        val sequence = gestureSequence
+        val pageId = page.id
+        val pageX = startX
+        val pageY = startY
+        val task = Runnable {
+            longPressTask = null
+            guardEditing {
+                val callback = onContextMenuRequested ?: return@guardEditing false
+                if (sequence != gestureSequence || document?.id != pageId || !isEnabled || isReadOnly ||
+                    pointerId < 0 || stylusActive || multiTouch || !fingerPanEligible || fingerPanMoved || mode != Mode.PAN) return@guardEditing false
+                contextMenuShown = true
+                mode = Mode.NONE
+                resetEdgePull()
+                val hit = document?.elements?.lastOrNull { ElementGeometry.hitTest(it, pageX, pageY, 12f / scale) }
+                if (hit?.id !in selection) select(hit?.id)
+                invalidate()
+                callback(pageX, pageY)
+                true
+            }
+        }
+        longPressTask = task
+        gestureHandler.postDelayed(task, ViewConfiguration.getLongPressTimeout().toLong())
+    }
+
+    private fun cancelContextLongPress() {
+        longPressTask?.let { gestureHandler.removeCallbacks(it) }
+        longPressTask = null
+    }
+
+    private fun resetEdgePull() {
+        edgePull.reset()
+        publishEdgeProgress()
+    }
+
+    private fun publishEdgeProgress() {
+        val progress = edgePull.progress
+        if (progress == publishedEdgeProgress) return
+        publishedEdgeProgress = progress
+        onPageEdgeProgress?.invoke(progress)
     }
 
     private fun eraseTo(x: Float, y: Float) {
@@ -632,9 +748,15 @@ class NotebookCanvas(context: Context) : View(context) {
     }
 
     private fun cancelGesture() {
+        cancelContextLongPress()
+        resetEdgePull()
+        gestureSequence++
         pointerId = -1
         stylusActive = false
         multiTouch = false
+        fingerPanEligible = false
+        fingerPanMoved = false
+        contextMenuShown = false
         stagedElements = null
         clearSegment()
         setTemporaryEraser(false)
@@ -702,3 +824,4 @@ class NotebookCanvas(context: Context) : View(context) {
         super.onDetachedFromWindow()
     }
 }
+

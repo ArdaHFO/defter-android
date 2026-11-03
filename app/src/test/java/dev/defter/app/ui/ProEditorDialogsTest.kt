@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], qualifiers = "w800dp-h900dp-mdpi")
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], qualifiers = "w800dp-h900dp-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ProEditorDialogsTest {
     @get:Rule val compose = createComposeRule()

@@ -1,5 +1,7 @@
 package dev.defter.app.data
 
+import dev.defter.app.localization.tr
+
 import dev.defter.app.model.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -38,7 +40,7 @@ internal object AudioJson {
     }
 
     fun fromJson(json: JSONObject): AudioRecording = try {
-        require(json.getInt("version") == 3) { "Desteklenmeyen ses belgesi sürümü." }
+        require(json.getInt("version") == 3) { tr("Desteklenmeyen ses belgesi sürümü.") }
         val item = itemFromJson(json)
         AudioRecording(item.id, item.title, item.folderId, item.notebookId,
             json.getJSONArray("parts").objects().map { p -> AudioPart(p.getString("id"), p.getString("assetId"), p.getString("mimeType"),
@@ -49,41 +51,41 @@ internal object AudioJson {
             item.state, json.getLong("createdAt"), item.updatedAt, item.deletedAt, item.revision,
             TranscriptionStatus.valueOf(json.getString("transcriptionStatus")), json.nullableString("transcriptionModel"),
             json.getString("transcriptionLanguage"), json.getLong("transcribedUntilMs"), json.nullableString("transcriptionError"))
-            .also { validate(it); require(it.toItem() == item) { "Ses dizini ve belge uyuşmuyor." } }
-    } catch (error: Exception) { throw IOException("Ses belgesi okunamadı. Mevcut kayıt korunuyor.", error) }
+            .also { validate(it); require(it.toItem() == item) { tr("Ses dizini ve belge uyuşmuyor.") } }
+    } catch (error: Exception) { throw IOException(tr("Ses belgesi okunamadı. Mevcut kayıt korunuyor."), error) }
 
     fun validateItem(item: AudioItem) {
         DocumentJson.validId(item.id); DocumentJson.validateName(item.title)
         item.folderId?.let(DocumentJson::validId); item.notebookId?.let(DocumentJson::validId)
-        require(item.durationMs in 0..MAX_DURATION_MS && item.revision >= 0 && item.updatedAt >= 0 && (item.deletedAt == null || item.deletedAt >= 0)) { "Geçersiz ses dizini." }
+        require(item.durationMs in 0..MAX_DURATION_MS && item.revision >= 0 && item.updatedAt >= 0 && (item.deletedAt == null || item.deletedAt >= 0)) { tr("Geçersiz ses dizini.") }
     }
 
     fun validate(recording: AudioRecording) {
         validateItem(recording.toItem())
-        require(recording.createdAt >= 0 && recording.parts.size <= 10_000 && recording.transcript.size <= 100_000 && recording.bookmarks.size <= 100_000) { "Ses belgesi çok büyük." }
-        require(recording.transcriptionLanguage.matches(languages) && (recording.transcriptionModel?.length ?: 0) <= 200 && (recording.transcriptionError?.length ?: 0) <= 2000) { "Geçersiz yazıya çevirme bilgisi." }
+        require(recording.createdAt >= 0 && recording.parts.size <= 10_000 && recording.transcript.size <= 100_000 && recording.bookmarks.size <= 100_000) { tr("Ses belgesi çok büyük.") }
+        require(recording.transcriptionLanguage.matches(languages) && (recording.transcriptionModel?.length ?: 0) <= 200 && (recording.transcriptionError?.length ?: 0) <= 2000) { tr("Geçersiz yazıya çevirme bilgisi.") }
         var offset = 0L
         val ids = mutableSetOf<String>()
         val sourceKeys = mutableSetOf<String>()
         recording.parts.forEach { p ->
             DocumentJson.validId(p.id); DocumentJson.validId(p.assetId)
-            require(ids.add(p.id) && p.mimeType in mimeTypes && p.bytes in 1..MAX_AUDIO_BYTES && p.durationMs in 1..MAX_DURATION_MS && p.offsetMs == offset) { "Geçersiz ses parçası." }
-            p.sourceKey?.let { require(it.length in 1..200 && '/' !in it && '\\' !in it && sourceKeys.add(it)) { "Geçersiz ses kaynak kimliği." } }
+            require(ids.add(p.id) && p.mimeType in mimeTypes && p.bytes in 1..MAX_AUDIO_BYTES && p.durationMs in 1..MAX_DURATION_MS && p.offsetMs == offset) { tr("Geçersiz ses parçası.") }
+            p.sourceKey?.let { require(it.length in 1..200 && '/' !in it && '\\' !in it && sourceKeys.add(it)) { tr("Geçersiz ses kaynak kimliği.") } }
             offset = Math.addExact(offset, p.durationMs)
-            require(offset <= MAX_DURATION_MS) { "Ses kaydı en fazla 7 gün olabilir." }
+            require(offset <= MAX_DURATION_MS) { tr("Ses kaydı en fazla 7 gün olabilir.") }
         }
-        require(recording.transcribedUntilMs in 0..offset) { "Geçersiz yazıya çevirme konumu." }
+        require(recording.transcribedUntilMs in 0..offset) { tr("Geçersiz yazıya çevirme konumu.") }
         ids.clear()
         recording.transcript.forEach { s ->
             DocumentJson.validId(s.id)
             require(ids.add(s.id) && s.startMs in 0..offset && s.endMs in s.startMs..offset && s.text.length <= 100_000 &&
-                (s.language == null || s.language.matches(languages)) && (s.speaker?.length ?: 0) <= 200) { "Geçersiz zamanlı metin." }
+                (s.language == null || s.language.matches(languages)) && (s.speaker?.length ?: 0) <= 200) { tr("Geçersiz zamanlı metin.") }
         }
         ids.clear()
         recording.bookmarks.forEach { b ->
             DocumentJson.validId(b.id); b.pageId?.let(DocumentJson::validId)
             // A live bookmark can lead the last durable part. Recording interruption preserves it.
-            require(ids.add(b.id) && b.positionMs in 0..MAX_DURATION_MS && b.label.length <= 1000) { "Geçersiz ses işareti." }
+            require(ids.add(b.id) && b.positionMs in 0..MAX_DURATION_MS && b.label.length <= 1000) { tr("Geçersiz ses işareti.") }
         }
     }
 

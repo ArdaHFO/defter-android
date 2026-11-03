@@ -17,7 +17,7 @@ import java.io.File
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class ProStorageTest {
     private lateinit var repository: DocumentRepository
     @Before fun setup() {

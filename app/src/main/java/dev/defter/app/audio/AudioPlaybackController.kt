@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import android.content.BroadcastReceiver
 import android.content.Intent
@@ -87,7 +89,7 @@ class AudioPlaybackController(context: Context) {
         } catch (error: kotlinx.coroutines.CancellationException) {
             throw error
         } catch (error: Exception) {
-            if (request == requestGeneration) fail("Ses kaydı açılamadı: ${error.message.orEmpty()}")
+            if (request == requestGeneration) fail(tr("Ses kaydı açılamadı: %1\$s", error.message.orEmpty()))
         }
     }
 
@@ -98,12 +100,12 @@ class AudioPlaybackController(context: Context) {
         wantsPlayback = false
         abandonAudioFocus()
         try {
-            require(files.size == recording.parts.size) { "Ses parçaları eksik." }
+            require(files.size == recording.parts.size) { tr("Ses parçaları eksik.") }
             timeline = AudioTimeline(recording.parts.map { it.durationMs })
             this.files = files.toList()
             mutableState.value = AudioPlaybackState(recordingId = recording.id,
                 durationMs = timeline.durationMs, speed = state.value.speed)
-            if (files.isEmpty()) fail("Bu kayıtta henüz oynatılabilir ses yok.")
+            if (files.isEmpty()) fail(tr("Bu kayıtta henüz oynatılabilir ses yok."))
         } catch (error: Exception) {
             this.files = emptyList()
             timeline = AudioTimeline(emptyList())
@@ -145,7 +147,7 @@ class AudioPlaybackController(context: Context) {
         if (target.partIndex != partIndex || !prepared) loadPart(target)
         else try {
             player?.seekTo(target.partPositionMs, MediaPlayer.SEEK_CLOSEST)
-        } catch (error: Exception) { fail("Ses konumu değiştirilemedi.") }
+        } catch (error: Exception) { fail(tr("Ses konumu değiştirilemedi.")) }
     }
 
     fun setSpeed(speed: Float) {
@@ -157,7 +159,7 @@ class AudioPlaybackController(context: Context) {
             }
             mutableState.value = state.value.copy(speed = value, error = null)
         } catch (error: Exception) {
-            mutableState.value = state.value.copy(error = "Bu oynatma hızı uygulanamadı.")
+            mutableState.value = state.value.copy(error = tr("Bu oynatma hızı uygulanamadı."))
         }
     }
 
@@ -189,7 +191,7 @@ class AudioPlaybackController(context: Context) {
                 try {
                     if (target.partPositionMs > 0) current.seekTo(target.partPositionMs, MediaPlayer.SEEK_CLOSEST)
                     else if (wantsPlayback) startPrepared()
-                } catch (error: Exception) { fail("Ses parçası oynatılamadı.") }
+                } catch (error: Exception) { fail(tr("Ses parçası oynatılamadı.")) }
             }
             current.setOnSeekCompleteListener {
                 if (token == generation && player === current && wantsPlayback) startPrepared()
@@ -208,13 +210,13 @@ class AudioPlaybackController(context: Context) {
                 }
             }
             current.setOnErrorListener { _, _, _ ->
-                if (token == generation && player === current) fail("Ses dosyası okunamadı veya oynatma kesildi.")
+                if (token == generation && player === current) fail(tr("Ses dosyası okunamadı veya oynatma kesildi."))
                 true
             }
-            require(files[target.partIndex].isFile) { "Ses dosyası bulunamadı." }
+            require(files[target.partIndex].isFile) { tr("Ses dosyası bulunamadı.") }
             current.setDataSource(files[target.partIndex].absolutePath)
             current.prepareAsync()
-        } catch (error: Exception) { fail("Ses dosyası açılamadı: ${error.message.orEmpty()}") }
+        } catch (error: Exception) { fail(tr("Ses dosyası açılamadı: %1\$s", error.message.orEmpty())) }
     }
 
     private fun startPrepared() {
@@ -222,14 +224,14 @@ class AudioPlaybackController(context: Context) {
         try {
             if (!hasAudioFocus) {
                 hasAudioFocus = audioManager.requestAudioFocus(focusRequest) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-                check(hasAudioFocus) { "Ses çıkışı başka bir uygulama tarafından kullanılıyor." }
+                check(hasAudioFocus) { tr("Ses çıkışı başka bir uygulama tarafından kullanılıyor.") }
             }
             player?.playbackParams = PlaybackParams().setSpeed(state.value.speed).setPitch(1f)
             player?.start()
             mutableState.value = state.value.copy(isPlaying = true, error = null)
             handler.removeCallbacks(ticker)
             handler.post(ticker)
-        } catch (error: Exception) { fail("Ses oynatma başlatılamadı.") }
+        } catch (error: Exception) { fail(tr("Ses oynatma başlatılamadı.")) }
     }
 
     private fun releasePlayer() {
@@ -259,6 +261,6 @@ class AudioPlaybackController(context: Context) {
     }
 
     private fun requireMainThread() = check(Looper.myLooper() == Looper.getMainLooper()) {
-        "Ses oynatıcı kontrolleri ana iş parçacığında çağrılmalı."
+        tr("Ses oynatıcı kontrolleri ana iş parçacığında çağrılmalı.")
     }
 }

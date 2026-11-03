@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33])
 class HandwritingRecognizerTest {
     @Test fun preservesStrokeAndPointOrderButExcludesHighlighter() {
         val first = StrokeElement(points = listOf(InkPoint(11f, 22f), InkPoint(33f, 44f)))

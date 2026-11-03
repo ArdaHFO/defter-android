@@ -1,5 +1,8 @@
 package dev.defter.app.ui
 
+import dev.defter.app.localization.tr
+import dev.defter.app.localization.quantity
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -52,7 +55,7 @@ fun NotebookTabs(model: DefterViewModel, onChoose: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { model.openNotebook(id) }, enabled = !model.busy,
                             colors = ButtonDefaults.textButtonColors(contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant),
-                            modifier = Modifier.widthIn(max = 200.dp).semantics { contentDescription = "Sekme ${book.title}"; selected = isSelected }) {
+                            modifier = Modifier.widthIn(max = 200.dp).semantics { contentDescription = tr("Sekme %1\$s", book.title); selected = isSelected }) {
                             Icon(Icons.Outlined.AutoStories, null, Modifier.size(17.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(book.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -60,12 +63,12 @@ fun NotebookTabs(model: DefterViewModel, onChoose: () -> Unit) {
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                                 modifier = Modifier.clearAndSetSemantics {})
                         }
-                        IconButton(onClick = { model.closeTab(id) }, enabled = !model.busy) { Icon(Icons.Outlined.Close, "${book.title} sekmesini kapat", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        IconButton(onClick = { model.closeTab(id) }, enabled = !model.busy) { Icon(Icons.Outlined.Close, tr("%1\$s sekmesini kapat", book.title), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     }
                 }
             }
         }
-        FilledTonalIconButton(onClick = onChoose, enabled = !model.busy, shape = RoundedCornerShape(14.dp)) { Icon(Icons.Outlined.Add, "Sekme aç", Modifier.size(20.dp)) }
+        FilledTonalIconButton(onClick = onChoose, enabled = !model.busy, shape = RoundedCornerShape(14.dp)) { Icon(Icons.Outlined.Add, tr("Sekme aç"), Modifier.size(20.dp)) }
     }
 }
 
@@ -80,13 +83,13 @@ fun NotebookPickerDialog(model: DefterViewModel, title: String, onChoose: (Strin
                     Icon(Icons.Outlined.AutoStories, null, Modifier.size(21.dp)); Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(book.title, maxLines = 2, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-                        Text("${book.pageIds.size} sayfa", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(quantity("%1\$s sayfa", book.pageIds.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Icon(Icons.AutoMirrored.Outlined.ArrowForward, null, Modifier.size(18.dp))
                 }
             }
         }
-    }, confirmButton = { TextButton(onClick = onDismiss) { Text("Kapat") } })
+    }, confirmButton = { TextButton(onClick = onDismiss) { Text(tr("Kapat")) } })
 }
 
 @Composable
@@ -122,10 +125,10 @@ private fun ReferencePane(model: DefterViewModel) {
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(book?.title.orEmpty(), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("Referans · ${index + 1}/${book?.pageIds?.size ?: 0}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(tr("Referans · %1\$s/%2\$s", index + 1, book?.pageIds?.size ?: 0), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            IconButton(onClick = model::swapPanes, enabled = !model.busy) { Icon(Icons.Outlined.SwapHoriz, "Referansı düzenlemeye geç") }
-            IconButton(onClick = model::closeReference, enabled = !model.busy) { Icon(Icons.Outlined.Close, "Referansı kapat") }
+            IconButton(onClick = model::swapPanes, enabled = !model.busy) { Icon(Icons.Outlined.SwapHoriz, tr("Referansı düzenlemeye geç")) }
+            IconButton(onClick = model::closeReference, enabled = !model.busy) { Icon(Icons.Outlined.Close, tr("Referansı kapat")) }
         }
         AndroidView(factory = { NotebookCanvas(it) }, update = { view ->
             view.document = doc
@@ -135,10 +138,10 @@ private fun ReferencePane(model: DefterViewModel) {
             view.isEnabled = !model.busy
         }, modifier = Modifier.weight(1f).fillMaxWidth())
         Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface), horizontalArrangement = Arrangement.Center) {
-            IconButton(onClick = { model.stepReference(-1) }, enabled = !model.busy && index > 0) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Referansta önceki sayfa") }
+            IconButton(onClick = { model.stepReference(-1) }, enabled = !model.busy && index > 0) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Referansta önceki sayfa")) }
             Icon(Icons.Outlined.PanTool, null, Modifier.align(Alignment.CenterVertically).size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Kaydır ve yakınlaştır", Modifier.align(Alignment.CenterVertically).padding(horizontal = 7.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            IconButton(onClick = { model.stepReference(1) }, enabled = !model.busy && index >= 0 && index < (book?.pageIds?.lastIndex ?: 0)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, "Referansta sonraki sayfa") }
+            Text(tr("Kaydır ve yakınlaştır"), Modifier.align(Alignment.CenterVertically).padding(horizontal = 7.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            IconButton(onClick = { model.stepReference(1) }, enabled = !model.busy && index >= 0 && index < (book?.pageIds?.lastIndex ?: 0)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, tr("Referansta sonraki sayfa")) }
         }
     }
 }
@@ -147,7 +150,7 @@ private fun ReferencePane(model: DefterViewModel) {
 fun PageSearchResults(model: DefterViewModel) {
     if (model.searching) LinearProgressIndicator(Modifier.fillMaxWidth())
     if (model.searchResults.isNotEmpty()) {
-        Text("SAYFA İÇERİĞİ · ${model.searchResults.size} sonuç", Modifier.padding(vertical = 12.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(quantity("SAYFA İÇERİĞİ · %1\$s sonuç", model.searchResults.size), Modifier.padding(vertical = 12.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         LazyColumn(Modifier.fillMaxWidth().heightIn(max = 240.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(model.searchResults, key = { it.pageId }) { result ->
                 OutlinedButton(onClick = { model.openPage(result.notebookId, result.pageId) }, modifier = Modifier.fillMaxWidth(),
@@ -156,7 +159,7 @@ fun PageSearchResults(model: DefterViewModel) {
                     Icon(Icons.Outlined.Description, null, Modifier.size(22.dp))
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("${result.title} · ${result.pageNumber}. sayfa", fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                        Text(tr("%1\$s · %2\$s. sayfa", result.title, result.pageNumber), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                         Text(result.excerpt, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
@@ -168,19 +171,19 @@ fun PageSearchResults(model: DefterViewModel) {
 
 @Composable
 fun HandwritingSettingsDialog(model: DefterViewModel, onDismiss: () -> Unit) {
-    AlertDialog(onDismissRequest = { if (!model.busy) onDismiss() }, title = { Text("El yazısı ve arama") }, text = {
+    AlertDialog(onDismissRequest = { if (!model.busy) onDismiss() }, title = { Text(tr("El yazısı ve arama")) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Dil modeli bir kez internetten indirilir. Yazı tanıma cihaz üzerinde çalışır. Fotoğraf ve PDF içindeki basılı metin bu el yazısı modelinin kapsamı dışındadır.")
+            Text(tr("Dil modeli bir kez internetten indirilir. Yazı tanıma cihaz üzerinde çalışır. Fotoğraf ve PDF içindeki basılı metin bu el yazısı modelinin kapsamı dışındadır."))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = model.recognitionLanguage == "tr-TR", onClick = { model.recognitionLanguage = "tr-TR" }, enabled = !model.busy, label = { Text("Türkçe") })
-                FilterChip(selected = model.recognitionLanguage == "en-US", onClick = { model.recognitionLanguage = "en-US" }, enabled = !model.busy, label = { Text("İngilizce") })
+                FilterChip(selected = model.recognitionLanguage == "tr-TR", onClick = { model.recognitionLanguage = "tr-TR" }, enabled = !model.busy, label = { Text(tr("Türkçe")) })
+                FilterChip(selected = model.recognitionLanguage == "en-US", onClick = { model.recognitionLanguage = "en-US" }, enabled = !model.busy, label = { Text(tr("İngilizce")) })
             }
-            OutlinedButton(onClick = model::downloadHandwritingModel, enabled = !model.busy, modifier = Modifier.fillMaxWidth()) { Text("Dil modelini indir") }
-            Button(onClick = model::indexHandwriting, enabled = !model.busy, modifier = Modifier.fillMaxWidth()) { Text("El yazılarını aramaya hazırla") }
-            Text("Yeni yazı eklediğinde dizini yeniden güncelleyebilirsin. Dönüştürmek için editör menüsündeki El yazısını metne çevir seçeneğini kullan.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedButton(onClick = model::downloadHandwritingModel, enabled = !model.busy, modifier = Modifier.fillMaxWidth()) { Text(tr("Dil modelini indir")) }
+            Button(onClick = model::indexHandwriting, enabled = !model.busy, modifier = Modifier.fillMaxWidth()) { Text(tr("El yazılarını aramaya hazırla")) }
+            Text(tr("Yeni yazı eklediğinde dizini yeniden güncelleyebilirsin. Dönüştürmek için editör menüsündeki El yazısını metne çevir seçeneğini kullan."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (model.progress.isNotBlank()) { LinearProgressIndicator(Modifier.fillMaxWidth()); Text(model.progress) }
         }
-    }, confirmButton = { TextButton(onClick = onDismiss, enabled = !model.busy) { Text("Kapat") } })
+    }, confirmButton = { TextButton(onClick = onDismiss, enabled = !model.busy) { Text(tr("Kapat")) } })
 }
 
 @Composable
@@ -188,16 +191,16 @@ fun RecognitionResultDialog(model: DefterViewModel) {
     val candidates = model.recognitionCandidates
     var value by rememberSaveable(candidates) { mutableStateOf(candidates.firstOrNull().orEmpty()) }
     var replace by rememberSaveable { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = model::dismissRecognition, title = { Text("El yazısı sonucu") }, text = {
+    AlertDialog(onDismissRequest = model::dismissRecognition, title = { Text(tr("El yazısı sonucu")) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Sonucu kontrol edip düzeltebilirsin.")
-            OutlinedTextField(value, { value = it.take(10_000) }, label = { Text("Tanınan metin") }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 8)
+            Text(tr("Sonucu kontrol edip düzeltebilirsin."))
+            OutlinedTextField(value, { value = it.take(10_000) }, label = { Text(tr("Tanınan metin")) }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 8)
             if (candidates.size > 1) Row(Modifier.horizontalScroll(rememberScrollState())) {
-                candidates.take(5).forEachIndexed { index, text -> SuggestionChip(onClick = { value = text }, label = { Text("Öneri ${index + 1}") }, modifier = Modifier.padding(end = 6.dp)) }
+                candidates.take(5).forEachIndexed { index, text -> SuggestionChip(onClick = { value = text }, label = { Text(tr("Öneri %1\$s", index + 1)) }, modifier = Modifier.padding(end = 6.dp)) }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(replace, { replace = it }); Text("Seçilen el yazısını metinle değiştir") }
-            Text(if (replace) "Özgün mürekkep kaldırılır. İşlemi Geri al ile geri çevirebilirsin." else "Özgün el yazısı korunur, metin ayrıca eklenir.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(replace, { replace = it }); Text(tr("Seçilen el yazısını metinle değiştir")) }
+            Text(if (replace) tr("Özgün mürekkep kaldırılır. İşlemi Geri al ile geri çevirebilirsin.") else tr("Özgün el yazısı korunur, metin ayrıca eklenir."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-    }, confirmButton = { TextButton(onClick = { model.useRecognizedText(value, replace) }, enabled = value.isNotBlank() && !model.busy) { Text("Uygula") } },
-        dismissButton = { TextButton(onClick = model::dismissRecognition) { Text("İptal") } })
+    }, confirmButton = { TextButton(onClick = { model.useRecognizedText(value, replace) }, enabled = value.isNotBlank() && !model.busy) { Text(tr("Uygula")) } },
+        dismissButton = { TextButton(onClick = model::dismissRecognition) { Text(tr("İptal")) } })
 }

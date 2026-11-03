@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream
 import java.util.zip.ZipEntry
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class AudioStorageTest {
     private lateinit var repository: DocumentRepository
     @Before fun setup() {

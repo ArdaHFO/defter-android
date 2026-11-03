@@ -1,6 +1,7 @@
 package dev.defter.app
 
 import android.app.Application
+import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
@@ -9,6 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
+import android.os.PersistableBundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,10 @@ import androidx.lifecycle.viewModelScope
 import dev.defter.app.data.DocumentRepository
 import dev.defter.app.model.*
 import dev.defter.app.ink.PageRenderer
+import dev.defter.app.ink.InkEditing
+import dev.defter.app.ink.PageEdgeDirection
+import dev.defter.app.localization.tr
+import dev.defter.app.localization.quantity
 import dev.defter.app.recognition.HandwritingRecognizer
 import dev.defter.app.recognition.MlKitHandwritingRecognizer
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +42,15 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     var notebookId by mutableStateOf<String?>(null); private set
     var page by mutableStateOf<PageDocument?>(null); private set
     var assets by mutableStateOf<Map<String, Bitmap>>(emptyMap()); private set
-    var config by mutableStateOf(DrawingConfig())
+    private val editorPreferences = application.getSharedPreferences("editor_preferences", Context.MODE_PRIVATE)
+    private var drawingConfig by mutableStateOf(DrawingConfig(touchDrawing = editorPreferences.getBoolean("finger_draws", false)))
+    var config: DrawingConfig
+        get() = drawingConfig
+        set(value) {
+            val modeChanged = drawingConfig.touchDrawing != value.touchDrawing
+            drawingConfig = value
+            if (modeChanged) editorPreferences.edit().putBoolean("finger_draws", value.touchDrawing).apply()
+        }
     var loading by mutableStateOf(true); private set
     var busy by mutableStateOf(false); private set
     var error by mutableStateOf<String?>(null); private set
@@ -70,6 +84,9 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     private val redo = ArrayDeque<PageDocument>()
     private val failedSaves = mutableMapOf<String, PageDocument>()
     private var lastSave: Job? = null
+    private var copiedElements: List<PageElement> = emptyList()
+    private var copiedFromNotebook: String? = null
+    private var clipboardToken: String? = null
     val notebook: Notebook? get() = library.notebooks.firstOrNull { it.id == notebookId }
     val pageIndex: Int get() = notebook?.pageIds?.indexOf(page?.id) ?: -1
 
@@ -105,12 +122,12 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         }
     }
 
-    private fun message(e: Exception) = e.message?.take(350) ?: "İşlem tamamlanamadı. Lütfen yeniden dene."
+    private fun message(e: Exception) = e.message?.take(350) ?: tr("İşlem tamamlanamadı. Lütfen yeniden dene.")
     fun dismissError() { error = null }
     fun reportEditingError(value: String) { error = value.take(350) }
     fun dismissNotice() { notice = null }
     fun reportFilePickerUnavailable() {
-        notice = "Bu cihazda Android dosya seçicisi bulunamadı. Defterlerini kullanmaya devam edebilirsin; dosya alışverişi için sistem dosya seçicisi gerekir."
+        notice = tr("Bu cihazda Android dosya seçicisi bulunamadı. Defterlerini kullanmaya devam edebilirsin; dosya alışverişi için sistem dosya seçicisi gerekir.")
     }
     fun navigateFolder(id: String?) { folderId = id; persistSession() }
 
@@ -141,7 +158,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
 
     private suspend fun awaitSaves() {
         lastSave?.join()
-        check(failedSaves.isEmpty()) { "Son değişiklikler kaydedilemedi. Önce kaydı yeniden dene." }
+        check(failedSaves.isEmpty()) { tr("Son değişiklikler kaydedilemedi. Önce kaydı yeniden dene.") }
     }
 
     private fun save(snapshot: PageDocument) {
@@ -162,7 +179,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
                 runCatching { repository.loadPage(snapshot.id) }.getOrNull()?.takeIf { it == snapshot }?.let { committedRevisions[it.id] = it.revision }
                 if ((latestSnapshots[snapshot.id]?.revision ?: -1) <= snapshot.revision) {
                     failedSaves[snapshot.id] = snapshot
-                    error = "Not henüz kaydedilemedi. ${message(e)}"
+                    error = tr("Not henüz kaydedilemedi. %1\$s", message(e))
                 }
             } finally {
                 pendingSaves--
@@ -252,6 +269,26 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         if (deleted) { openTabs = openTabs - id; tabPages.remove(id); state.remove<String>("tab-$id"); if (referenceNotebookId == id) closeReference() }
     }
 
+    fun permanentlyDeleteNotebooks(ids: Set<String>) = operation {
+        awaitSaves()
+        library = repository.permanentlyDeleteNotebooks(ids)
+        openTabs = openTabs.filterNot { it in ids }
+        ids.forEach { id -> tabPages.remove(id); state.remove<String>("tab-$id") }
+        if (referenceNotebookId in ids) closeReference()
+        if (notebookId in ids) { notebookId = null; page = null; assets = emptyMap(); resetHistory() }
+        if (copiedFromNotebook in ids) {
+            // A purge may clear our selection, never a newer clipboard from another app.
+            runCatching {
+                val clipboard = getApplication<Application>().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                if (clipboardToken != null && clipboard.primaryClip?.description?.extras?.getString("defter_selection") == clipboardToken)
+                    clipboard.setPrimaryClip(ClipData.newPlainText("Defter", ""))
+            }
+            copiedElements = emptyList(); clipboardToken = null; copiedFromNotebook = null
+        }
+        searchResults = searchResults.filterNot { it.notebookId in ids }
+        notice = quantity("%1\$d defter kalıcı olarak silindi.", ids.size)
+    }
+
     private suspend fun loadPage(id: String) { activatePage(repository.loadPage(id)) }
     private suspend fun activatePage(next: PageDocument) {
         val decoded = withContext(Dispatchers.IO) { decodeAssets(next) }
@@ -263,8 +300,25 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     private fun resetHistory() { undo.clear(); redo.clear(); canUndo = false; canRedo = false }
 
     fun selectPage(id: String) = operation {
-        awaitSaves(); require(id in (notebook?.pageIds ?: emptyList())) { "Sayfa bu defterde değil." }
+        awaitSaves(); require(id in (notebook?.pageIds ?: emptyList())) { tr("Sayfa bu defterde değil.") }
         loadPage(id); notebookId?.let(::trackTab)
+    }
+
+    /** One release at a page edge is one operation; stale callbacks cannot append extra pages. */
+    fun navigatePageBySwipe(sourcePageId: String, direction: PageEdgeDirection) = operation {
+        if (page?.id != sourcePageId) return@operation
+        awaitSaves()
+        val book = notebook ?: return@operation
+        val index = book.pageIds.indexOf(sourcePageId)
+        if (index < 0) return@operation
+        val nextId = book.pageIds.getOrNull(index + if (direction == PageEdgeDirection.NEXT) 1 else -1)
+        if (nextId != null) loadPage(nextId)
+        else if (direction == PageEdgeDirection.NEXT && index == book.pageIds.lastIndex) {
+            val next = repository.addPage(book.id, page?.template ?: PaperTemplate.DOTS, sourcePageId)
+            library = repository.loadLibrary()
+            activatePage(next)
+        } else return@operation
+        trackTab(book.id)
     }
     fun addPage(template: PaperTemplate) = operation {
         awaitSaves()
@@ -293,26 +347,27 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         library = repository.moveNotebook(id, destination)
     }
 
-    fun addText(text: String) {
+    fun addText(text: String, atX: Float? = null, atY: Float? = null) {
         if (text.isBlank()) return
         page?.let { current ->
             changePage(current.copy(elements = current.elements + TextElement(
-                text = text.take(10_000), x = 100f, y = 180f, color = config.color
+                text = text.take(10_000), x = (atX ?: 100f).coerceIn(0f, current.width - 24f),
+                y = (atY ?: 180f).coerceIn(0f, current.height - 40f), color = config.color
             )))
             config = config.copy(tool = DrawingTool.SELECT)
         }
     }
 
-    fun importImage(uri: Uri) = operation {
-        val current = page ?: error("Resim eklemek için bir defter aç.")
+    fun importImage(uri: Uri, atX: Float? = null, atY: Float? = null) = operation {
+        val current = page ?: error(tr("Resim eklemek için bir defter aç."))
         val imported = repository.importImage(uri)
         val imageWidth = minOf(current.width * .65f, imported.width.toFloat())
         val ratio = imported.height.toFloat() / imported.width
         val imageHeight = minOf(imageWidth * ratio, current.height * .75f)
         val finalWidth = imageHeight / ratio
         val next = current.copy(elements = current.elements + ImageElement(
-            assetId = imported.assetId, x = (current.width - finalWidth) / 2,
-            y = 160f, width = finalWidth, height = imageHeight
+            assetId = imported.assetId, x = (atX ?: ((current.width - finalWidth) / 2)).coerceIn(0f, current.width - finalWidth),
+            y = (atY ?: 160f).coerceIn(0f, current.height - imageHeight), width = finalWidth, height = imageHeight
         ))
         val decoded = withContext(Dispatchers.IO) { decodeAssets(next) }
         // The operation lock remains held during import, so commit explicitly here.
@@ -341,14 +396,14 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
             val file = repository.assetFile(id)
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeFile(file.absolutePath, bounds)
-            require(bounds.outWidth > 0 && bounds.outHeight > 0) { "Defterdeki bir görsel okunamadı." }
+            require(bounds.outWidth > 0 && bounds.outHeight > 0) { tr("Defterdeki bir görsel okunamadı.") }
             var sample = 1
             while (kotlin.math.ceil(bounds.outWidth.toDouble() / sample) > imageDimension || kotlin.math.ceil(bounds.outHeight.toDouble() / sample) > imageDimension) {
-                require(sample <= Int.MAX_VALUE / 2) { "Görsel boyutları desteklenen sınırı aşıyor." }
+                require(sample <= Int.MAX_VALUE / 2) { tr("Görsel boyutları desteklenen sınırı aşıyor.") }
                 sample *= 2
             }
             decoded[id] = BitmapFactory.decodeFile(file.absolutePath, BitmapFactory.Options().apply { inSampleSize = sample })
-                ?: error("Defterdeki bir görsel okunamadı.")
+                ?: error(tr("Defterdeki bir görsel okunamadı."))
         }
         document.pdfBackground?.let { background -> decoded["pdf:${background.assetId}:${background.pageIndex}"] = repository.renderPdfBackground(background, pdfDimension) }
         decoded
@@ -365,15 +420,52 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         }
     }
 
-    fun paste() {
+    fun copySelection(ids: Set<String>): Boolean {
+        if (busy || loading) return false
+        val selected = page?.elements?.filter { it.id in ids }.orEmpty()
+        if (selected.isEmpty()) return false
+        return try {
+            val token = newId()
+            val description = ClipDescription("Defter", arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN, "application/vnd.defter.selection"))
+            description.extras = PersistableBundle().apply { putString("defter_selection", token) }
+            val text = selected.filterIsInstance<TextElement>().joinToString("\n") { it.text }
+            val clip = ClipData(description, ClipData.Item(text))
+            (getApplication<Application>().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(clip)
+            copiedElements = selected.map { if (it is StrokeElement) it.copy(points = it.points.toList()) else it }
+            copiedFromNotebook = notebookId
+            clipboardToken = token
+            true
+        } catch (e: Exception) { error = message(e); false }
+    }
+
+    fun paste(atX: Float? = null, atY: Float? = null) {
+        if (busy || loading || page == null) return
         try {
             val clipboard = getApplication<Application>().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = clipboard.primaryClip
-            if (clip == null || clip.itemCount == 0) { notice = "Panoda içerik yok."; return }
+            if (clip == null || clip.itemCount == 0) { notice = tr("Panoda içerik yok."); return }
+            val token = clip.description.extras?.getString("defter_selection")
+            if (token != null && token == clipboardToken && copiedElements.isNotEmpty()) {
+                val current = page ?: return
+                val bounds = InkEditing.groupBounds(copiedElements) ?: return
+                val defaultOffset = InkEditing.copyOffset(copiedElements, current.width, current.height)
+                fun position(requested: Float?, start: Float, end: Float, size: Float, fallback: Float): Float {
+                    if (requested == null || !requested.isFinite()) return fallback
+                    return if (end - start <= size) (requested - start).coerceIn(-start, size - end)
+                        else requested.coerceIn(0f, size) - start
+                }
+                val dx = position(atX, bounds.left, bounds.right, current.width, defaultOffset.first)
+                val dy = position(atY, bounds.top, bounds.bottom, current.height, defaultOffset.second)
+                val copies = copiedElements.map { InkEditing.copied(it, dx, dy) }
+                changePage(current.copy(elements = current.elements + copies))
+                page?.let(::refreshAssets)
+                return
+            }
             val item = clip.getItemAt(0)
-            if (item.uri != null) importImage(item.uri)
-            else if (!item.text.isNullOrBlank()) addText(item.text.toString())
-            else notice = "Bu içerik yapıştırılamıyor. Görseli Paylaş menüsünden veya dosyadan ekleyebilirsin."
+            if (item.uri != null) importImage(item.uri, atX, atY)
+            else if (!item.text.isNullOrBlank()) addText(item.text.toString(), atX, atY)
+            else if (clip.description.hasMimeType("application/vnd.defter.selection")) notice = tr("Kopyalanan çizim artık bu oturumda yok. İçeriği yeniden kopyala.")
+            else notice = tr("Bu içerik yapıştırılamıyor. Görseli Paylaş menüsünden veya dosyadan ekleyebilirsin.")
         } catch (e: Exception) { error = message(e) }
     }
 
@@ -384,12 +476,12 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         try {
             if (intent.type?.startsWith("image/") == true) {
                 val value = intent.getParcelableExtra<android.os.Parcelable>(Intent.EXTRA_STREAM)
-                val uri = value as? Uri ?: error("Paylaşılan görselin dosya adresi geçersiz.")
-                require(uri.scheme == "content" || uri.scheme == "file") { "Desteklenmeyen dosya adresi." }
+                val uri = value as? Uri ?: error(tr("Paylaşılan görselin dosya adresi geçersiz."))
+                require(uri.scheme == "content" || uri.scheme == "file") { tr("Desteklenmeyen dosya adresi.") }
                 pendingSharedImage = uri
             } else if (intent.type?.startsWith("text/") == true) {
                 pendingSharedText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.take(10_000)
-                    ?.takeIf(String::isNotBlank) ?: error("Paylaşılan metin boş.")
+                    ?.takeIf(String::isNotBlank) ?: error(tr("Paylaşılan metin boş."))
             }
         } catch (e: Exception) { error = message(e) }
         persistSession()
@@ -416,7 +508,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     fun openPage(bookId: String, pageId: String) = operation {
         awaitSaves()
         val book = library.notebooks.first { it.id == bookId && it.deletedAt == null }
-        require(pageId in book.pageIds) { "Sayfa bulunamadı." }
+        require(pageId in book.pageIds) { tr("Sayfa bulunamadı.") }
         activatePage(repository.loadPage(pageId)); notebookId = bookId; trackTab(bookId)
     }
 
@@ -463,12 +555,12 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     fun importPdf(uri: Uri) = operation {
-        awaitSaves(); progress = "PDF sayfaları hazırlanıyor…"
+        awaitSaves(); progress = tr("PDF sayfaları hazırlanıyor…")
         val name = runCatching {
             getApplication<Application>().contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) cursor.getString(0).substringBeforeLast('.').take(120) else null
             }
-        }.getOrNull()?.takeIf(String::isNotBlank) ?: "PDF defteri"
+        }.getOrNull()?.takeIf(String::isNotBlank) ?: tr("PDF defteri")
         val book = repository.importPdf(uri, name, folderId)
         library = repository.loadLibrary(); activatePage(repository.loadPage(book.pageIds.first())); notebookId = book.id; trackTab(book.id)
     }
@@ -533,7 +625,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
             if (page?.id == failed.id) { activatePage(recovered.page); notebookId = recovered.notebookId; trackTab(recovered.notebookId) }
         }
         library = repository.loadLibrary(); unsaved = failedSaves.isNotEmpty(); error = null
-        notice = "Kaydedilemeyen değişiklikler ayrı sayfalarda kurtarıldı. Diğer kayıtlar korundu."
+        notice = tr("Kaydedilemeyen değişiklikler ayrı sayfalarda kurtarıldı. Diğer kayıtlar korundu.")
     }
 
     fun searchPages(query: String) {
@@ -563,20 +655,20 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     fun downloadHandwritingModel() = operation {
-        progress = "El yazısı modeli indiriliyor…"
+        progress = tr("El yazısı modeli indiriliyor…")
         recognizer.downloadModel(recognitionLanguage)
-        notice = "El yazısı modeli hazır. Tanıma artık cihazında çalışabilir."
+        notice = tr("El yazısı modeli hazır. Tanıma artık cihazında çalışabilir.")
     }
 
     fun recognizeHandwriting(selectedIds: Set<String> = emptySet()) = operation {
         awaitSaves()
-        require(recognizer.isModelDownloaded(recognitionLanguage)) { "Önce el yazısı dil modelini indir." }
+        require(recognizer.isModelDownloaded(recognitionLanguage)) { tr("Önce el yazısı dil modelini indir.") }
         val doc = page ?: return@operation
         val strokes = doc.elements.filterIsInstance<StrokeElement>().filter { it.kind == InkKind.PEN && !it.isShapeFragment && (selectedIds.isEmpty() || it.id in selectedIds) }
-        require(strokes.isNotEmpty()) { "Tanınabilecek kalem yazısı yok." }
-        progress = "El yazısı okunuyor…"
+        require(strokes.isNotEmpty()) { tr("Tanınabilecek kalem yazısı yok.") }
+        progress = tr("El yazısı okunuyor…")
         val candidates = recognizer.recognize(strokes, recognitionLanguage).filter(String::isNotBlank)
-        require(candidates.isNotEmpty()) { "Yazı tanınamadı. Daha küçük bir bölge seçmeyi dene." }
+        require(candidates.isNotEmpty()) { tr("Yazı tanınamadı. Daha küçük bir bölge seçmeyi dene.") }
         recognitionCandidates = candidates; recognitionSourcePage = doc.id; recognitionSourceRevision = doc.revision; recognitionStrokeIds = strokes.map { it.id }.toSet()
         if (selectedIds.isEmpty()) {
             val indexed = doc.copy(revision = doc.revision + 1, recognitionRevision = doc.revision + 1, textRecognition = candidates.first(), recognitionLanguage = recognitionLanguage)
@@ -600,10 +692,10 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
 
     fun indexHandwriting() = operation {
         awaitSaves()
-        require(recognizer.isModelDownloaded(recognitionLanguage)) { "Önce el yazısı dil modelini indir." }
+        require(recognizer.isModelDownloaded(recognitionLanguage)) { tr("Önce el yazısı dil modelini indir.") }
         val ids = library.notebooks.filter { it.deletedAt == null }.flatMap { it.pageIds }
         for ((index, id) in ids.withIndex()) {
-            progress = "El yazısı aranabilir hâle getiriliyor · ${index + 1}/${ids.size}"
+            progress = tr("El yazısı aranabilir hâle getiriliyor · %1\$s/%2\$s", index + 1, ids.size)
             val doc = repository.loadPage(id)
             if (doc.recognitionRevision == doc.revision && doc.recognitionLanguage == recognitionLanguage) continue
             val strokes = doc.elements.filterIsInstance<StrokeElement>().filter { it.kind == InkKind.PEN && !it.isShapeFragment }
@@ -614,7 +706,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
             if (page?.id == id) page = indexed
             refreshReferenceIfSame(indexed)
         }
-        library = repository.loadLibrary(); notice = "El yazısı dizini güncellendi. Kütüphaneden içerik arayabilirsin."
+        library = repository.loadLibrary(); notice = tr("El yazısı dizini güncellendi. Kütüphaneden içerik arayabilirsin.")
     }
 
     override fun onCleared() { recognizerInstance?.close(); super.onCleared() }
@@ -624,9 +716,9 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         withContext(Dispatchers.IO) {
             getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use {
                 repository.exportBackup(it)
-            } ?: error("Yedek dosyası açılamadı.")
+            } ?: error(tr("Yedek dosyası açılamadı."))
         }
-        notice = "Tam yedek kaydedildi. Dosyayı cihazının dışında da saklayabilirsin."
+        notice = tr("Tam yedek kaydedildi. Dosyayı cihazının dışında da saklayabilirsin.")
     }
 
     fun importBackup(uri: Uri) = operation {
@@ -634,14 +726,14 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         library = withContext(Dispatchers.IO) {
             getApplication<Application>().contentResolver.openInputStream(uri)?.use {
                 repository.importBackup(it)
-            } ?: error("Yedek dosyası açılamadı.")
+            } ?: error(tr("Yedek dosyası açılamadı."))
         }
-        notice = "Yedek içe aktarıldı. Mevcut defterlerin korundu."
+        notice = tr("Yedek içe aktarıldı. Mevcut defterlerin korundu.")
     }
 
     fun exportPdf(uri: Uri) = operation {
         awaitSaves()
-        val book = notebook ?: error("Önce bir defter aç.")
+        val book = notebook ?: error(tr("Önce bir defter aç."))
         withContext(Dispatchers.IO) {
             val pdf = android.graphics.pdf.PdfDocument()
             try {
@@ -664,9 +756,9 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
                     }
                 }
                 getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.use(pdf::writeTo)
-                    ?: error("PDF dosyası açılamadı.")
+                    ?: error(tr("PDF dosyası açılamadı."))
             } finally { pdf.close() }
         }
-        notice = "PDF kaydedildi."
+        notice = tr("PDF kaydedildi.")
     }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="quantity_notebooks">
+        <item quantity="one">"%1$s defter"</item>
+        <item quantity="other">"%1$s defter"</item>
+    </plurals>
+    <plurals name="quantity_folders">
+        <item quantity="one">"%1$s klasör"</item>
+        <item quantity="other">"%1$s klasör"</item>
+    </plurals>
+    <plurals name="quantity_pages">
+        <item quantity="one">"%1$s sayfa"</item>
+        <item quantity="other">"%1$s sayfa"</item>
+    </plurals>
+    <plurals name="quantity_page_details">
+        <item quantity="one">"%1$s sayfa · %2$s"</item>
+        <item quantity="other">"%1$s sayfa · %2$s"</item>
+    </plurals>
+    <plurals name="quantity_objects">
+        <item quantity="one">"%1$s nesne"</item>
+        <item quantity="other">"%1$s nesne"</item>
+    </plurals>
+    <plurals name="quantity_search_results">
+        <item quantity="one">"SAYFA İÇERİĞİ · %1$s sonuç"</item>
+        <item quantity="other">"SAYFA İÇERİĞİ · %1$s sonuç"</item>
+    </plurals>
+    <plurals name="quantity_notebooks_deleted">
+        <item quantity="one">"%1$d defter kalıcı olarak silindi."</item>
+        <item quantity="other">"%1$d defter kalıcı olarak silindi."</item>
+    </plurals>
+    <plurals name="quantity_audio_deleted">
+        <item quantity="one">"%1$d ses kaydı kalıcı olarak silindi."</item>
+        <item quantity="other">"%1$d ses kaydı kalıcı olarak silindi."</item>
+    </plurals>
+    <plurals name="quantity_confirm_audio">
+        <item quantity="one">"%1$d ses kaydı ve transkripti kalıcı olarak silinecek. Bu işlem geri alınamaz."</item>
+        <item quantity="other">"%1$d ses kaydı ve transkripti kalıcı olarak silinecek. Bu işlem geri alınamaz."</item>
+    </plurals>
+    <plurals name="quantity_confirm_notebooks">
+        <item quantity="one">"%1$d defter ve sayfaları kalıcı olarak silinecek. Bağlı ses kayıtları korunur, silinen sayfalara bağlantıları kaldırılır. Bu işlem geri alınamaz."</item>
+        <item quantity="other">"%1$d defter ve sayfaları kalıcı olarak silinecek. Bağlı ses kayıtları korunur, silinen sayfalara bağlantıları kaldırılır. Bu işlem geri alınamaz."</item>
+    </plurals>
+</resources>

@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import dev.defter.app.data.DocumentRepository
@@ -18,9 +20,9 @@ internal object AudioCaptureFiles {
     private val recoveryMutex = Mutex()
     suspend fun <T> withRecoveryLock(block: suspend () -> T): T = recoveryMutex.withLock { block() }
     fun directory(context: Context, recordingId: String): File {
-        require(recordingId.matches(Regex("[a-zA-Z0-9_-]{1,100}"))) { "Geçersiz ses kaydı kimliği." }
+        require(recordingId.matches(Regex("[a-zA-Z0-9_-]{1,100}"))) { tr("Geçersiz ses kaydı kimliği.") }
         return File(context.filesDir, "defter/audio-pending/$recordingId").also {
-            check(it.isDirectory || it.mkdirs()) { "Ses kayıt klasörü oluşturulamadı." }
+            check(it.isDirectory || it.mkdirs()) { tr("Ses kayıt klasörü oluşturulamadı.") }
         }
     }
 

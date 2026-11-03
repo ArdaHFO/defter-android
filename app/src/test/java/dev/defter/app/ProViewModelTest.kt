@@ -32,7 +32,7 @@ import java.io.File
 /** Actual repository + ViewModel integration. Only the downloaded recognition model is replaced. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class ProViewModelTest {
     private val scheduler = TestCoroutineScheduler()

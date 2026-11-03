@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [35], manifest = Config.NONE)
 class WhisperTranscriberTest {
     @Test fun nativeUtf8TextPreservesTurkishAndEmojiWhileOffsetsAreClampedToChunk() {
         val result = WhisperTranscriber.parseSegments("""[

@@ -8,7 +8,7 @@ import org.robolectric.annotation.Config
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class StrictJsonTest {
     @Test fun commentsCannotHideDeepNestingFromTheGuard() {
         val nested = "[".repeat(2000) + "0" + "]".repeat(2000)

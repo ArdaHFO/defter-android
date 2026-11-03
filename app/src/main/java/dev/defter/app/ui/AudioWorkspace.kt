@@ -1,5 +1,7 @@
 package dev.defter.app.ui
 
+import dev.defter.app.localization.tr
+
 import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
@@ -28,6 +30,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -45,9 +49,11 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
     val work by audio.transcription.state.collectAsState()
     val model by audio.models.state.collectAsState()
     var create by rememberSaveable { mutableStateOf(false) }
-    var pendingTitle by rememberSaveable { mutableStateOf("Yeni ses kaydı") }
+    var pendingTitle by rememberSaveable { mutableStateOf(tr("Yeni ses kaydı")) }
     var modelDialog by rememberSaveable { mutableStateOf(false) }
     var showTrash by rememberSaveable { mutableStateOf(false) }
+    var trashSelection by rememberSaveable(audio.scopeNotebookId, audio.scopeFolderId) { mutableStateOf(listOf<String>()) }
+    var pendingPurge by rememberSaveable { mutableStateOf<List<String>?>(null) }
     var allFolders by rememberSaveable { mutableStateOf(false) }
     var renameId by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -62,12 +68,12 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
         else audio.startRecording(pendingTitle)
     }
     val microphonePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) startWithNotification() else audio.reportError("Kayıt başlatmak için mikrofon izni gerekli. Ses dosyalarını içe aktarmaya devam edebilirsin.")
+        if (granted) startWithNotification() else audio.reportError(tr("Kayıt başlatmak için mikrofon izni gerekli. Ses dosyalarını içe aktarmaya devam edebilirsin."))
     }
     val importAudio = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { it?.let(audio::importAudio) }
     val exportText = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { it?.let(audio::exportTranscript) }
     val exportSrt = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/x-subrip")) { it?.let(audio::exportTranscript) }
-    fun picker(action: () -> Unit) { try { action() } catch (_: ActivityNotFoundException) { audio.reportError("Bu cihazda dosya seçicisi bulunamadı.") } }
+    fun picker(action: () -> Unit) { try { action() } catch (_: ActivityNotFoundException) { audio.reportError(tr("Bu cihazda dosya seçicisi bulunamadı.")) } }
     val selected = audio.selected
     val owner = notes.library.notebooks.firstOrNull { it.id == audio.scopeNotebookId }
     val folder = notes.library.folders.firstOrNull { it.id == audio.scopeFolderId }
@@ -76,12 +82,12 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
         Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Row(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = audio::back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Seslerden geri dön") }
+                    IconButton(onClick = audio::back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Seslerden geri dön")) }
                     Column(Modifier.weight(1f).padding(horizontal = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(selected?.title ?: if (owner != null) "Defter sesleri" else "Sesler", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text(owner?.title ?: folder?.name ?: "Dosyalar · bağımsız ses arşivi", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(selected?.title ?: if (owner != null) tr("Defter sesleri") else tr("Sesler"), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(owner?.title ?: folder?.name ?: tr("Dosyalar · bağımsız ses arşivi"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
-                    FilledTonalIconButton(onClick = { modelDialog = true }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.SettingsVoice, "Konuşma modeli") }
+                    FilledTonalIconButton(onClick = { modelDialog = true }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.SettingsVoice, tr("Konuşma modeli")) }
                 }
             }
         }
@@ -90,8 +96,8 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
             Surface(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
                 Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Text("Metne çevriliyor · ${TranscriptTools.clock(work.completedMs)} / ${TranscriptTools.clock(work.totalMs)}", Modifier.weight(1f).padding(start = 10.dp), style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = audio.transcription::pause, modifier = Modifier.heightIn(min = 48.dp)) { Text("Duraklat") }
+                    Text(tr("Metne çevriliyor · %1\$s / %2\$s", TranscriptTools.clock(work.completedMs), TranscriptTools.clock(work.totalMs)), Modifier.weight(1f).padding(start = 10.dp), style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = audio.transcription::pause, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Duraklat")) }
                 }
             }
         }
@@ -101,24 +107,39 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
                     (if (audio.scopeNotebookId != null) it.notebookId == audio.scopeNotebookId else allFolders || (it.notebookId == null && it.folderId == audio.scopeFolderId)) &&
                     (audio.query.isBlank() || it.id in audio.matches)
             }.sortedByDescending { it.updatedAt }
+            val selectableIds = records.filterNot { item ->
+                (capture.isBusy && capture.recordingId == item.id) || (work.running && work.recordingId == item.id)
+            }.map { it.id }.toSet()
+            LaunchedEffect(showTrash, selectableIds) {
+                trashSelection = if (showTrash) trashSelection.filter { it in selectableIds } else emptyList()
+            }
+            fun toggleTrash(id: String) {
+                if (!audio.busy && id in selectableIds)
+                    trashSelection = if (id in trashSelection) trashSelection - id else trashSelection + id
+            }
             LazyColumn(Modifier.widthIn(max = 1080.dp).fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(onClick = { create = true }, enabled = !audio.busy && !capture.isBusy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) { Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Kayıt başlat") }
-                        OutlinedButton(onClick = { audio.prepareImport(); picker { importAudio.launch(arrayOf("audio/*")) } }, enabled = !audio.busy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) { Icon(Icons.Outlined.AudioFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Ses içe aktar") }
+                        Button(onClick = { create = true }, enabled = !audio.busy && !capture.isBusy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) { Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Kayıt başlat")) }
+                        OutlinedButton(onClick = { audio.prepareImport(); picker { importAudio.launch(arrayOf("audio/*")) } }, enabled = !audio.busy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) { Icon(Icons.Outlined.AudioFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Ses içe aktar")) }
                     }
                 }
                 item {
-                    OutlinedTextField(audio.query, audio::search, Modifier.fillMaxWidth(), placeholder = { Text("Ses veya transkript ara") }, singleLine = true,
+                    OutlinedTextField(audio.query, audio::search, Modifier.fillMaxWidth(), placeholder = { Text(tr("Ses veya transkript ara")) }, singleLine = true,
                         leadingIcon = { Icon(Icons.Outlined.Search, null) }, trailingIcon = { if (audio.searching) CircularProgressIndicator(Modifier.size(20.dp)) }, shape = RoundedCornerShape(18.dp),
                         colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = MaterialTheme.colorScheme.surface, focusedContainerColor = MaterialTheme.colorScheme.surface, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant))
                 }
                 item {
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AudioFilterChip(!showTrash, { showTrash = false }, "Kayıtlar")
-                        AudioFilterChip(showTrash, { showTrash = true }, "Silinenler")
-                        if (owner == null) AudioFilterChip(allFolders, { allFolders = !allFolders }, "Tüm sesler")
+                        AudioFilterChip(!showTrash, { showTrash = false }, tr("Kayıtlar"))
+                        AudioFilterChip(showTrash, { showTrash = true }, tr("Silinenler"))
+                        if (owner == null) AudioFilterChip(allFolders, { allFolders = !allFolders }, tr("Tüm sesler"))
                     }
+                }
+                if (showTrash) item {
+                    TrashSelectionBar(total = selectableIds.size, selected = trashSelection.size, busy = audio.busy,
+                        onSelectAll = { trashSelection = selectableIds.toList() }, onClear = { trashSelection = emptyList() },
+                        onDelete = { pendingPurge = trashSelection.filter { it in selectableIds }.takeIf { it.isNotEmpty() } })
                 }
                 if (records.isEmpty()) item {
                     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(26.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
@@ -127,31 +148,34 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
                                 Icon(Icons.Outlined.GraphicEq, null, Modifier.padding(20.dp).size(40.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             Spacer(Modifier.height(22.dp))
-                            Text(if (showTrash) "Silinen ses yok" else "Henüz ses kaydı yok", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
-                            Text("Mikrofonla kaydet veya cihazından bir ses dosyası ekle.", Modifier.widthIn(max = 340.dp).padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(if (showTrash) tr("Silinen ses yok") else tr("Henüz ses kaydı yok"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+                            Text(tr("Mikrofonla kaydet veya cihazından bir ses dosyası ekle."), Modifier.widthIn(max = 340.dp).padding(top = 10.dp), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
                 items(records, key = { it.id }) { item ->
                     var menu by remember { mutableStateOf(false) }
-                    Surface(onClick = { audio.select(item.id) }, enabled = !audio.busy, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Surface(onClick = { if (showTrash) toggleTrash(item.id) else audio.select(item.id) }, enabled = !audio.busy && (!showTrash || item.id in selectableIds), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, if (showTrash && item.id in trashSelection) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)) {
                         Row(Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            if (showTrash) Checkbox(checked = item.id in trashSelection, onCheckedChange = { toggleTrash(item.id) },
+                                enabled = !audio.busy && item.id in selectableIds,
+                                modifier = Modifier.semantics { contentDescription = tr("Ses kaydını seç: %1\$s", item.title) })
                             Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer) {
                                 Icon(Icons.Outlined.GraphicEq, null, Modifier.padding(13.dp).size(24.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                                 Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                Text("${TranscriptTools.clock(item.durationMs)} · ${audio.library.notebooks.firstOrNull { it.id == item.notebookId }?.title ?: "Bağımsız ses"}", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${TranscriptTools.clock(item.durationMs)} · ${audio.library.notebooks.firstOrNull { it.id == item.notebookId }?.title ?: tr("Bağımsız ses")}", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Box {
-                                IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, "Ses seçenekleri ${item.title}") }
+                                IconButton(onClick = { menu = true }, enabled = !audio.busy) { Icon(Icons.Outlined.MoreVert, tr("Ses seçenekleri %1\$s", item.title)) }
                                 DropdownMenu(menu, { menu = false }) {
-                                    if (showTrash) DropdownMenuItem(text = { Text("Sesi geri getir") }, onClick = { menu = false; audio.delete(item.id, false) })
+                                    if (showTrash) DropdownMenuItem(text = { Text(tr("Sesi geri getir")) }, onClick = { menu = false; audio.delete(item.id, false) })
                                     else {
-                                        DropdownMenuItem(text = { Text("Ses adını değiştir") }, onClick = { menu = false; renameId = item.id })
-                                        DropdownMenuItem(text = { Text("Ses klasörünü değiştir") }, onClick = { menu = false; moveId = item.id })
-                                        DropdownMenuItem(text = { Text("Deftere bağla / ayır") }, onClick = { menu = false; linkId = item.id })
-                                        DropdownMenuItem(text = { Text("Sesi sil") }, onClick = { menu = false; deleteId = item.id })
+                                        DropdownMenuItem(text = { Text(tr("Ses adını değiştir")) }, onClick = { menu = false; renameId = item.id })
+                                        DropdownMenuItem(text = { Text(tr("Ses klasörünü değiştir")) }, onClick = { menu = false; moveId = item.id })
+                                        DropdownMenuItem(text = { Text(tr("Deftere bağla / ayır")) }, onClick = { menu = false; linkId = item.id })
+                                        DropdownMenuItem(text = { Text(tr("Sesi sil")) }, onClick = { menu = false; deleteId = item.id })
                                     }
                                 }
                             }
@@ -163,25 +187,27 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
             onModel = { modelDialog = true }, onRename = { renameId = selected.id }, onDelete = { deleteId = selected.id }, onLink = { linkId = selected.id },
             onExport = { format -> audio.prepareExport(format); picker { if (format == "srt") exportSrt.launch("${selected.title.take(80)}.srt") else exportText.launch("${selected.title.take(80)}.txt") } })
     }
-    if (create) AudioNameDialog("Yeni ses kaydı", "Yeni ses kaydı", { create = false }) { title ->
+    if (create) AudioNameDialog(tr("Yeni ses kaydı"), tr("Yeni ses kaydı"), { create = false }) { title ->
         create = false; pendingTitle = title
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) startWithNotification()
         else microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
     }
-    renameId?.let { id -> AudioNameDialog("Ses adını değiştir", audio.library.audioItems.firstOrNull { it.id == id }?.title.orEmpty(), { renameId = null }) { audio.rename(id, it); renameId = null } }
-    deleteId?.let { id -> AlertDialog(onDismissRequest = { deleteId = null }, title = { Text("Ses çöp kutusuna taşınsın mı?") }, text = { Text("Kaydı ve transkripti Silinenler bölümünden geri getirebilirsin.") },
-        confirmButton = { TextButton(onClick = { audio.delete(id, true); deleteId = null }) { Text("Sil") } }, dismissButton = { TextButton(onClick = { deleteId = null }) { Text("Vazgeç") } }) }
-    moveId?.let { id -> AudioDestinationDialog("Ses klasörü", listOf(null to "Ana klasör") + audio.library.folders.map { it.id to it.name }, { moveId = null }) { audio.move(id, it); moveId = null } }
-    linkId?.let { id -> AudioDestinationDialog("Deftere bağla", listOf(null to "Bağımsız ses olarak tut") + audio.library.notebooks.filter { it.deletedAt == null }.map { it.id to it.title }, { linkId = null }) { audio.link(id, it); linkId = null } }
-    if (modelDialog) AlertDialog(onDismissRequest = { modelDialog = false }, icon = { Icon(Icons.Outlined.SettingsVoice, null) }, title = { Text("Yerel konuşma modeli") }, text = {
+    renameId?.let { id -> AudioNameDialog(tr("Ses adını değiştir"), audio.library.audioItems.firstOrNull { it.id == id }?.title.orEmpty(), { renameId = null }) { audio.rename(id, it); renameId = null } }
+    deleteId?.let { id -> AlertDialog(onDismissRequest = { deleteId = null }, title = { Text(tr("Ses çöp kutusuna taşınsın mı?")) }, text = { Text(tr("Kaydı ve transkripti Silinenler bölümünden geri getirebilirsin.")) },
+        confirmButton = { TextButton(onClick = { audio.delete(id, true); deleteId = null }) { Text(tr("Sil")) } }, dismissButton = { TextButton(onClick = { deleteId = null }) { Text(tr("Vazgeç")) } }) }
+    pendingPurge?.let { ids -> PermanentDeletionDialog(ids.size, audio = true,
+        onConfirm = { pendingPurge = null; audio.permanentlyDelete(ids.toSet()) }, onDismiss = { pendingPurge = null }) }
+    moveId?.let { id -> AudioDestinationDialog(tr("Ses klasörü"), listOf(null to tr("Ana klasör")) + audio.library.folders.map { it.id to it.name }, { moveId = null }) { audio.move(id, it); moveId = null } }
+    linkId?.let { id -> AudioDestinationDialog(tr("Deftere bağla"), listOf(null to tr("Bağımsız ses olarak tut")) + audio.library.notebooks.filter { it.deletedAt == null }.map { it.id to it.title }, { linkId = null }) { audio.link(id, it); linkId = null } }
+    if (modelDialog) AlertDialog(onDismissRequest = { modelDialog = false }, icon = { Icon(Icons.Outlined.SettingsVoice, null) }, title = { Text(tr("Yerel konuşma modeli")) }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Türkçe ve İngilizce konuşmayı cihazında metne çevirir. Ses kayıtların gönderilmez. Model yaklaşık 148 MB indirilir.")
-            Text(when (model.status) { WhisperModelStatus.READY -> "Model hazır · çevrimdışı kullanabilirsin"; WhisperModelStatus.DOWNLOADING -> "İndiriliyor · ${model.downloadedBytes / 1_000_000} / ${model.totalBytes / 1_000_000} MB"; WhisperModelStatus.CHECKING -> "Model doğrulanıyor…"; WhisperModelStatus.ERROR -> model.message ?: "Model indirilemedi"; else -> "Model henüz indirilmedi" })
+            Text(tr("Türkçe ve İngilizce konuşmayı cihazında metne çevirir. Ses kayıtların gönderilmez. Model yaklaşık 148 MB indirilir."))
+            Text(when (model.status) { WhisperModelStatus.READY -> tr("Model hazır · çevrimdışı kullanabilirsin"); WhisperModelStatus.DOWNLOADING -> tr("İndiriliyor · %1\$s / %2\$s MB", model.downloadedBytes / 1_000_000, model.totalBytes / 1_000_000); WhisperModelStatus.CHECKING -> tr("Model doğrulanıyor…"); WhisperModelStatus.ERROR -> model.message ?: tr("Model indirilemedi"); else -> tr("Model henüz indirilmedi") })
             if (model.status == WhisperModelStatus.DOWNLOADING) LinearProgressIndicator(progress = { if (model.totalBytes > 0) model.downloadedBytes.toFloat() / model.totalBytes else 0f }, modifier = Modifier.fillMaxWidth())
         }
-    }, confirmButton = { if (model.status == WhisperModelStatus.DOWNLOADING) TextButton(onClick = audio::cancelDownload) { Text("İndirmeyi iptal et") }
-        else if (model.status != WhisperModelStatus.READY && model.status != WhisperModelStatus.CHECKING) TextButton(onClick = audio::downloadModel) { Text("Modeli indir") }
-        else TextButton(onClick = { modelDialog = false }) { Text("Tamam") } }, dismissButton = { TextButton(onClick = { modelDialog = false }) { Text("Kapat") } })
+    }, confirmButton = { if (model.status == WhisperModelStatus.DOWNLOADING) TextButton(onClick = audio::cancelDownload) { Text(tr("İndirmeyi iptal et")) }
+        else if (model.status != WhisperModelStatus.READY && model.status != WhisperModelStatus.CHECKING) TextButton(onClick = audio::downloadModel) { Text(tr("Modeli indir")) }
+        else TextButton(onClick = { modelDialog = false }) { Text(tr("Tamam")) } }, dismissButton = { TextButton(onClick = { modelDialog = false }) { Text(tr("Kapat")) } })
 }
 
 @Composable
@@ -199,12 +225,12 @@ fun AudioRecorderStrip(audio: AudioViewModel, pageId: String?, onOpen: () -> Uni
                     TextButton(onClick = onOpen, modifier = Modifier.heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
                         Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("${if (capture.phase == AudioRecorderPhase.PAUSED) "Duraklatıldı" else if (capture.phase == AudioRecorderPhase.FINALIZING) "Kaydediliyor" else "Ses kaydı"} · ${TranscriptTools.clock(capture.elapsedMs)}", fontWeight = FontWeight.SemiBold)
+                        Text("${if (capture.phase == AudioRecorderPhase.PAUSED) tr("Duraklatıldı") else if (capture.phase == AudioRecorderPhase.FINALIZING) tr("Kaydediliyor") else tr("Ses kaydı")} · ${TranscriptTools.clock(capture.elapsedMs)}", fontWeight = FontWeight.SemiBold)
                     }
-                    if (capture.phase == AudioRecorderPhase.RECORDING) FilledTonalIconButton(onClick = { audio.recorder.pause() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Pause, "Ses kaydını duraklat") }
-                    if (capture.phase == AudioRecorderPhase.PAUSED) FilledTonalIconButton(onClick = audio::resumeRecording, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.FiberManualRecord, "Ses kaydına devam et") }
-                    if (capture.isBusy) IconButton(onClick = { audio.recorder.stop() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Stop, "Ses kaydını bitir") }
-                    if (capture.phase in setOf(AudioRecorderPhase.RECORDING, AudioRecorderPhase.PAUSED)) IconButton(onClick = { audio.addBookmark(pageId) }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.BookmarkAdd, "Ses zamanına işaret koy") }
+                    if (capture.phase == AudioRecorderPhase.RECORDING) FilledTonalIconButton(onClick = { audio.recorder.pause() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Pause, tr("Ses kaydını duraklat")) }
+                    if (capture.phase == AudioRecorderPhase.PAUSED) FilledTonalIconButton(onClick = audio::resumeRecording, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.FiberManualRecord, tr("Ses kaydına devam et")) }
+                    if (capture.isBusy) IconButton(onClick = { audio.recorder.stop() }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Stop, tr("Ses kaydını bitir")) }
+                    if (capture.phase in setOf(AudioRecorderPhase.RECORDING, AudioRecorderPhase.PAUSED)) IconButton(onClick = { audio.addBookmark(pageId) }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.BookmarkAdd, tr("Ses zamanına işaret koy")) }
                 }
                 if (capture.error != null) Text(capture.error.orEmpty(), Modifier.padding(start = 22.dp, end = 22.dp, bottom = 12.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
@@ -235,11 +261,11 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                         val playColor by animateColorAsState(if (playing) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary, tween(180), label = "playbackControlColor")
                         val playContent by animateColorAsState(if (playing) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimary, tween(180), label = "playbackControlContent")
                         FilledIconButton(onClick = audio::togglePlayback, enabled = recording.parts.isNotEmpty() && !capture.isBusy, modifier = Modifier.size(60.dp), shape = RoundedCornerShape(20.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = playColor, contentColor = playContent)) {
-                            Icon(if (playing) Icons.Outlined.Pause else Icons.Outlined.PlayArrow, "Sesi oynat veya duraklat", Modifier.size(30.dp))
+                            Icon(if (playing) Icons.Outlined.Pause else Icons.Outlined.PlayArrow, tr("Sesi oynat veya duraklat"), Modifier.size(30.dp))
                         }
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text("${TranscriptTools.clock(position)} / ${TranscriptTools.clock(recording.durationMs)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                            Text(if (recording.state == AudioRecordingState.INTERRUPTED) "Kesintiden kurtarılan kayıt" else "Cihazında saklanıyor", Modifier.padding(top = 3.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(if (recording.state == AudioRecordingState.INTERRUPTED) tr("Kesintiden kurtarılan kayıt") else tr("Cihazında saklanıyor"), Modifier.padding(top = 3.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         TextButton(onClick = { audio.player.setSpeed(if (playback.speed >= 2f) .75f else playback.speed + .25f) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("${playback.speed}×", fontWeight = FontWeight.SemiBold) }
                     }
@@ -248,10 +274,10 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (active) {
-                            TextButton(onClick = onRename, modifier = Modifier.heightIn(min = 48.dp)) { Text("Adını değiştir") }
-                            TextButton(onClick = onLink, modifier = Modifier.heightIn(min = 48.dp)) { Text("Defter bağlantısı") }
-                            TextButton(onClick = onDelete, modifier = Modifier.heightIn(min = 48.dp), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text("Sil") }
-                        } else TextButton(onClick = { audio.delete(recording.id, false) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Sesi geri getir") }
+                            TextButton(onClick = onRename, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Adını değiştir")) }
+                            TextButton(onClick = onLink, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Defter bağlantısı")) }
+                            TextButton(onClick = onDelete, modifier = Modifier.heightIn(min = 48.dp), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(tr("Sil")) }
+                        } else TextButton(onClick = { audio.delete(recording.id, false) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("Sesi geri getir")) }
                     }
                 }
             }
@@ -260,7 +286,7 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
             Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("tr" to "Türkçe", "en" to "English", "auto" to "Otomatik").forEach { (tag, title) -> AudioFilterChip(language == tag, { language = tag }, title, enabled = !processing) }
+                        listOf("tr" to tr("Türkçe"), "en" to tr("İngilizce"), "auto" to tr("Otomatik")).forEach { (tag, title) -> AudioFilterChip(language == tag, { language = tag }, title, enabled = !processing) }
                     }
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = {
@@ -268,17 +294,17 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                             else if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE || (recording.transcribedUntilMs > 0 && language != recording.transcriptionLanguage)) confirmRestart = true
                             else audio.transcribe(language)
                         }, enabled = !audio.busy && !work.running && !capture.isBusy && recording.parts.isNotEmpty(), modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp)) {
-                            Icon(Icons.Outlined.Transcribe, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE) "Yeniden metne çevir" else if (recording.transcribedUntilMs > 0) "Çevirmeye devam et" else "Metne çevir")
+                            Icon(Icons.Outlined.Transcribe, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE) tr("Yeniden metne çevir") else if (recording.transcribedUntilMs > 0) tr("Çevirmeye devam et") else tr("Metne çevir"))
                         }
-                        OutlinedButton(onClick = { audio.addBookmark(notes.page?.id?.takeIf { notes.notebookId == recording.notebookId }) }, enabled = recording.parts.isNotEmpty() && !audio.busy && (!capture.isBusy || capture.recordingId == recording.id), modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) { Text("İşaret koy") }
+                        OutlinedButton(onClick = { audio.addBookmark(notes.page?.id?.takeIf { notes.notebookId == recording.notebookId }) }, enabled = recording.parts.isNotEmpty() && !audio.busy && (!capture.isBusy || capture.recordingId == recording.id), modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) { Text(tr("İşaret koy")) }
                     }
                     recording.transcriptionError?.let { Text(it, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
-                    if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE && recording.transcript.isEmpty()) Text("Bu kayıtta tanınan konuşma bulunamadı.", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodyMedium)
+                    if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE && recording.transcript.isEmpty()) Text(tr("Bu kayıtta tanınan konuşma bulunamadı."), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
         if (recording.bookmarks.isNotEmpty()) {
-            item { Text("Zaman işaretleri", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+            item { Text(tr("Zaman işaretleri"), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
             items(recording.bookmarks, key = { "bookmark-${it.id}" }) { mark ->
                 Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                     Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
@@ -289,21 +315,21 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                         }
                         val pageOwner = mark.pageId?.let { pageId -> audio.library.notebooks.firstOrNull { pageId in it.pageIds || pageId in it.trashedPageIds } }
                         if (mark.pageId != null && pageOwner != null && pageOwner.deletedAt == null && mark.pageId in pageOwner.pageIds) {
-                            TextButton(onClick = { notes.openPage(pageOwner.id, mark.pageId); audio.close() }, modifier = Modifier.padding(start = 28.dp).heightIn(min = 48.dp)) { Text("Sayfaya git") }
-                        } else if (mark.pageId != null) Text("Bağlı sayfa kullanılamıyor", Modifier.padding(start = 40.dp, end = 12.dp, bottom = 10.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            TextButton(onClick = { notes.openPage(pageOwner.id, mark.pageId); audio.close() }, modifier = Modifier.padding(start = 28.dp).heightIn(min = 48.dp)) { Text(tr("Sayfaya git")) }
+                        } else if (mark.pageId != null) Text(tr("Bağlı sayfa kullanılamıyor"), Modifier.padding(start = 40.dp, end = 12.dp, bottom = 10.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
         item {
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("Transkript", Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Text(tr("Transkript"), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                 if (recording.transcript.isNotEmpty()) {
-                    TextButton(onClick = { onExport("txt") }, modifier = Modifier.heightIn(min = 48.dp)) { Text("TXT") }
-                    TextButton(onClick = { onExport("srt") }, modifier = Modifier.heightIn(min = 48.dp)) { Text("SRT") }
+                    TextButton(onClick = { onExport("txt") }, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("TXT")) }
+                    TextButton(onClick = { onExport("srt") }, modifier = Modifier.heightIn(min = 48.dp)) { Text(tr("SRT")) }
                 }
             }
-            Text("Metne dokunarak o anı dinle. Tanıma hatalarını düzenleyebilirsin.", Modifier.padding(top = 2.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(tr("Metne dokunarak o anı dinle. Tanıma hatalarını düzenleyebilirsin."), Modifier.padding(top = 2.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         items(recording.transcript, key = { it.id }) { segment ->
             val current = playback.isPlaying && playback.recordingId == recording.id && position in segment.startMs..segment.endMs
@@ -314,19 +340,19 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { audio.playAt(segment.startMs) }, modifier = Modifier.heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)) { Text(TranscriptTools.clock(segment.startMs), fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(4.dp)); Icon(Icons.Outlined.PlayArrow, null, Modifier.size(18.dp)) }
                         Spacer(Modifier.weight(1f))
-                        if (active && !processing) IconButton(onClick = { editId = segment.id; editText = segment.text }) { Icon(Icons.Outlined.Edit, "Transkript bölümünü düzenle") }
-                        if (notes.page != null && active) IconButton(onClick = { notes.addText(segment.text); audio.close() }) { Icon(Icons.Outlined.PostAdd, "Transkripti açık sayfaya ekle") }
+                        if (active && !processing) IconButton(onClick = { editId = segment.id; editText = segment.text }) { Icon(Icons.Outlined.Edit, tr("Transkript bölümünü düzenle")) }
+                        if (notes.page != null && active) IconButton(onClick = { notes.addText(segment.text); audio.close() }) { Icon(Icons.Outlined.PostAdd, tr("Transkripti açık sayfaya ekle")) }
                     }
                     SelectionContainer { Text(segment.text, Modifier.padding(top = 2.dp, bottom = 8.dp), style = MaterialTheme.typography.bodyLarge, lineHeight = 25.sp) }
-                    if (segment.edited) Text("Düzenlendi", Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (segment.edited) Text(tr("Düzenlendi"), Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
     }
-    if (confirmRestart) AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text("Transkript yeniden oluşturulsun mu?") }, text = { Text("Mevcut transkript ve yaptığın metin düzeltmeleri yeni sonuçla değiştirilecek. Ses kaydı korunur.") },
-        confirmButton = { TextButton(onClick = { audio.transcribe(language, true); confirmRestart = false }) { Text("Yeniden oluştur") } }, dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text("Vazgeç") } })
-    if (editId != null) AlertDialog(onDismissRequest = { editId = null }, title = { Text("Transkripti düzenle") }, text = { OutlinedTextField(editText, { editText = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp, max = 300.dp), label = { Text("Konuşma metni") }) },
-        confirmButton = { TextButton(onClick = { audio.editSegment(editId!!, editText); editId = null }, enabled = editText.isNotBlank() && editText.length <= 10000) { Text("Kaydet") } }, dismissButton = { TextButton(onClick = { editId = null }) { Text("Vazgeç") } })
+    if (confirmRestart) AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text(tr("Transkript yeniden oluşturulsun mu?")) }, text = { Text(tr("Mevcut transkript ve yaptığın metin düzeltmeleri yeni sonuçla değiştirilecek. Ses kaydı korunur.")) },
+        confirmButton = { TextButton(onClick = { audio.transcribe(language, true); confirmRestart = false }) { Text(tr("Yeniden oluştur")) } }, dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text(tr("Vazgeç")) } })
+    if (editId != null) AlertDialog(onDismissRequest = { editId = null }, title = { Text(tr("Transkripti düzenle")) }, text = { OutlinedTextField(editText, { editText = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp, max = 300.dp), label = { Text(tr("Konuşma metni")) }) },
+        confirmButton = { TextButton(onClick = { audio.editSegment(editId!!, editText); editId = null }, enabled = editText.isNotBlank() && editText.length <= 10000) { Text(tr("Kaydet")) } }, dismissButton = { TextButton(onClick = { editId = null }) { Text(tr("Vazgeç")) } })
 }
 
 @Composable
@@ -342,11 +368,11 @@ private fun AudioFilterChip(selected: Boolean, onClick: () -> Unit, title: Strin
 @Composable
 private fun AudioNameDialog(title: String, initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
     var value by rememberSaveable { mutableStateOf(initial) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(title) }, text = { OutlinedTextField(value, { value = it }, singleLine = true, label = { Text("Kayıt adı") }) },
-        confirmButton = { TextButton(onClick = { onSave(value.trim()) }, enabled = value.isNotBlank() && value.trim().length <= 180) { Text("Tamam") } }, dismissButton = { TextButton(onClick = onDismiss) { Text("Vazgeç") } })
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(title) }, text = { OutlinedTextField(value, { value = it }, singleLine = true, label = { Text(tr("Kayıt adı")) }) },
+        confirmButton = { TextButton(onClick = { onSave(value.trim()) }, enabled = value.isNotBlank() && value.trim().length <= 180) { Text(tr("Tamam")) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(tr("Vazgeç")) } })
 }
 
 @Composable
 private fun AudioDestinationDialog(title: String, entries: List<Pair<String?, String>>, onDismiss: () -> Unit, onChoose: (String?) -> Unit) {
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(title) }, text = { LazyColumn(Modifier.heightIn(max = 360.dp)) { items(entries) { (id, name) -> TextButton(onClick = { onChoose(id) }, Modifier.fillMaxWidth()) { Text(name) } } } }, confirmButton = { TextButton(onClick = onDismiss) { Text("Vazgeç") } })
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(title) }, text = { LazyColumn(Modifier.heightIn(max = 360.dp)) { items(entries) { (id, name) -> TextButton(onClick = { onChoose(id) }, Modifier.fillMaxWidth()) { Text(name) } } } }, confirmButton = { TextButton(onClick = onDismiss) { Text(tr("Vazgeç")) } })
 }

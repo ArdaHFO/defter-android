@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
@@ -63,7 +65,7 @@ class AudioRecorderController(context: Context) {
             val previous = state.value
             AudioRecorderSession.mutableState.value = previous.copy(
                 phase = if (foreground) AudioRecorderPhase.ERROR else previous.phase,
-                error = "Ses kaydı başlatılamadı. Mikrofon iznini ve uygulamanın açık olduğunu kontrol edin."
+                error = tr("Ses kaydı başlatılamadı. Mikrofon iznini ve uygulamanın açık olduğunu kontrol edin.")
             )
             false
         }

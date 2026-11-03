@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit
 
 /** Real Activity, repository, ViewModels and Compose controls with synthetic local WAV fixtures. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], qualifiers = "w1280dp-h900dp-land-mdpi")
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], qualifiers = "w1280dp-h900dp-land-mdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @LooperMode(LooperMode.Mode.PAUSED)
 class AudioWorkspaceTest {
@@ -237,7 +237,7 @@ class AudioWorkspaceTest {
         }
     }
 
-    @Test @Config(qualifiers = "w393dp-h851dp-port-mdpi")
+    @Test @Config(application = dev.defter.app.localization.TurkishTestApplication::class, qualifiers = "w393dp-h851dp-port-mdpi")
     fun phoneArchiveAndTranscriptControlsRemainReachable() {
         fresh()
         val recording = seed("Biyoloji · hücre ve enerji", "Hücre, canlıların temel yapı birimidir. Enerji dönüşümü mitokondride gerçekleşir.")

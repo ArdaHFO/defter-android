@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_784a555dd7ab" formatted="false">" (sync conflict)"</string>
+    <string name="text_c5e0e1869031" formatted="false">" · recovered"</string>
+    <string name="text_cac7bfc1ed77" formatted="false">"%1$d notebooks permanently deleted."</string>
+    <string name="text_3a03e32bc875" formatted="false">"%1$d notebooks and their pages will be permanently deleted. Linked audio recordings are kept, and their links to deleted pages are removed. This cannot be undone."</string>
+    <string name="text_1d716f1bc739" formatted="false">"%1$d recordings permanently deleted."</string>
+    <string name="text_66f2a7173bfc" formatted="false">"%1$d recordings and their transcripts will be permanently deleted. This cannot be undone."</string>
+    <string name="text_e5a70fde14cc" formatted="false">"%1$d selected"</string>
+    <string name="text_c1d1ba580107" formatted="false">"%1$s notebooks"</string>
+    <string name="text_1e0dc4f1aea2" formatted="false">"%1$s notebooks · %2$s folders"</string>
+    <string name="text_2a4742722ee8" formatted="false">"Bookmark added at %1$s."</string>
+    <string name="text_c931cb5cff3b" formatted="false">"%1$s crop boundary"</string>
+    <string name="text_8e3e10f58f55" formatted="false">"%1$s objects"</string>
+    <string name="text_326d33034da8" formatted="false">"%1$s color"</string>
+    <string name="text_b1591a79a9da" formatted="false">"%1$s pages"</string>
+    <string name="text_3f1c2e17e99e" formatted="false">"%1$s pages · %2$s"</string>
+    <string name="text_1c571d73d338" formatted="false">"Close %1$s tab"</string>
+    <string name="text_4b002c6c348a" formatted="false">"Options for %1$s"</string>
+    <string name="text_bff642835d52" formatted="false">"%1$s · Page %2$s"</string>
+    <string name="text_28566c033735" formatted="false">"KEY NOTES"</string>
+    <string name="text_27801417db4b" formatted="false">"The name must contain 1–200 characters."</string>
+    <string name="text_461536dbe838" formatted="false">"Sage"</string>
+    <string name="text_3827cba582d2" formatted="false">"Rename"</string>
+    <string name="text_c91da2e0203b" formatted="false">"Bottom"</string>
+    <string name="text_1805bf33db71" formatted="false">"Root folder"</string>
+    <string name="text_a3dbe5686ef1" formatted="false">"Transcription paused because Android\'s background processing time limit was reached. Completed sections were preserved."</string>
+    <string name="text_5a3f99c5c09d" formatted="false">"Clear search"</string>
+    <string name="text_26df28d024a6" formatted="false">"Slate"</string>
+    <string name="text_2d65dc965961" formatted="false">"Background processing could not start. %1$s"</string>
+    <string name="text_0193e6cd3139" formatted="false">"Angle increment"</string>
+    <string name="text_32cc8825f59e" formatted="false">"Snap lines and arrows to the selected angles. The rectangle tool draws squares and the ellipse tool draws circles."</string>
+    <string name="text_0d26bf5f2e68" formatted="false">"The transcription result is too large."</string>
+    <string name="text_b490ea62c38b" formatted="false">"The linked page is unavailable"</string>
+    <string name="text_394359385a56" formatted="false">"Standalone recordings and audio files"</string>
+    <string name="text_ba9d21172de9" formatted="false">"Standalone audio"</string>
+    <string name="text_1f6f56656f4c" formatted="false">"Keep as standalone audio"</string>
+    <string name="text_9e66a1b0b5a9" formatted="false">"Try searching for another name."</string>
+    <string name="text_b4a48bcca201" formatted="false">"Another recording is being processed, or processing could not start."</string>
+    <string name="text_0f5a95e22d93" formatted="false">"Copy to another notebook"</string>
+    <string name="text_8e39a14c847b" formatted="false">"Move to another notebook"</string>
+    <string name="text_80027849422e" formatted="false">"The start time is invalid."</string>
+    <string name="text_dc556201b977" formatted="false">"The document must be a JSON object."</string>
+    <string name="text_b16bc0e596e9" formatted="false">"The document file is damaged. The existing file is preserved."</string>
+    <string name="text_8a1b1417e17d" formatted="false">"The document could not be read. The existing file is preserved."</string>
+    <string name="text_a7d1e47b8f9e" formatted="false">"The document is incomplete."</string>
+    <string name="text_b1af6f518a92" formatted="false">"The document structure is invalid."</string>
+    <string name="text_6e7a60fa9b20" formatted="false">"The document structure is nested too deeply."</string>
+    <string name="text_47ea7a179b1e" formatted="false">"White"</string>
+    <string name="text_d8e1ce802374" formatted="false">"Blank"</string>
+    <string name="text_86366438b6fd" formatted="false">"Backups are limited to 512 MB in this alpha release."</string>
+    <string name="text_532553a0a5f0" formatted="false">"The Android file picker is unavailable on this device. You can keep using your notebooks. Importing and exporting files requires the system file picker."</string>
+    <string name="text_11cdbbb7fdd5" formatted="false">"No file picker was found on this device."</string>
+    <string name="text_270dbe94929c" formatted="false">"No handwriting model was found for this language."</string>
+    <string name="text_c112b54b62a6" formatted="false">"This content cannot be pasted. Add the image using Share or import it from a file."</string>
+    <string name="text_cd730db2a9ff" formatted="false">"This operation contains too much stroke detail. Try a smaller area. Nothing was changed."</string>
+    <string name="text_f1513a5d6792" formatted="false">"This recording does not contain playable audio yet."</string>
+    <string name="text_98a4ce31f669" formatted="false">"No speech was recognized in this recording."</string>
+    <string name="text_9af4321250dc" formatted="false">"This object type is not supported."</string>
+    <string name="text_3fcd7bb47e19" formatted="false">"This playback speed could not be applied."</string>
+    <string name="text_45179f18c1e0" formatted="false">"This recording has been deleted."</string>
+    <string name="text_73cffa3df286" formatted="false">"Transcription paused because the device is too warm. Continue when it has cooled down."</string>
+    <string name="text_5493c425813c" formatted="false">"The device is too warm. Start transcription when it has cooled down."</string>
+    <string name="text_e3926cd27da0" formatted="false">"Saved on your device"</string>
+    <string name="text_5b531a29e0df" formatted="false">"Stored on your device"</string>
+    <string name="text_1aa20d0c832a" formatted="false">"Cornell"</string>
+    <string name="text_7ae17d06d727" formatted="false">"NOTEBOOKS"</string>
+    <string name="text_ed15b4b6a191" formatted="false">"Notebook name"</string>
+    <string name="text_f72d5e4e7444" formatted="false">"Notebook link"</string>
+    <string name="text_643cc63f6a68" formatted="false">"No notebooks found"</string>
+    <string name="text_9f1d1a9a71b6" formatted="false">"Notebook not found."</string>
+    <string name="text_6f644427fb39" formatted="false">"Notebook menu"</string>
+    <string name="text_294571a9bbd9" formatted="false">"Notebook page. Write with a pen and zoom with two fingers."</string>
+    <string name="text_68a21dbebbd1" formatted="false">"Notebook audio"</string>
+    <string name="text_501ab9ca2a65" formatted="false">"Search notebooks or content"</string>
+    <string name="text_1daf0be47a01" formatted="false">"Notebook · %1$s"</string>
+    <string name="text_625e41031ae0" formatted="false">"The notebook is in the trash."</string>
+    <string name="text_6fa97aab22b6" formatted="false">"A notebook must keep at least one page."</string>
+    <string name="text_60c9110fdc61" formatted="false">"A notebook must contain at least one page."</string>
+    <string name="text_f1ce60f3ebd2" formatted="false">"An image in the notebook could not be read."</string>
+    <string name="text_3c1a51def969" formatted="false">"Link to notebook"</string>
+    <string name="text_627ce7e41ee6" formatted="false">"Link / unlink notebook"</string>
+    <string name="text_4fbea97516b3" formatted="false">"Create notebook"</string>
+    <string name="text_7702e56b00c8" formatted="false">"Move notebook"</string>
+    <string name="text_a7e6b606bf80" formatted="false">"Rename notebook"</string>
+    <string name="text_41c634a95098" formatted="false">"The notebook\'s folder is missing."</string>
+    <string name="text_badd99cc5583" formatted="false">"Your notebooks are safe in your library."</string>
+    <string name="text_4afc001697ab" formatted="false">"Ocean blue"</string>
+    <string name="text_5ed862fc233c" formatted="false">"Storage is running low. Completed audio was preserved and recording paused."</string>
+    <string name="text_bee222c4cb06" formatted="false">"Your classes, sketches, and ideas."</string>
+    <string name="text_8bd154c0d7e0" formatted="false">"Unsupported document version."</string>
+    <string name="text_9ceff3810426" formatted="false">"Unsupported file address."</string>
+    <string name="text_0954173d73e3" formatted="false">"Unsupported handwriting language."</string>
+    <string name="text_aebc3f8b28ff" formatted="false">"Unsupported image."</string>
+    <string name="text_b8276b0aeed0" formatted="false">"Unsupported speech language."</string>
+    <string name="text_2db13053156b" formatted="false">"Unsupported library version."</string>
+    <string name="text_76635d5501a0" formatted="false">"Unsupported audio document version."</string>
+    <string name="text_235e85af3fec" formatted="false">"Unsupported audio container."</string>
+    <string name="text_ce66503ec7ec" formatted="false">"Unsupported transcription language."</string>
+    <string name="text_25633c695abe" formatted="false">"Unsupported backup format."</string>
+    <string name="text_b2459f107506" formatted="false">"Active lecture recording and recording controls"</string>
+    <string name="text_26183306dcac" formatted="false">"Continue"</string>
+    <string name="text_d0a7782b0e67" formatted="false">"Rectangle"</string>
+    <string name="text_12d34675caa1" formatted="false">"Download the language model once. Handwriting recognition runs on your device. Printed text in photos and PDFs is not supported by this handwriting model."</string>
+    <string name="text_bd5eb5828961" formatted="false">"Download language model"</string>
+    <string name="text_9ea23ddaed2a" formatted="false">"Recreate the transcript to change its language."</string>
+    <string name="text_d56773c7d12a" formatted="false">"Stop the active recording before playback."</string>
+    <string name="text_47ffaefb9e84" formatted="false">"The file is not a PDF."</string>
+    <string name="text_649a68d11ac6" formatted="false">"The file exceeds the allowed size."</string>
+    <string name="text_2834af0e2685" formatted="false">"No supported audio track was found in the file."</string>
+    <string name="text_b7e87442a2d7" formatted="false">"No supported audio track was found in the file."</string>
+    <string name="text_36e14d97cfd9" formatted="false">"Files"</string>
+    <string name="text_1cbe065a9602" formatted="false">"Files · standalone audio archive"</string>
+    <string name="text_19b6acde3303" formatted="false">"Pause"</string>
+    <string name="text_49730237c2a7" formatted="false">"Paused"</string>
+    <string name="text_500d0d0a361c" formatted="false">"Stop and save"</string>
+    <string name="text_388f030daa29" formatted="false">"THINK. WRITE. REMEMBER."</string>
+    <string name="text_b43a86e6dae2" formatted="false">"Edited"</string>
+    <string name="text_f2c3e18ed22d" formatted="false">"The insertion position was not found."</string>
+    <string name="text_d11d618d52e1" formatted="false">"Prepare handwriting for search"</string>
+    <string name="text_a576861006b0" formatted="false">"Making handwriting searchable · %1$s/%2$s"</string>
+    <string name="text_088745896b65" formatted="false">"The handwriting index was updated. You can search content from the library."</string>
+    <string name="text_36090d88f1e7" formatted="false">"Handwriting processing was cancelled."</string>
+    <string name="text_57b69bade770" formatted="false">"The handwriting coordinates are invalid."</string>
+    <string name="text_3b38bf17b672" formatted="false">"The handwriting model is ready. Recognition can now run on your device."</string>
+    <string name="text_e87fbfae2f76" formatted="false">"Downloading handwriting model…"</string>
+    <string name="text_d2882996b37e" formatted="false">"Recognizing handwriting…"</string>
+    <string name="text_8c45a42f0791" formatted="false">"Handwriting result"</string>
+    <string name="text_6dc46cc73e2d" formatted="false">"The handwriting recognizer was closed."</string>
+    <string name="text_36e727308f62" formatted="false">"Handwriting and search"</string>
+    <string name="text_c81cf643153e" formatted="false">"Convert handwriting to text"</string>
+    <string name="text_220b8926fd40" formatted="false">"Ellipse"</string>
+    <string name="text_0da854ad8744" formatted="false">"An outdated or conflicting page version cannot be saved."</string>
+    <string name="text_45e557f9b398" formatted="false">"The synced notebook ID does not match."</string>
+    <string name="text_69fcff163cac" formatted="false">"A sync file must contain exactly one notebook."</string>
+    <string name="text_0e941d05c729" formatted="false">"The sync file contains unrelated audio."</string>
+    <string name="text_fc48b54d7717" formatted="false">"The synced notebook no longer exists on this device. An outdated operation cannot restore it."</string>
+    <string name="text_17e3a27d9368" formatted="false">"Highlighter"</string>
+    <string name="text_41a8c2c3bd58" formatted="false">"MAKE ROOM FOR IDEAS"</string>
+    <string name="text_96b5c13bd8b2" formatted="false">"Geometry tools"</string>
+    <string name="text_6b65f1920bb2" formatted="false">"Undo"</string>
+    <string name="text_8ff239c76d10" formatted="false">"Restore"</string>
+    <string name="text_ea46b7448108" formatted="false">"Pan"</string>
+    <string name="text_777808338743" formatted="false">"Invalid PDF page."</string>
+    <string name="text_93e0d0b734c5" formatted="false">"Invalid pressure."</string>
+    <string name="text_b06cd2f9f40b" formatted="false">"Invalid document ID."</string>
+    <string name="text_860781d2af16" formatted="false">"Invalid dimensions."</string>
+    <string name="text_8b49ffc1ee37" formatted="false">"Invalid rotation angle."</string>
+    <string name="text_e59fb1ad6b3b" formatted="false">"Invalid coordinates."</string>
+    <string name="text_5f1aabd18bce" formatted="false">"Invalid crop area."</string>
+    <string name="text_1f264938bb14" formatted="false">"Invalid page revision."</string>
+    <string name="text_9059eee82f28" formatted="false">"Invalid audio index."</string>
+    <string name="text_e7e87066d3c6" formatted="false">"Invalid audio bookmark."</string>
+    <string name="text_7245e8ede530" formatted="false">"Invalid recording ID."</string>
+    <string name="text_4ad1e02e9877" formatted="false">"Invalid audio source ID."</string>
+    <string name="text_9bf4ac53181c" formatted="false">"Invalid audio segment."</string>
+    <string name="text_d1db3155cbd6" formatted="false">"Invalid recognition language."</string>
+    <string name="text_237398f4dec1" formatted="false">"Invalid recognition revision."</string>
+    <string name="text_60fd252fcfb1" formatted="false">"Invalid date."</string>
+    <string name="text_6a9ba1fb02de" formatted="false">"Invalid or oversized audio buffer."</string>
+    <string name="text_70621d648f5e" formatted="false">"Invalid transcription metadata."</string>
+    <string name="text_0cccfcc23e33" formatted="false">"Invalid transcription position."</string>
+    <string name="text_f93087893396" formatted="false">"Invalid backup file list."</string>
+    <string name="text_bf197f7644fe" formatted="false">"Invalid backup image."</string>
+    <string name="text_8b55652d2e67" formatted="false">"Invalid backup path."</string>
+    <string name="text_48bfae25b9f9" formatted="false">"Invalid timed text."</string>
+    <string name="text_3b37c4936f19" formatted="false">"Invalid stroke point."</string>
+    <string name="text_462074c0cb59" formatted="false">"Invalid stroke."</string>
+    <string name="text_5694c05b1a70" formatted="false">"Image"</string>
+    <string name="text_139cd7934b6e" formatted="false">"The image is not a PNG."</string>
+    <string name="text_a94722f8e924" formatted="false">"The image could not be opened."</string>
+    <string name="text_9504d75aa306" formatted="false">"The image dimensions exceed the supported limit."</string>
+    <string name="text_ccb096417f30" formatted="false">"The image file is damaged."</string>
+    <string name="text_e1ce8f155dc2" formatted="false">"The image could not be saved."</string>
+    <string name="text_e6c8e7a37d37" formatted="false">"The image could not be decoded."</string>
+    <string name="text_2a6c3404b8a1" formatted="false">"Crop image"</string>
+    <string name="text_c568d9e9f791" formatted="false">"Unsafe backup path."</string>
+    <string name="text_a35c30929e0a" formatted="false">"An unsafe model download redirect was rejected."</string>
+    <string name="text_284bf13c7065" formatted="false">"HEX color code"</string>
+    <string name="text_074e464dc790" formatted="false">"Preparing…"</string>
+    <string name="text_6c7b891a846c" formatted="false">"No recordings yet"</string>
+    <string name="text_ac3277f7ef77" formatted="false">"FOLDERS"</string>
+    <string name="text_15e141bee057" formatted="false">"TOPIC / DATE"</string>
+    <string name="text_fa95462bfacb" formatted="false">"Pen"</string>
+    <string name="text_05c28670f092" formatted="false">"Freehand pen strokes are not affected."</string>
+    <string name="text_1dc7472b3156" formatted="false">"Delete permanently?"</string>
+    <string name="text_a6269a544411" formatted="false">"Delete permanently"</string>
+    <string name="text_cabf8e95a514" formatted="false">"Thickness"</string>
+    <string name="text_34159775248b" formatted="false">"Thickness setting"</string>
+    <string name="text_7f1c8bc4a5bc" formatted="false">"Cover color"</string>
+    <string name="text_7b31a9fc4816" formatted="false">"Close"</string>
+    <string name="text_70d332f70384" formatted="false">"Grid"</string>
+    <string name="text_b5edd3869fa0" formatted="false">"Not saved · retry"</string>
+    <string name="text_2eb2690fc2be" formatted="false">"Unsaved changes were recovered as separate pages. Other saved content was preserved."</string>
+    <string name="text_3d4e94b27c3e" formatted="false">"Saving"</string>
+    <string name="text_dd292f855cd8" formatted="false">"Saving…"</string>
+    <string name="text_c1fe2ecdff02" formatted="false">"Save"</string>
+    <string name="text_c342663261a8" formatted="false">"Saving could not be completed"</string>
+    <string name="text_827bd69677d1" formatted="false">"You can restore the recording and transcript from Deleted items."</string>
+    <string name="text_9fa49cef32db" formatted="false">"Pan and zoom"</string>
+    <string name="text_8676c71c5fc8" formatted="false">"Recording name"</string>
+    <string name="text_af65f380df4c" formatted="false">"The recording stream was not opened."</string>
+    <string name="text_e703b5d18a9d" formatted="false">"Start recording"</string>
+    <string name="text_c95775e2f3e3" formatted="false">"Microphone permission is needed to record. You can still import audio files."</string>
+    <string name="text_8967670619b0" formatted="false">"Recording paused"</string>
+    <string name="text_06ff8ec3f503" formatted="false">"Changes in audio sample format within a recording are not supported."</string>
+    <string name="text_77c3446c278e" formatted="false">"The recording folder could not be created."</string>
+    <string name="text_699ea13b1392" formatted="false">"The recording duration is invalid or exceeds 24 hours."</string>
+    <string name="text_3d9990599379" formatted="false">"The recording duration could not be read."</string>
+    <string name="text_f6bdad7c7928" formatted="false">"The recording path is invalid."</string>
+    <string name="text_cafb2d991bbe" formatted="false">"Recordings"</string>
+    <string name="text_82b1c07947b1" formatted="false">"No decodable audio was found in the recording."</string>
+    <string name="text_af4c01624977" formatted="false">"Lasso"</string>
+    <string name="text_be4542596b23" formatted="false">"Cut"</string>
+    <string name="text_aea3ab5806c9" formatted="false">"Truncated PCM audio frame."</string>
+    <string name="text_a4bd7172c526" formatted="false">"Recording recovered after interruption"</string>
+    <string name="text_1ed109983309" formatted="false">"Terracotta"</string>
+    <string name="text_505b9693a658" formatted="false">"Folder name"</string>
+    <string name="text_0b927e205c5f" formatted="false">"The folder tree could not be resolved."</string>
+    <string name="text_3f39443cc7c0" formatted="false">"Folder not found."</string>
+    <string name="text_bd19d49ffcc8" formatted="false">"A folder cycle was detected."</string>
+    <string name="text_3790b90a64d2" formatted="false">"Move to folder"</string>
+    <string name="text_8e4c6a8a7a29" formatted="false">"Rename folder"</string>
+    <string name="text_aced2bb52968" formatted="false">"Transcript"</string>
+    <string name="text_863b4998080f" formatted="false">"Speech model"</string>
+    <string name="text_242eda2cfda6" formatted="false">"The speech model could not be downloaded."</string>
+    <string name="text_742b0cefe350" formatted="false">"Recover as copy"</string>
+    <string name="text_a8bcca42d9ce" formatted="false">"Copy"</string>
+    <string name="text_01d536187ef0" formatted="false">"The copied drawing is no longer available in this session. Copy the content again."</string>
+    <string name="text_b24a36089466" formatted="false">"Dark"</string>
+    <string name="text_94c742ad5e3e" formatted="false">"Cream"</string>
+    <string name="text_7a8b87a7dbe1" formatted="false">"Sand"</string>
+    <string name="text_9e5da0b2a46c" formatted="false">"Recovered notes"</string>
+    <string name="text_de8790971fde" formatted="false">"ORGANIZE YOUR LIBRARY"</string>
+    <string name="text_d2c99d2503b5" formatted="false">"Paper color"</string>
+    <string name="text_748dd3ee5905" formatted="false">"Library"</string>
+    <string name="text_d61da38bac0e" formatted="false">"The library file is too large."</string>
+    <string name="text_138099d455e2" formatted="false">"The library is missing."</string>
+    <string name="text_ef36386aa1c1" formatted="false">"Library menu"</string>
+    <string name="text_2fa08e0cbe59" formatted="false">"Your library"</string>
+    <string name="text_b56ee02c62b9" formatted="false">"Back to library"</string>
+    <string name="text_2559af1c2fa1" formatted="false">"Red"</string>
+    <string name="text_d6883e18cead" formatted="false">"Off-white"</string>
+    <string name="text_f148c2a539a3" formatted="false">"Partial eraser"</string>
+    <string name="text_4e52adc41240" formatted="false">"Navy"</string>
+    <string name="text_97c0014c6a71" formatted="false">"Lavender"</string>
+    <string name="text_262b943e8879" formatted="false">"Math tools"</string>
+    <string name="text_be17d3159785" formatted="false">"Blue"</string>
+    <string name="text_80422e38652c" formatted="false">"Text"</string>
+    <string name="text_ae24e6b73192" formatted="false">"Text size"</string>
+    <string name="text_06455df7d342" formatted="false">"Add text"</string>
+    <string name="text_869e99e1026f" formatted="false">"The text is too long."</string>
+    <string name="text_37eaec21d3de" formatted="false">"Tap text to listen at that moment. You can edit recognition mistakes."</string>
+    <string name="text_9c62a9f2f729" formatted="false">"Transcribe"</string>
+    <string name="text_60373245df97" formatted="false">"Transcription could not start."</string>
+    <string name="text_9c290e6e6639" formatted="false">"Stop recording before transcription."</string>
+    <string name="text_7d377ab2c1fb" formatted="false">"Transcribing · %1$s / %2$s"</string>
+    <string name="text_b9a3e78ad860" formatted="false">"Edit text"</string>
+    <string name="text_1e2ed1538930" formatted="false">"The existing transcript and your text corrections will be replaced with the new result. The audio recording is preserved."</string>
+    <string name="text_9b317677ca9e" formatted="false">"Another process or a privacy setting muted the microphone. Recording paused."</string>
+    <string name="text_10f55984d300" formatted="false">"Preparing microphone"</string>
+    <string name="text_9afb9735d687" formatted="false">"Microphone permission was revoked."</string>
+    <string name="text_5fbef9eb5799" formatted="false">"Microphone permission was not granted."</string>
+    <string name="text_6eb295014aae" formatted="false">"Microphone recording could not start. Check permission and try again from the app."</string>
+    <string name="text_d4fabbeacfbf" formatted="false">"Microphone recording was interrupted."</string>
+    <string name="text_42f60bff2c96" formatted="false">"The microphone or recording device was interrupted."</string>
+    <string name="text_994a81e4d734" formatted="false">"Record with your microphone or add an audio file from your device."</string>
+    <string name="text_44af9680c508" formatted="false">"Model SHA-256 verification failed. The file was not used."</string>
+    <string name="text_5d23481719cd" formatted="false">"The model address must use HTTPS."</string>
+    <string name="text_46850c9fa699" formatted="false">"The model size could not be verified."</string>
+    <string name="text_5ef3f526205b" formatted="false">"The resumed model download could not be verified."</string>
+    <string name="text_1cfb89bdf1db" formatted="false">"The resumed model download range is invalid."</string>
+    <string name="text_367c352301e0" formatted="false">"The model file exceeds the expected size."</string>
+    <string name="text_98d12a3d36e5" formatted="false">"Verifying model…"</string>
+    <string name="text_1dae61c2892a" formatted="false">"Model ready · available offline"</string>
+    <string name="text_6a6380328565" formatted="false">"Model not downloaded yet"</string>
+    <string name="text_05f45d891127" formatted="false">"Model download failed"</string>
+    <string name="text_86254f608ad3" formatted="false">"Model download failed (HTTP %1$s)."</string>
+    <string name="text_e74499e42be7" formatted="false">"The model could not be downloaded."</string>
+    <string name="text_0f8a4fd5e26a" formatted="false">"Model download paused."</string>
+    <string name="text_8b0ee0038d0a" formatted="false">"Too many redirects while downloading the model."</string>
+    <string name="text_617a83c726d7" formatted="false">"The model folder could not be created."</string>
+    <string name="text_4dfa634af2ec" formatted="false">"The model redirect address is missing."</string>
+    <string name="text_c1b132eb7174" formatted="false">"Download model"</string>
+    <string name="text_748e3369a213" formatted="false">"Purple"</string>
+    <string name="text_1eb3fc960548" formatted="false">"Dotted"</string>
+    <string name="text_cbded135ac8f" formatted="false">"The note has not been saved yet. %1$s"</string>
+    <string name="text_959f1d1df29f" formatted="false">"Notes"</string>
+    <string name="text_99c255ddfb67" formatted="false">"Your notes stay on your device.\nWorks offline."</string>
+    <string name="text_36f00a4655d7" formatted="false">"Your note"</string>
+    <string name="text_843ac01149cc" formatted="false">"Arrow"</string>
+    <string name="text_ee1cd50e9422" formatted="false">"Automatic"</string>
+    <string name="text_3b672440e886" formatted="false">"Playback speed must be between 0.5 and 2."</string>
+    <string name="text_0ca828852a85" formatted="false">"The PCM format is not supported."</string>
+    <string name="text_f5a581e9fd42" formatted="false">"A PDF must contain 1–2000 pages."</string>
+    <string name="text_78f89dc72812" formatted="false">"The PDF could not be opened."</string>
+    <string name="text_42a7ce1451f0" formatted="false">"The PDF could not be opened. It may be damaged or password protected."</string>
+    <string name="text_3ae9ed42655d" formatted="false">"The PDF is empty or too large."</string>
+    <string name="text_bc9d07cbf204" formatted="false">"PDF notebook"</string>
+    <string name="text_a90c5983e763" formatted="false">"The PDF file could not be opened."</string>
+    <string name="text_215546c7daf3" formatted="false">"Import PDF"</string>
+    <string name="text_2481e27ae35b" formatted="false">"PDF saved."</string>
+    <string name="text_40cc87bbcc66" formatted="false">"The PDF could not be read."</string>
+    <string name="text_9db2a2f6d771" formatted="false">"Save as PDF"</string>
+    <string name="text_15cf347fa4da" formatted="false">"The PDF page dimensions do not match."</string>
+    <string name="text_92d7174ac53b" formatted="false">"Preparing PDF pages…"</string>
+    <string name="text_b04e8d5774d5" formatted="false">"PDF page not found."</string>
+    <string name="text_fb212a131f68" formatted="false">"The PDF page exceeds the supported size."</string>
+    <string name="text_1ef5433d1d5d" formatted="false">"The PDF page is missing."</string>
+    <string name="text_9ca2b260c185" formatted="false">"The PDF preview dimensions are invalid."</string>
+    <string name="text_da2b28327760" formatted="false">"The clipboard is empty."</string>
+    <string name="text_eae56e21f282" formatted="false">"Paste from clipboard"</string>
+    <string name="text_7e19740a6bb1" formatted="false">"Draw with finger and pen. Switch to pan mode."</string>
+    <string name="text_54cd58a4582c" formatted="false">"Finger: pan"</string>
+    <string name="text_b04c5504fdbd" formatted="false">"Finger: draw"</string>
+    <string name="text_5e6546d70aac" formatted="false">"Pan with your finger and draw with your pen. Switch to draw mode."</string>
+    <string name="text_e8a50f177686" formatted="false">"Draw with finger"</string>
+    <string name="text_1d7f3081de86" formatted="false">"Your finger pans the page; your pen uses the selected tool."</string>
+    <string name="text_ad801997a4be" formatted="false">"The shared image\'s file address is invalid."</string>
+    <string name="text_2453ff92384a" formatted="false">"Add shared content to this page"</string>
+    <string name="text_1c327e56cb71" formatted="false">"Open or create a notebook to add the shared content."</string>
+    <string name="text_ce0b58848012" formatted="false">"The shared text is empty."</string>
+    <string name="text_24486046779e" formatted="false">"Reference · %1$s/%2$s"</string>
+    <string name="text_908e7f81dff1" formatted="false">"Next reference page"</string>
+    <string name="text_da2623d48cf7" formatted="false">"Previous reference page"</string>
+    <string name="text_ac11a57cd0b7" formatted="false">"Edit reference"</string>
+    <string name="text_444753ae8950" formatted="false">"Close reference"</string>
+    <string name="text_cc3aa5876b6a" formatted="false">"Color code"</string>
+    <string name="text_e4e01eec78b5" formatted="false">"Add image"</string>
+    <string name="text_fbf7d9d3d1b6" formatted="false">"Open a notebook to add an image."</string>
+    <string name="text_fce3ab8a2991" formatted="false">"The eraser does not affect images or text. Delete them using the selection tool."</string>
+    <string name="text_26683453d48b" formatted="false">"PAGE CONTENT · %1$s results"</string>
+    <string name="text_8a21220051bc" formatted="false">"SRT"</string>
+    <string name="text_5b550ebb8339" formatted="false">"Yellow"</string>
+    <string name="text_3819cd1604f7" formatted="false">"Page %1$s"</string>
+    <string name="text_0be2fc1447eb" formatted="false">"Actions for page %1$s"</string>
+    <string name="text_5ba57a100dd5" formatted="false">"Move page %1$s later"</string>
+    <string name="text_24d8eef139f9" formatted="false">"Move page %1$s earlier"</string>
+    <string name="text_06150c9fd7ea" formatted="false">"The page will be moved to Deleted items. You can restore it later."</string>
+    <string name="text_b28d72e78f51" formatted="false">"The page changed in another session. The conflicting note is preserved. Reopen the page."</string>
+    <string name="text_debb2a25d063" formatted="false">"The page does not belong to a notebook."</string>
+    <string name="text_ed95bb178fb3" formatted="false">"The page is referenced more than once."</string>
+    <string name="text_769632eebedb" formatted="false">"The page is not in this notebook."</string>
+    <string name="text_f1378c53adc5" formatted="false">"Page not found."</string>
+    <string name="text_5fb4160a393a" formatted="false">"The page file is too large for this version."</string>
+    <string name="text_98f756ebae5e" formatted="false">"Add page"</string>
+    <string name="text_f4d1116e0b70" formatted="false">"Page actions"</string>
+    <string name="text_126b71837fcd" formatted="false">"A page cannot be moved after itself."</string>
+    <string name="text_19bcde1e7bdd" formatted="false">"The page ID does not match."</string>
+    <string name="text_fb5e1f94506d" formatted="false">"The page order must contain every page exactly once."</string>
+    <string name="text_6c25d0598212" formatted="false">"The page or destination notebook was not found."</string>
+    <string name="text_3b0a7f256cf2" formatted="false">"The page is too large."</string>
+    <string name="text_888177ce800b" formatted="false">"Page preview"</string>
+    <string name="text_ca1f914f6368" formatted="false">"Page template"</string>
+    <string name="text_e4fe8d0e28b4" formatted="false">"Pages"</string>
+    <string name="text_7f9b2392b1e6" formatted="false">"Pages · %1$s"</string>
+    <string name="text_6ea57821b05b" formatted="false">"Show pages"</string>
+    <string name="text_730e96626bea" formatted="false">"The PDF for this page was not found."</string>
+    <string name="text_ffd3063203b6" formatted="false">"The image for this page was not found."</string>
+    <string name="text_69e3ac96ebf1" formatted="false">"Go to page"</string>
+    <string name="text_727cc8d3eeac" formatted="false">"Restore page"</string>
+    <string name="text_c67628fdb778" formatted="false">"Copy page"</string>
+    <string name="text_5fd6d6cbd914" formatted="false">"Delete page"</string>
+    <string name="text_e893c9b40ce6" formatted="false">"Delete page?"</string>
+    <string name="text_68aa29a22cf9" formatted="false">"Move page"</string>
+    <string name="text_5e1375aad14b" formatted="false">"Duplicate page"</string>
+    <string name="text_a8e0e801a5b6" formatted="false">"Right"</string>
+    <string name="text_d2d71906e653" formatted="false">"Tab %1$s"</string>
+    <string name="text_c9b49f72ea63" formatted="false">"Open tab"</string>
+    <string name="text_4450023d3d45" formatted="false">"Open in tab"</string>
+    <string name="text_75cfbcc9e2b0" formatted="false">"Rename audio"</string>
+    <string name="text_fd1e9355daef" formatted="false">"Open audio archive"</string>
+    <string name="text_aff31b0b48b1" formatted="false">"The audio document could not be read. The existing recording is preserved."</string>
+    <string name="text_572389a1555f" formatted="false">"The audio document is too large."</string>
+    <string name="text_f085dddfdbf4" formatted="false">"The audio format is missing."</string>
+    <string name="text_08944326d79f" formatted="false">"The audio is preserved on your device, but saving could not finish. Try stopping again. %1$s"</string>
+    <string name="text_9c4110470a19" formatted="false">"The audio index and document do not match."</string>
+    <string name="text_8ad0dd59106f" formatted="false">"The audio file could not be opened or is not supported."</string>
+    <string name="text_c90914e5a1d9" formatted="false">"The audio file could not be opened."</string>
+    <string name="text_8826ee74c9e1" formatted="false">"The audio file could not be opened: %1$s"</string>
+    <string name="text_3a8e1a9f2af3" formatted="false">"The audio file is empty or exceeds the 256 MB limit."</string>
+    <string name="text_c94630a49761" formatted="false">"The audio file is empty or missing."</string>
+    <string name="text_3450cca5d33a" formatted="false">"The audio file is empty or too large."</string>
+    <string name="text_c264b7f98ae6" formatted="false">"The audio file is missing or empty."</string>
+    <string name="text_db29e1dee2d1" formatted="false">"Audio file not found."</string>
+    <string name="text_86443c621367" formatted="false">"The audio file could not be read or playback was interrupted."</string>
+    <string name="text_bd4ba9b74cef" formatted="false">"The audio file format and header do not match."</string>
+    <string name="text_b1615c3e43df" formatted="false">"The audio input buffer could not be obtained."</string>
+    <string name="text_bf91419dff05" formatted="false">"Import audio"</string>
+    <string name="text_b25bce004f1e" formatted="false">"Audio bookmark not found."</string>
+    <string name="text_58524a554451" formatted="false">"The audio bookmark\'s page was not found."</string>
+    <string name="text_69ddc411cb05" formatted="false">"Audio bookmarks · %1$s"</string>
+    <string name="text_fc99da7f865e" formatted="false">"Audio operation"</string>
+    <string name="text_5fdc2f10b27a" formatted="false">"The audio operation could not be completed."</string>
+    <string name="text_bda21cb75f65" formatted="false">"Saving audio"</string>
+    <string name="text_6c9830a48817" formatted="false">"Audio recording"</string>
+    <string name="text_0268a03f5f68" formatted="false">"The recording could not be opened: %1$s"</string>
+    <string name="text_5ecdc601b88a" formatted="false">"Another operation changed this recording. Refresh and try again."</string>
+    <string name="text_cdf9530fa935" formatted="false">"Recording could not start. Check microphone permission and make sure the app is open."</string>
+    <string name="text_6a95609c8eb7" formatted="false">"Recording not found."</string>
+    <string name="text_58716f37f208" formatted="false">"The recording index does not match."</string>
+    <string name="text_3fa6ad52529f" formatted="false">"A recording cannot exceed 7 days."</string>
+    <string name="text_a390cb01672a" formatted="false">"There is not enough free space to record audio."</string>
+    <string name="text_284162b9168f" formatted="false">"The recording operation could not be completed."</string>
+    <string name="text_900b372645ee" formatted="false">"Recording was interrupted. Completed segments were preserved on your device."</string>
+    <string name="text_e31727ad9b5b" formatted="false">"No recording is selected."</string>
+    <string name="text_62656cc7a5d4" formatted="false">"Recording in progress"</string>
+    <string name="text_a79b370bacac" formatted="false">"Audio recording and transcript"</string>
+    <string name="text_c038638ef6dc" formatted="false">"The recording is in the trash."</string>
+    <string name="text_09186bac6be0" formatted="false">"Resume recording"</string>
+    <string name="text_a5b3f26faaa3" formatted="false">"Finish recording"</string>
+    <string name="text_d5a503a7efb9" formatted="false">"Pause recording"</string>
+    <string name="text_10950f9f2322" formatted="false">"Select recording: %1$s"</string>
+    <string name="text_f262f4d2fa8d" formatted="false">"The recording\'s notebook was not found."</string>
+    <string name="text_e7603059b711" formatted="false">"The recording\'s notebook is missing."</string>
+    <string name="text_962d69ce3d80" formatted="false">"The recording\'s folder was not found."</string>
+    <string name="text_9c3d55cf6aef" formatted="false">"The recording\'s folder is missing."</string>
+    <string name="text_b0d24b790cfe" formatted="false">"The audio source changed during recording."</string>
+    <string name="text_92b121348ffa" formatted="false">"The audio recording folder could not be created."</string>
+    <string name="text_68441b3672ce" formatted="false">"Audio folder"</string>
+    <string name="text_1c3fbe8c6bab" formatted="false">"Change audio folder"</string>
+    <string name="text_35f0e9d5466b" formatted="false">"The playback position could not be changed."</string>
+    <string name="text_bd7010558a1f" formatted="false">"Audio transcription"</string>
+    <string name="text_6888b4179f8c" formatted="false">"Audio could not be transcribed."</string>
+    <string name="text_14f4ffab6b56" formatted="false">"Transcribing audio"</string>
+    <string name="text_19af61eb4e70" formatted="false">"The transcript is too large for this version."</string>
+    <string name="text_b2a1c43ba3c9" formatted="false">"Audio playback could not start."</string>
+    <string name="text_97c4291008ad" formatted="false">"Audio player controls must be called on the main thread."</string>
+    <string name="text_d4ee05cc0338" formatted="false">"Audio segments are missing."</string>
+    <string name="text_4e99a81e3bd7" formatted="false">"The audio segment is empty or exceeds the 64 MB limit."</string>
+    <string name="text_ef7fd7763450" formatted="false">"An audio segment is missing or its size changed."</string>
+    <string name="text_dd10ff99cb68" formatted="false">"The audio segment could not be played."</string>
+    <string name="text_c34bee9e6c3c" formatted="false">"The audio segment duration is invalid."</string>
+    <string name="text_cbfb1f1baab9" formatted="false">"The audio service was closed."</string>
+    <string name="text_987795d41f6a" formatted="false">"Audio options for %1$s"</string>
+    <string name="text_ddcb44ab6ed7" formatted="false">"The audio duration is not supported."</string>
+    <string name="text_d3279f74464e" formatted="false">"The audio duration could not be read."</string>
+    <string name="text_d2f489590262" formatted="false">"Search audio or transcripts"</string>
+    <string name="text_183826a6db08" formatted="false">"The audio timeline is invalid."</string>
+    <string name="text_d984e7284be2" formatted="false">"Bookmark audio position"</string>
+    <string name="text_5eb8b2e8171a" formatted="false">"Move audio to trash?"</string>
+    <string name="text_be68ac5c12a6" formatted="false">"The audio decoder is not responding."</string>
+    <string name="text_570d91d94d58" formatted="false">"The audio output buffer could not be obtained."</string>
+    <string name="text_11680823ab0c" formatted="false">"Another app is using the audio output."</string>
+    <string name="text_0f4a329676e9" formatted="false">"The audio sample format is not supported."</string>
+    <string name="text_d697e7fde4b9" formatted="false">"Restore audio"</string>
+    <string name="text_0f63d9de4924" formatted="false">"Play or pause audio"</string>
+    <string name="text_17ab48f9a0a5" formatted="false">"Delete audio"</string>
+    <string name="text_acb73e93d125" formatted="false">"Audio"</string>
+    <string name="text_8721d1370279" formatted="false">"Back from audio"</string>
+    <string name="text_6caa06b138cc" formatted="false">"Select"</string>
+    <string name="text_9ef0fc2e83d4" formatted="false">"Select / move"</string>
+    <string name="text_f70f96abbee0" formatted="false">"Replace selected handwriting with text"</string>
+    <string name="text_4812fbae2300" formatted="false">"Enlarge selection"</string>
+    <string name="text_dd02270bddff" formatted="false">"Copy selection"</string>
+    <string name="text_d1271993664f" formatted="false">"Shrink selection"</string>
+    <string name="text_7cb660077737" formatted="false">"Recolor selection"</string>
+    <string name="text_00480b8f2d84" formatted="false">"Delete selection"</string>
+    <string name="text_d7895fb22c41" formatted="false">"Duplicate selection"</string>
+    <string name="text_5358eaea69a6" formatted="false">"Delete selected"</string>
+    <string name="text_9bb53775d5c4" formatted="false">"Rotate selected image"</string>
+    <string name="text_a95db517d7c2" formatted="false">"Crop selected image"</string>
+    <string name="text_dd8f3ae2040d" formatted="false">"Edit selected text"</string>
+    <string name="text_aff950b58891" formatted="false">"Delete selection"</string>
+    <string name="text_b697bcdf5d49" formatted="false">"Clear selection"</string>
+    <string name="text_f698e9b40f9f" formatted="false">"Delete"</string>
+    <string name="text_168c6681822d" formatted="false">"Eraser settings"</string>
+    <string name="text_e667de152f4c" formatted="false">"Eraser options"</string>
+    <string name="text_15179112ce94" formatted="false">"Content to erase"</string>
+    <string name="text_740a2eca52a6" formatted="false">"Restore your deleted notebooks here."</string>
+    <string name="text_cb60884a4116" formatted="false">"Deleted page"</string>
+    <string name="text_8bf37a70539e" formatted="false">"Deleted page not found."</string>
+    <string name="text_6a443d77c107" formatted="false">"No deleted pages."</string>
+    <string name="text_f62289b4dcbe" formatted="false">"No deleted audio"</string>
+    <string name="text_fa6e01b70299" formatted="false">"Deleted items"</string>
+    <string name="text_653eada58bc8" formatted="false">"Deleted (%1$s)"</string>
+    <string name="text_da0ac5a7ad25" formatted="false">"A deleted recording cannot be edited."</string>
+    <string name="text_7aa3fd1f8f90" formatted="false">"Segments cannot be added to a deleted recording."</string>
+    <string name="text_6cc63ec42dbc" formatted="false">"Erase mode"</string>
+    <string name="text_a7d17064f226" formatted="false">"Select for deletion: %1$s"</string>
+    <string name="text_159844990f03" formatted="false">"Black"</string>
+    <string name="text_361847a8cfe5" formatted="false">"Left"</string>
+    <string name="text_8c3bbf93f5a9" formatted="false">"The latest changes could not be saved. Retry saving first."</string>
+    <string name="text_91480e0f1eb5" formatted="false">"The last page cannot be deleted. Add a new page first."</string>
+    <string name="text_8f3516f651e8" formatted="false">"The last page cannot be moved. Add a new page first or copy the page."</string>
+    <string name="text_0f05da67b868" formatted="false">"The last audio segment could not be finalized. It is preserved on your device for recovery."</string>
+    <string name="text_765eb2f15309" formatted="false">"After"</string>
+    <string name="text_4c68362c332e" formatted="false">"Next page"</string>
+    <string name="text_b42978623826" formatted="false">"Swipe a little further for the next page"</string>
+    <string name="text_f4c40dfbd357" formatted="false">"Release for the next page"</string>
+    <string name="text_01e13d28c683" formatted="false">"The next audio segment could not be opened. Recording was safely paused."</string>
+    <string name="text_c788960f633e" formatted="false">"There is not enough free space for the next audio segment."</string>
+    <string name="text_679ea26039cc" formatted="false">"The next audio segment could not be tracked."</string>
+    <string name="text_79c023ed793c" formatted="false">"Review the result and make corrections."</string>
+    <string name="text_ed8d85f88b43" formatted="false">"DELETED NOTEBOOKS"</string>
+    <string name="text_bf88451b8744" formatted="false">"Touch and hold a page, then drag to reorder it. You can also use the arrows."</string>
+    <string name="text_d3dc6ac94909" formatted="false">"TXT"</string>
+    <string name="text_5ee6c5bf0705" formatted="false">"Reset crop"</string>
+    <string name="text_e7a7d3779c5a" formatted="false">"Create full backup"</string>
+    <string name="text_bf07e603c6b1" formatted="false">"Full backup saved. Keep a copy outside your device as well."</string>
+    <string name="text_79c4b04b6ee8" formatted="false">"OK"</string>
+    <string name="text_3d5a87c56ac9" formatted="false">"Select a handwritten area or write on the page to recognize text."</string>
+    <string name="text_44acfb772011" formatted="false">"There is no handwriting to recognize."</string>
+    <string name="text_b08fff32ecfb" formatted="false">"Recognized text"</string>
+    <string name="text_0893ae5fdb88" formatted="false">"The recognized text is too long."</string>
+    <string name="text_3c36f881f2ff" formatted="false">"Select a smaller handwriting area at a time."</string>
+    <string name="text_eadd16c7b549" formatted="false">"Duplicate JSON field."</string>
+    <string name="text_498c79ec3eed" formatted="false">"Duplicate notebook ID."</string>
+    <string name="text_df05d88c86ad" formatted="false">"Duplicate folder ID."</string>
+    <string name="text_825ffa3b3920" formatted="false">"Duplicate object ID."</string>
+    <string name="text_4e17ba857e9c" formatted="false">"Duplicate audio ID."</string>
+    <string name="text_611b9d099303" formatted="false">"Transcript"</string>
+    <string name="text_7a3e657e25f8" formatted="false">"The transcript changed in another operation."</string>
+    <string name="text_9c2f300a6315" formatted="false">"The transcript changed in another operation. The saved text was preserved."</string>
+    <string name="text_b83e1b32df86" formatted="false">"Edit transcript section"</string>
+    <string name="text_2fbc2e52fbc0" formatted="false">"The transcription operation changed in another session."</string>
+    <string name="text_750c4332170e" formatted="false">"Transcript saved."</string>
+    <string name="text_107aa25d5d8e" formatted="false">"Transcript text cannot be empty."</string>
+    <string name="text_dcd031bd17dc" formatted="false">"Recreate transcript?"</string>
+    <string name="text_49d3304adccc" formatted="false">"Add transcript to the open page"</string>
+    <string name="text_59e63895d43a" formatted="false">"Edit transcript"</string>
+    <string name="text_5a77365b2692" formatted="false">"Orange"</string>
+    <string name="text_5f410aa966a6" formatted="false">"All audio"</string>
+    <string name="text_e0b4b1ee86ff" formatted="false">"All drawings"</string>
+    <string name="text_ef0b6d89aaa3" formatted="false">"Select all"</string>
+    <string name="text_0f8b5cb2e84b" formatted="false">"Turkish"</string>
+    <string name="text_5311ef9a5c7f" formatted="false">"Transcribe Turkish and English speech on your device. Your recordings are not uploaded. The model download is approximately 148 MB."</string>
+    <string name="text_08a24723d591" formatted="false">"Apply"</string>
+    <string name="text_dd5e4953a6ff" formatted="false">"App language"</string>
+    <string name="text_39a8d28c1c6b" formatted="false">"Cancel"</string>
+    <string name="text_d3f2efa1a2cb" formatted="false">"The Whisper model could not be opened."</string>
+    <string name="text_73327a1c6193" formatted="false">"The Whisper model was not found."</string>
+    <string name="text_99cc131c1b0b" formatted="false">"Touched part only"</string>
+    <string name="text_9307f6bd1915" formatted="false">"Highlighter only"</string>
+    <string name="text_d40b8a9bfbd4" formatted="false">"Pen only"</string>
+    <string name="text_a47b45e2aa6d" formatted="false">"Shapes only"</string>
+    <string name="text_40d4b6c06a38" formatted="false">"Only notebooks in the trash can be permanently deleted. Refresh the list."</string>
+    <string name="text_cf1f73306fad" formatted="false">"Only recordings in the trash can be permanently deleted. Refresh the list."</string>
+    <string name="text_0f25142f7fb4" formatted="false">"Side button · Eraser"</string>
+    <string name="text_cad8b48c3e5f" formatted="false">"Open side by side"</string>
+    <string name="text_172b43747c76" formatted="false">"Paste"</string>
+    <string name="text_91de72ebf2d1" formatted="false">"Text size · %1$s"</string>
+    <string name="text_bdb3bcbb1cf0" formatted="false">"Handwriting could not be recognized. Try selecting a smaller area."</string>
+    <string name="text_741c7b620444" formatted="false">"Back up"</string>
+    <string name="text_6406deda4ab9" formatted="false">"Stop recording and wait for it to be saved before creating a backup."</string>
+    <string name="text_c4d05a350dc5" formatted="false">"The backup manifest is missing."</string>
+    <string name="text_a894ec9fcd70" formatted="false">"The backup file could not be opened."</string>
+    <string name="text_0f98d657ced3" formatted="false">"The backup file is damaged: %1$s"</string>
+    <string name="text_86117a817abe" formatted="false">"The backup could not be imported. Your existing notebooks are preserved."</string>
+    <string name="text_33b39ece2e11" formatted="false">"Backup imported. Your existing notebooks were preserved."</string>
+    <string name="text_e4ea148fc06c" formatted="false">"A file is too large for the backup."</string>
+    <string name="text_bce0deba08b1" formatted="false">"The backup path was not found."</string>
+    <string name="text_e0a2a3f3f0ba" formatted="false">"Stop recording before restoring a backup."</string>
+    <string name="text_e27541f14a8d" formatted="false">"A PDF is missing from the backup."</string>
+    <string name="text_31cb5fa81461" formatted="false">"An image is missing from the backup."</string>
+    <string name="text_a91f13aeae6e" formatted="false">"The backup contains unrelated files."</string>
+    <string name="text_d95b6a982ac3" formatted="false">"A page is missing from the backup."</string>
+    <string name="text_4c1fed90b39c" formatted="false">"An audio document is missing from the backup."</string>
+    <string name="text_fe87bed5eb71" formatted="false">"The audio index in the backup does not match."</string>
+    <string name="text_e2ff9cc59b2d" formatted="false">"An audio segment size in the backup does not match."</string>
+    <string name="text_cd56dd9bff2d" formatted="false">"An audio segment is missing from the backup."</string>
+    <string name="text_b5fb8a95508a" formatted="false">"The backup contains too many files."</string>
+    <string name="text_4c2ce6705bb3" formatted="false">"The backup file list does not match."</string>
+    <string name="text_4a63652c2242" formatted="false">"An image in the backup could not be decoded."</string>
+    <string name="text_09b400dc31cd" formatted="false">"Restore backup"</string>
+    <string name="text_a984408141aa" formatted="false">"Turn a new page."</string>
+    <string name="text_0566f7c42267" formatted="false">"New notebook"</string>
+    <string name="text_8d62dd79b534" formatted="false">"New folder"</string>
+    <string name="text_28042b224c01" formatted="false">"New page"</string>
+    <string name="text_e2e00d346a1c" formatted="false">"Release to add a new page"</string>
+    <string name="text_e8e9c9de6ab9" formatted="false">"Swipe a little further to add a new page"</string>
+    <string name="text_5799341342e5" formatted="false">"New recording"</string>
+    <string name="text_2087da620c0f" formatted="false">"Update the index again after adding handwriting. To convert it, use Convert handwriting to text in the editor menu."</string>
+    <string name="text_2de7525d280c" formatted="false">"Rename"</string>
+    <string name="text_1f30ff52f9d5" formatted="false">"Retry"</string>
+    <string name="text_92cd7ed75753" formatted="false">"Transcribe again"</string>
+    <string name="text_a80e947bda14" formatted="false">"Recreate"</string>
+    <string name="text_0ec69b318fc3" formatted="false">"On-device speech model"</string>
+    <string name="text_7c0bc10dd2e7" formatted="false">"Green"</string>
+    <string name="text_7b3b9d65c024" formatted="false">"Redo"</string>
+    <string name="text_c754452f77e1" formatted="false">"Bookmarks"</string>
+    <string name="text_55a5dc0bd5b2" formatted="false">"YOUR WORKSPACE"</string>
+    <string name="text_d6130d3f0ea7" formatted="false">"Resume transcription"</string>
+    <string name="text_409a84ec9d79" formatted="false">"No recording was found to transcribe."</string>
+    <string name="text_759aab337542" formatted="false">"Line"</string>
+    <string name="text_6780b255dc39" formatted="false">"Stroke eraser"</string>
+    <string name="text_4080890dc3e2" formatted="false">"The stroke is too large."</string>
+    <string name="text_e29b5cec2697" formatted="false">"Lined"</string>
+    <string name="text_6989221ef94c" formatted="false">"Entire stroke"</string>
+    <string name="text_628af20b485a" formatted="false">"The drawing operation could not be completed."</string>
+    <string name="text_d00225b3aa1a" formatted="false">"Trash"</string>
+    <string name="text_49001f91c775" formatted="false">"Trash is empty"</string>
+    <string name="text_c4055d494a9f" formatted="false">"Move to trash"</string>
+    <string name="text_258b410c8931" formatted="false">"Move to trash?"</string>
+    <string name="text_47a077377fca" formatted="false">"The output file could not be opened."</string>
+    <string name="text_4dc4c654bbed" formatted="false">"SUMMARY"</string>
+    <string name="text_75b0690622cc" formatted="false">"Download and verify the Whisper language model first."</string>
+    <string name="text_30bde66616ca" formatted="false">"Stop the active recording first."</string>
+    <string name="text_c5fec5bdf9ef" formatted="false">"Create another notebook first."</string>
+    <string name="text_b9a0b7080a50" formatted="false">"Open a notebook first."</string>
+    <string name="text_52f23fe33a01" formatted="false">"Open a recording first."</string>
+    <string name="text_78ede1028688" formatted="false">"Download the handwriting language model first."</string>
+    <string name="text_85bc769ffa15" formatted="false">"Download the speech model first."</string>
+    <string name="text_b8db1b6328e1" formatted="false">"Pause transcription first."</string>
+    <string name="text_1485aeb12f8a" formatted="false">"Stop recording first."</string>
+    <string name="text_f16d1b4ef69b" formatted="false">"Stop recording first."</string>
+    <string name="text_f70c5ddde663" formatted="false">"Stop recording and transcription first."</string>
+    <string name="text_6a89ec3b7e3c" formatted="false">"Download the handwriting model for the selected language first."</string>
+    <string name="text_297eee23f531" formatted="false">"Download the on-device speech model first."</string>
+    <string name="text_b74566b03eea" formatted="false">"Previous page"</string>
+    <string name="text_16ad5962d77b" formatted="false">"Swipe a little further for the previous page"</string>
+    <string name="text_760beff57030" formatted="false">"Release for the previous page"</string>
+    <string name="text_411216556168" formatted="false">"Suggestion %1$s"</string>
+    <string name="text_897455a18823" formatted="false">"Preview unavailable"</string>
+    <string name="text_d6e93c4a0a1e" formatted="false">"For example 356859 · 6 characters"</string>
+    <string name="text_ea73fb08aa76" formatted="false">"For example, Mathematics"</string>
+    <string name="text_bfaca8828655" formatted="false">"Custom color"</string>
+    <string name="text_16781ad96dcf" formatted="false">"The original handwriting is preserved and text is added separately."</string>
+    <string name="text_6304e1af7664" formatted="false">"Select the part of the original image to keep. Cropping is reversible and the original image is preserved."</string>
+    <string name="text_3e5948ae79f7" formatted="false">"The original ink is removed. You can reverse this with Undo."</string>
+    <string name="text_9d0ccf19ae87" formatted="false">"Top"</string>
+    <string name="text_f6f3ed550d20" formatted="false">"Parent folder"</string>
+    <string name="text_9e6597d0a6cc" formatted="false">"Parent folder not found."</string>
+    <string name="text_d1f16e64f2dd" formatted="false">"The parent folder is missing."</string>
+    <string name="text_d3c09f865c75" formatted="false">"Create your first notebook"</string>
+    <string name="text_f713d7b770ee" formatted="false">"First page template"</string>
+    <string name="text_89749d7b82bc" formatted="false">"Downloading · %1$s / %2$s MB"</string>
+    <string name="text_dead9f31f24f" formatted="false">"Download paused. Start it again to resume."</string>
+    <string name="text_8eb627b2c5ce" formatted="false">"Download was interrupted. Start it again to resume."</string>
+    <string name="text_a5ed911611d2" formatted="false">"Cancel download"</string>
+    <string name="text_861dd128f74f" formatted="false">"English"</string>
+    <string name="text_72278748133a" formatted="false">"Cancel"</string>
+    <string name="text_2b6c4c4227f4" formatted="false">"Imported audio"</string>
+    <string name="text_9359a4f1606b" formatted="false">"Bookmark"</string>
+    <string name="text_5e45b34845c3" formatted="false">"Add bookmark"</string>
+    <string name="text_c3e13b03dc99" formatted="false">"Operation could not be completed"</string>
+    <string name="text_d89d434aafa3" formatted="false">"The operation could not be completed. Please try again."</string>
+    <string name="text_51eff8265248" formatted="false">"Shape snapping"</string>
+    <string name="text_9dee3f205dbb" formatted="false">"Snap shapes"</string>
+    <string name="text_e000f7a00edb" formatted="false">"You can restore the notebook “%1$s” later."</string>
+</resources>

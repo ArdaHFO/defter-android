@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +37,7 @@ data class WhisperModelState(
 
 internal data class WhisperModelSpec(val url: String, val bytes: Long, val sha256: String) {
     init {
-        require(URL(url).protocol == "https") { "Model adresi HTTPS olmalı." }
+        require(URL(url).protocol == "https") { tr("Model adresi HTTPS olmalı.") }
         require(bytes > 0 && sha256.matches(Regex("[a-f0-9]{64}")))
     }
     companion object {
@@ -63,7 +65,7 @@ internal class HttpsWhisperDownloadTransport : WhisperDownloadTransport {
     override fun open(url: String, offset: Long): WhisperDownloadResponse {
         var location = URL(url)
         repeat(6) {
-            require(location.protocol == "https") { "Güvensiz model yönlendirmesi reddedildi." }
+            require(location.protocol == "https") { tr("Güvensiz model yönlendirmesi reddedildi.") }
             val connection = location.openConnection() as HttpURLConnection
             connection.connectTimeout = 15_000
             connection.readTimeout = 20_000
@@ -74,7 +76,7 @@ internal class HttpsWhisperDownloadTransport : WhisperDownloadTransport {
                 val code = connection.responseCode
                 if (code in listOf(301, 302, 303, 307, 308)) {
                     val target = connection.getHeaderField("Location")
-                        ?: throw IOException("Model yönlendirme adresi eksik.")
+                        ?: throw IOException(tr("Model yönlendirme adresi eksik."))
                     location = URL(location, target)
                     connection.disconnect()
                 } else {
@@ -91,7 +93,7 @@ internal class HttpsWhisperDownloadTransport : WhisperDownloadTransport {
                 throw error
             }
         }
-        throw IOException("Model için çok fazla yönlendirme alındı.")
+        throw IOException(tr("Model için çok fazla yönlendirme alındı."))
     }
 }
 
@@ -133,7 +135,7 @@ class WhisperModelManager internal constructor(
     }
 
     fun cancelDownload() {
-        activeDownload?.cancel(CancellationException("Model indirmesi duraklatıldı."))
+        activeDownload?.cancel(CancellationException(tr("Model indirmesi duraklatıldı.")))
         activeResponse?.close()
     }
 
@@ -141,7 +143,7 @@ class WhisperModelManager internal constructor(
         mutex.withLock {
             activeDownload = currentCoroutineContext()[Job]
             try {
-                check(directory.isDirectory || directory.mkdirs()) { "Model klasörü oluşturulamadı." }
+                check(directory.isDirectory || directory.mkdirs()) { tr("Model klasörü oluşturulamadı.") }
                 if (verified(model)) {
                     mutableState.value = state(WhisperModelStatus.READY)
                     return@withLock
@@ -155,9 +157,9 @@ class WhisperModelManager internal constructor(
                         currentCoroutineContext().ensureActive()
                         if (response.status == 200) offset = 0 // Server may ignore Range. Never append full content.
                         else if (response.status == 206) validateRange(response.contentRange, offset, specification.bytes)
-                        else throw IOException("Model indirilemedi (HTTP ${response.status}).")
+                        else throw IOException(tr("Model indirilemedi (HTTP %1\$s).", response.status))
                         val remaining = specification.bytes - offset
-                        if (response.length > remaining) throw IOException("Model dosyası beklenen boyutu aşıyor.")
+                        if (response.length > remaining) throw IOException(tr("Model dosyası beklenen boyutu aşıyor."))
                         FileOutputStream(partial, offset > 0).use { output ->
                             response.stream.use { input ->
                                 val buffer = ByteArray(64 * 1024)
@@ -167,7 +169,7 @@ class WhisperModelManager internal constructor(
                                     val count = input.read(buffer)
                                     if (count < 0) break
                                     if (count == 0) continue
-                                    if (offset + count > specification.bytes) throw IOException("Model boyutu doğrulanamadı.")
+                                    if (offset + count > specification.bytes) throw IOException(tr("Model boyutu doğrulanamadı."))
                                     output.write(buffer, 0, count)
                                     offset += count
                                     if (offset - lastPublished >= 256 * 1024 || offset == specification.bytes) {
@@ -181,21 +183,21 @@ class WhisperModelManager internal constructor(
                     }
                 }
                 currentCoroutineContext().ensureActive()
-                if (partial.length() != specification.bytes) throw IOException("İndirme yarım kaldı. Yeniden başlatarak sürdürebilirsin.")
+                if (partial.length() != specification.bytes) throw IOException(tr("İndirme yarım kaldı. Yeniden başlatarak sürdürebilirsin."))
                 mutableState.value = state(WhisperModelStatus.CHECKING, specification.bytes)
                 if (!verified(partial)) {
                     Files.deleteIfExists(partial.toPath())
-                    throw IOException("Model SHA-256 doğrulaması başarısız. Dosya kullanılmadı.")
+                    throw IOException(tr("Model SHA-256 doğrulaması başarısız. Dosya kullanılmadı."))
                 }
                 currentCoroutineContext().ensureActive()
                 Files.move(partial.toPath(), model.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
                 mutableState.value = state(WhisperModelStatus.READY)
             } catch (error: Exception) {
                 if (error is CancellationException || !currentCoroutineContext().isActive) {
-                    mutableState.value = state(WhisperModelStatus.MISSING, message = "İndirme duraklatıldı. Yeniden başlatarak sürdürebilirsin.")
-                    throw CancellationException("Model indirmesi duraklatıldı.", error)
+                    mutableState.value = state(WhisperModelStatus.MISSING, message = tr("İndirme duraklatıldı. Yeniden başlatarak sürdürebilirsin."))
+                    throw CancellationException(tr("Model indirmesi duraklatıldı."), error)
                 }
-                mutableState.value = state(WhisperModelStatus.ERROR, message = error.message ?: "Model indirilemedi.")
+                mutableState.value = state(WhisperModelStatus.ERROR, message = error.message ?: tr("Model indirilemedi."))
                 throw error
             } finally {
                 activeResponse = null
@@ -227,12 +229,12 @@ class WhisperModelManager internal constructor(
     internal companion object {
         fun validateRange(header: String?, offset: Long, total: Long) {
             val values = Regex("bytes (\\d+)-(\\d+)/(\\d+)").matchEntire(header.orEmpty())?.groupValues
-                ?: throw IOException("Model devam indirmesi doğrulanamadı.")
+                ?: throw IOException(tr("Model devam indirmesi doğrulanamadı."))
             val start = values[1].toLongOrNull()
             val end = values[2].toLongOrNull()
             val length = values[3].toLongOrNull()
             if (start != offset || end == null || end < offset || end >= total || length != total) {
-                throw IOException("Model devam indirmesinin aralığı geçersiz.")
+                throw IOException(tr("Model devam indirmesinin aralığı geçersiz."))
             }
         }
     }

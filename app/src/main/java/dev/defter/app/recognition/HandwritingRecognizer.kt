@@ -1,5 +1,7 @@
 package dev.defter.app.recognition
 
+import dev.defter.app.localization.tr
+
 import android.content.Context
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.common.MlKit
@@ -30,7 +32,7 @@ class MlKitHandwritingRecognizer(context: Context) : HandwritingRecognizer {
     private val appContext = context.applicationContext
     private var closed = false
     private fun manager(): RemoteModelManager {
-        check(!closed) { "El yazısı tanıyıcı kapatıldı." }
+        check(!closed) { tr("El yazısı tanıyıcı kapatıldı.") }
         MlKit.initialize(appContext)
         return RemoteModelManager.getInstance()
     }
@@ -44,8 +46,8 @@ class MlKitHandwritingRecognizer(context: Context) : HandwritingRecognizer {
     override suspend fun recognize(strokes: List<StrokeElement>, languageTag: String, preContext: String): List<String> {
         val ink = buildInk(strokes)
         val model = model(languageTag)
-        check(manager().isModelDownloaded(model).awaitResult()) { "Önce seçili dilin el yazısı modelini indir." }
-        check(!closed) { "El yazısı tanıyıcı kapatıldı." }
+        check(manager().isModelDownloaded(model).awaitResult()) { tr("Önce seçili dilin el yazısı modelini indir.") }
+        check(!closed) { tr("El yazısı tanıyıcı kapatıldı.") }
         val recognizer = DigitalInkRecognition.getClient(DigitalInkRecognizerOptions.builder(model).build())
         return try {
             val context = RecognitionContext.builder().setPreContext(preContext.takeLast(20)).build()
@@ -56,24 +58,25 @@ class MlKitHandwritingRecognizer(context: Context) : HandwritingRecognizer {
     override fun close() { closed = true }
 
     companion object {
-        val supportedLanguages = linkedMapOf("tr-TR" to "Türkçe", "en-US" to "English")
+        val supportedLanguages: Map<String, String>
+            get() = linkedMapOf("tr-TR" to tr("Türkçe"), "en-US" to tr("İngilizce"))
 
         private fun model(languageTag: String): DigitalInkRecognitionModel {
-            require(languageTag in supportedLanguages) { "Desteklenmeyen el yazısı dili." }
+            require(languageTag in supportedLanguages) { tr("Desteklenmeyen el yazısı dili.") }
             val id = DigitalInkRecognitionModelIdentifier.fromLanguageTag(languageTag)
-                ?: error("Bu dil için el yazısı modeli bulunamadı.")
+                ?: error(tr("Bu dil için el yazısı modeli bulunamadı."))
             return DigitalInkRecognitionModel.builder(id).build()
         }
 
         internal fun buildInk(strokes: List<StrokeElement>): Ink {
             val pens = strokes.filter { it.kind == InkKind.PEN && !it.isShapeFragment && it.points.isNotEmpty() }
-            require(pens.isNotEmpty()) { "Tanımak için kalemle yazılmış bir alan seç veya sayfaya yaz." }
-            require(pens.sumOf { it.points.size.toLong() } <= 200_000L) { "Tek seferde daha küçük bir yazı alanı seç." }
+            require(pens.isNotEmpty()) { tr("Tanımak için kalemle yazılmış bir alan seç veya sayfaya yaz.") }
+            require(pens.sumOf { it.points.size.toLong() } <= 200_000L) { tr("Tek seferde daha küçük bir yazı alanı seç.") }
             val builder = Ink.builder()
             pens.forEach { stroke ->
                 val inkStroke = Ink.Stroke.builder()
                 stroke.points.forEach { point ->
-                    require(point.x.isFinite() && point.y.isFinite()) { "El yazısı koordinatları geçersiz." }
+                    require(point.x.isFinite() && point.y.isFinite()) { tr("El yazısı koordinatları geçersiz.") }
                     // Existing notes have no timestamps. ML Kit explicitly supports untimed points.
                     inkStroke.addPoint(Ink.Point.create(point.x, point.y))
                 }
@@ -88,7 +91,7 @@ private suspend fun <T> Task<T>.awaitResult(): T = suspendCancellableCoroutine {
     addOnCompleteListener(Executor { it.run() }) { task ->
         if (continuation.isActive) {
             if (task.isSuccessful) continuation.resume(task.result)
-            else continuation.resumeWithException(task.exception ?: IllegalStateException("El yazısı işlemi iptal edildi."))
+            else continuation.resumeWithException(task.exception ?: IllegalStateException(tr("El yazısı işlemi iptal edildi.")))
         }
     }
 }

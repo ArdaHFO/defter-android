@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.media.AudioFormat
 import android.media.MediaCodec
 import android.media.MediaExtractor
@@ -33,7 +35,7 @@ class AudioDecoder {
         startMs: Long = 0,
         onChunk: suspend (DecodedAudioChunk) -> Unit,
     ): Unit = withContext(Dispatchers.IO) {
-        require(startMs >= 0) { "Başlangıç zamanı geçersiz." }
+        require(startMs >= 0) { tr("Başlangıç zamanı geçersiz.") }
         val extractor = open(file)
         var codec: MediaCodec? = null
         var started = false
@@ -43,7 +45,7 @@ class AudioDecoder {
             if (startMs >= duration) return@withContext
             extractor.selectTrack(track)
             if (startMs > 0) extractor.seekTo(startMs * 1_000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC)
-            val mime = inputFormat.getString(MediaFormat.KEY_MIME) ?: throw IOException("Ses biçimi eksik.")
+            val mime = inputFormat.getString(MediaFormat.KEY_MIME) ?: throw IOException(tr("Ses biçimi eksik."))
             val decoder = MediaCodec.createDecoderByType(mime)
             codec = decoder
             decoder.configure(inputFormat, null, null, 0)
@@ -88,7 +90,7 @@ class AudioDecoder {
                 if (!inputEnded) {
                     val index = decoder.dequeueInputBuffer(10_000)
                     if (index >= 0) {
-                        val buffer = decoder.getInputBuffer(index) ?: throw IOException("Ses giriş tamponu alınamadı.")
+                        val buffer = decoder.getInputBuffer(index) ?: throw IOException(tr("Ses giriş tamponu alınamadı."))
                         buffer.clear()
                         val size = extractor.readSampleData(buffer, 0)
                         if (size < 0) {
@@ -110,7 +112,7 @@ class AudioDecoder {
                         else AudioFormat.ENCODING_PCM_16BIT
                         validatePcmFormat(newRate, newChannels, newEncoding)
                         if (resampler != null && (newRate != rate || newChannels != channels)) {
-                            throw IOException("Kayıt içinde değişen ses örnekleme biçimi desteklenmiyor.")
+                            throw IOException(tr("Kayıt içinde değişen ses örnekleme biçimi desteklenmiyor."))
                         }
                         rate = newRate
                         channels = newChannels
@@ -118,16 +120,16 @@ class AudioDecoder {
                         lastProgress = SystemClock.elapsedRealtime()
                     }
                     MediaCodec.INFO_TRY_AGAIN_LATER -> {
-                        if (SystemClock.elapsedRealtime() - lastProgress > 30_000) throw IOException("Ses çözümleyici yanıt vermiyor.")
+                        if (SystemClock.elapsedRealtime() - lastProgress > 30_000) throw IOException(tr("Ses çözümleyici yanıt vermiyor."))
                     }
                     else -> if (index >= 0) {
                         val pcm: FloatArray
                         val presentationUs = info.presentationTimeUs
                         try {
                             pcm = if (info.size > 0 && info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG == 0) {
-                                val buffer = decoder.getOutputBuffer(index) ?: throw IOException("Ses çıkış tamponu alınamadı.")
+                                val buffer = decoder.getOutputBuffer(index) ?: throw IOException(tr("Ses çıkış tamponu alınamadı."))
                                 if (info.size > MAX_CODEC_BUFFER_BYTES || info.offset < 0 || info.offset.toLong() + info.size > buffer.capacity()) {
-                                    throw IOException("Geçersiz veya aşırı büyük ses tamponu.")
+                                    throw IOException(tr("Geçersiz veya aşırı büyük ses tamponu."))
                                 }
                                 buffer.position(info.offset)
                                 buffer.limit(info.offset + info.size)
@@ -151,7 +153,7 @@ class AudioDecoder {
                     }
                 }
             }
-            val converter = resampler ?: throw IOException("Kayıtta çözümlenebilir ses bulunamadı.")
+            val converter = resampler ?: throw IOException(tr("Kayıtta çözümlenebilir ses bulunamadı."))
             append(converter.finish())
             if (filled > 0) {
                 val origin = checkNotNull(originUs)
@@ -167,7 +169,7 @@ class AudioDecoder {
     }
 
     private fun open(file: File): MediaExtractor {
-        require(file.isFile && file.length() > 0) { "Ses dosyası bulunamadı veya boş." }
+        require(file.isFile && file.length() > 0) { tr("Ses dosyası bulunamadı veya boş.") }
         val extractor = MediaExtractor()
         try { extractor.setDataSource(file.absolutePath) } catch (error: Exception) { extractor.release(); throw error }
         return extractor
@@ -178,13 +180,13 @@ class AudioDecoder {
             val format = extractor.getTrackFormat(index)
             if (format.getString(MediaFormat.KEY_MIME)?.startsWith("audio/") == true) return index to format
         }
-        throw IOException("Dosyada desteklenen bir ses izi bulunamadı.")
+        throw IOException(tr("Dosyada desteklenen bir ses izi bulunamadı."))
     }
 
     private fun MediaFormat.durationMs(): Long {
-        if (!containsKey(MediaFormat.KEY_DURATION)) throw IOException("Kayıt süresi okunamadı.")
+        if (!containsKey(MediaFormat.KEY_DURATION)) throw IOException(tr("Kayıt süresi okunamadı."))
         val durationUs = getLong(MediaFormat.KEY_DURATION)
-        if (durationUs <= 0 || durationUs > 24L * 60 * 60 * 1_000_000) throw IOException("Kayıt süresi geçersiz veya 24 saatten uzun.")
+        if (durationUs <= 0 || durationUs > 24L * 60 * 60 * 1_000_000) throw IOException(tr("Kayıt süresi geçersiz veya 24 saatten uzun."))
         return (durationUs + 999) / 1_000
     }
 
@@ -195,14 +197,14 @@ class AudioDecoder {
 
         internal fun validatePcmFormat(rate: Int, channels: Int, encoding: Int) {
             if (rate !in 8_000..192_000 || channels !in 1..8 || encoding !in listOf(AudioFormat.ENCODING_PCM_16BIT, AudioFormat.ENCODING_PCM_FLOAT)) {
-                throw IOException("Ses örnekleme biçimi desteklenmiyor.")
+                throw IOException(tr("Ses örnekleme biçimi desteklenmiyor."))
             }
         }
 
         internal fun decodePcm(buffer: ByteBuffer, channels: Int, encoding: Int): FloatArray {
             require(channels in 1..8)
-            val bytes = when (encoding) { AudioFormat.ENCODING_PCM_16BIT -> 2; AudioFormat.ENCODING_PCM_FLOAT -> 4; else -> throw IOException("PCM biçimi desteklenmiyor.") }
-            if (buffer.remaining() % (channels * bytes) != 0) throw IOException("Kesilmiş PCM ses çerçevesi.")
+            val bytes = when (encoding) { AudioFormat.ENCODING_PCM_16BIT -> 2; AudioFormat.ENCODING_PCM_FLOAT -> 4; else -> throw IOException(tr("PCM biçimi desteklenmiyor.")) }
+            if (buffer.remaining() % (channels * bytes) != 0) throw IOException(tr("Kesilmiş PCM ses çerçevesi."))
             return FloatArray(buffer.remaining() / (channels * bytes)) {
                 var value = 0f
                 repeat(channels) {

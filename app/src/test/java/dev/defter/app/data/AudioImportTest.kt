@@ -22,7 +22,7 @@ import java.nio.ByteOrder
 
 /** Platform-contract regression. Real WAV decoding is separately checked on Android. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE, shadows = [AudioImportTest.TrackExtractor::class])
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE, shadows = [AudioImportTest.TrackExtractor::class])
 class AudioImportTest {
     private lateinit var repository: DocumentRepository
     @Before fun setup() {

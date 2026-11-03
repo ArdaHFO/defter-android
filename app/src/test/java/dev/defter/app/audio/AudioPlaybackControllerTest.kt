@@ -24,7 +24,7 @@ import java.util.UUID
 
 /** Real controller and Android callbacks. Codec decoding is the test framework boundary. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE, shadows = [AudioPlaybackControllerTest.PlaybackParamsShadow::class])
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE, shadows = [AudioPlaybackControllerTest.PlaybackParamsShadow::class])
 class AudioPlaybackControllerTest {
     @Implements(MediaPlayer::class)
     class PlaybackParamsShadow : ShadowMediaPlayer() {

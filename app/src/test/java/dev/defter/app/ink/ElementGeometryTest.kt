@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class ElementGeometryTest {
     @Test fun hitsMiddleOfSparseStrokeButNotDistantPoint() {
         val stroke = StrokeElement(points = listOf(InkPoint(0f, 0f), InkPoint(100f, 0f)), width = 4f)

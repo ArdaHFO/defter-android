@@ -1,0 +1,37 @@
+{
+  "version": "0.5.0-alpha",
+  "generated_utc": "2026-11-03T09:56:37.443981+00:00",
+  "junit_suites": 50,
+  "junit": {
+    "tests": 309,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Fatal": 0,
+    "Error": 0,
+    "Warning": 27,
+    "Information": 0
+  },
+  "matching_source_files": 1580,
+  "screenshots": [
+    "english-library.png",
+    "english-editor.png",
+    "input-context-phone.png",
+    "input-add-page-phone.png",
+    "bulk-trash-tablet.png",
+    "bulk-trash-phone.png",
+    "history-large-text-phone.png",
+    "modern-library-tablet.png",
+    "modern-library-phone.png",
+    "modern-editor-tablet.png",
+    "modern-editor-phone.png",
+    "audio-phone-library.png",
+    "audio-phone-transcript.png",
+    "audio-tablet-transcript.png",
+    "pro-editor-split.png",
+    "pro-editor-phone.png"
+  ],
+  "screenshot_kind": "Robolectric native Compose renders, synthetic data; not physical device screenshots"
+}

@@ -1,5 +1,8 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+import dev.defter.app.localization.quantity
+
 import android.app.Application
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -12,7 +15,6 @@ import dev.defter.app.model.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import java.util.Locale
 
 class AudioViewModel @JvmOverloads constructor(application: Application, private val saved: SavedStateHandle = SavedStateHandle()) : AndroidViewModel(application) {
     private val repository = DocumentRepository(application)
@@ -76,7 +78,7 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
         viewModelScope.launch {
             try { block() }
             catch (cancelled: CancellationException) { throw cancelled }
-            catch (failure: Exception) { error = failure.message?.take(350) ?: "Ses işlemi tamamlanamadı." }
+            catch (failure: Exception) { error = failure.message?.take(350) ?: tr("Ses işlemi tamamlanamadı.") }
             finally { busy = false }
         }
     }
@@ -89,7 +91,7 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
             val generation = selectionGeneration
             val document = repository.loadAudioRecording(id)
             if (generation == selectionGeneration) selected = document
-        }
+        } else if (id != null) clearSelection()
         if (query.isNotBlank()) search(query)
     }
 
@@ -127,10 +129,10 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
 
     /** UI requests microphone permission before calling this visible-user action. */
     fun startRecording(title: String) = action {
-        check(!recorder.state.value.isBusy) { "Önce açık kaydı durdur." }
+        check(!recorder.state.value.isBusy) { tr("Önce açık kaydı durdur.") }
         player.pause()
         transcription.pause()
-        val document = repository.createAudioRecording(title.trim().ifBlank { "Yeni ses kaydı" }, scopeFolderId, scopeNotebookId)
+        val document = repository.createAudioRecording(title.trim().ifBlank { tr("Yeni ses kaydı") }, scopeFolderId, scopeNotebookId)
         selected = document; saved["audioSelected"] = document.id
         if (!recorder.start(document.id)) repository.setAudioState(document.id, AudioRecordingState.INTERRUPTED)
         refreshData()
@@ -141,7 +143,7 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
         val title = withContext(Dispatchers.IO) {
             runCatching { getApplication<Application>().contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
                 if (it.moveToFirst()) it.getString(0)?.substringBeforeLast('.') else null
-            } }.getOrNull()?.take(180)?.ifBlank { null } ?: "İçe aktarılan ses"
+            } }.getOrNull()?.take(180)?.ifBlank { null } ?: tr("İçe aktarılan ses")
         }
         val document = repository.importAudio(uri, title, saved["audioImportFolder"], saved["audioImportBook"])
         selected = document; saved["audioSelected"] = document.id
@@ -155,41 +157,53 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
         requireIdle(id)
         player.pause(); repository.setAudioDeleted(id, deleted); clearSelection(); refreshData()
     }
-    private fun requireIdle(id: String) {
-        check(!(recorder.state.value.recordingId == id && recorder.state.value.isBusy)) { "Önce ses kaydını durdur." }
-        check(!(transcription.state.value.recordingId == id && transcription.state.value.running)) { "Önce metne çevirmeyi duraklat." }
+    fun permanentlyDelete(ids: Set<String>) {
+        val deleting = ids.toSet()
+        if (deleting.isEmpty()) return
+        action {
+            deleting.forEach(::requireIdle)
+            library = repository.permanentlyDeleteAudio(deleting)
+            if (selected?.id in deleting) clearSelection()
+            if (player.state.value.recordingId in deleting) player.pause()
+            refreshData()
+            notice = quantity("%1\$d ses kaydı kalıcı olarak silindi.", deleting.size)
+        }
     }
-    fun addBookmark(pageId: String? = null, label: String = "İşaret") = action {
+    private fun requireIdle(id: String) {
+        check(!(recorder.state.value.recordingId == id && recorder.state.value.isBusy)) { tr("Önce ses kaydını durdur.") }
+        check(!(transcription.state.value.recordingId == id && transcription.state.value.running)) { tr("Önce metne çevirmeyi duraklat.") }
+    }
+    fun addBookmark(pageId: String? = null, label: String = tr("İşaret")) = action {
         val capture = recorder.state.value
         val id = if (capture.isBusy) capture.recordingId else selected?.id
-        check(id != null) { "Önce bir ses kaydı aç." }
+        check(id != null) { tr("Önce bir ses kaydı aç.") }
         val position = if (capture.isBusy) capture.elapsedMs else player.state.value.positionMs
         repository.addAudioBookmark(id, position, label, pageId)
-        refreshData(); notice = "${TranscriptTools.clock(position)} konumuna işaret eklendi."
+        refreshData(); notice = tr("%1\$s konumuna işaret eklendi.", TranscriptTools.clock(position))
     }
     fun playAt(position: Long) {
         val document = selected ?: return
-        if (recorder.state.value.isBusy) { error = "Dinlemek için önce açık kaydı durdur."; return }
+        if (recorder.state.value.isBusy) { error = tr("Dinlemek için önce açık kaydı durdur."); return }
         if (player.state.value.recordingId != document.id) player.load(document, document.parts.map(repository::audioPartFile))
         player.seekTo(position); player.play()
     }
     fun togglePlayback() {
         val document = selected ?: return
-        if (recorder.state.value.isBusy) { error = "Dinlemek için önce açık kaydı durdur."; return }
+        if (recorder.state.value.isBusy) { error = tr("Dinlemek için önce açık kaydı durdur."); return }
         if (player.state.value.recordingId != document.id || player.state.value.durationMs != document.durationMs) player.load(document, document.parts.map(repository::audioPartFile))
         player.togglePlayback()
     }
     fun transcribe(language: String, restart: Boolean = false) {
         val document = selected ?: return
-        if (recorder.state.value.isBusy) { error = "Metne çevirmeden önce ses kaydını durdur."; return }
-        if (models.state.value.status != WhisperModelStatus.READY) { error = "Önce yerel konuşma modelini indir."; return }
+        if (recorder.state.value.isBusy) { error = tr("Metne çevirmeden önce ses kaydını durdur."); return }
+        if (models.state.value.status != WhisperModelStatus.READY) { error = tr("Önce yerel konuşma modelini indir."); return }
         player.pause()
-        if (!transcription.start(document.id, language, restart)) error = "Başka bir ses zaten işleniyor veya işlem başlatılamadı."
+        if (!transcription.start(document.id, language, restart)) error = tr("Başka bir ses zaten işleniyor veya işlem başlatılamadı.")
     }
     fun editSegment(segmentId: String, text: String) = action {
         val document = selected ?: return@action
         requireIdle(document.id)
-        require(text.isNotBlank()) { "Transkript metni boş olamaz." }
+        require(text.isNotBlank()) { tr("Transkript metni boş olamaz.") }
         selected = repository.updateTranscript(document.id, document.transcript.map {
             if (it.id == segmentId) it.copy(text = text.trim(), edited = true) else it
         }, document.revision)
@@ -204,12 +218,11 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
             searching = true
             try {
                 delay(220)
-                val needle = value.lowercase(Locale.forLanguageTag("tr"))
                 val results = mutableSetOf<String>()
                 for (item in library.audioItems) {
                     ensureActive()
-                    if (item.title.lowercase(Locale.forLanguageTag("tr")).contains(needle)) results += item.id
-                    else if (repository.loadAudioRecording(item.id).transcript.any { it.text.lowercase(Locale.forLanguageTag("tr")).contains(needle) }) results += item.id
+                    if (item.title.contains(value, ignoreCase = true)) results += item.id
+                    else if (repository.loadAudioRecording(item.id).transcript.any { it.text.contains(value, ignoreCase = true) }) results += item.id
                 }
                 if (generation == searchGeneration) matches = results
             } catch (cancelled: CancellationException) { throw cancelled }
@@ -222,21 +235,21 @@ class AudioViewModel @JvmOverloads constructor(application: Application, private
         modelJob = viewModelScope.launch {
             try { models.download() }
             catch (cancelled: CancellationException) { throw cancelled }
-            catch (failure: Exception) { error = failure.message ?: "Konuşma modeli indirilemedi." }
+            catch (failure: Exception) { error = failure.message ?: tr("Konuşma modeli indirilemedi.") }
         }
     }
     fun cancelDownload() { models.cancelDownload(); modelJob?.cancel() }
     fun prepareExport(format: String) { saved["audioExportId"] = selected?.id; saved["audioExportFormat"] = format }
     fun exportTranscript(uri: Uri) = action {
-        val id = saved.get<String>("audioExportId") ?: error("Ses kaydı seçilmedi.")
+        val id = saved.get<String>("audioExportId") ?: error(tr("Ses kaydı seçilmedi."))
         val format = saved.get<String>("audioExportFormat") ?: "txt"
         val document = repository.loadAudioRecording(id)
         val text = if (format == "srt") TranscriptTools.srt(document.transcript) else "${document.title}\n\n${TranscriptTools.plain(document.transcript)}"
         withContext(Dispatchers.IO) {
             getApplication<Application>().contentResolver.openOutputStream(uri, "wt")?.bufferedWriter(Charsets.UTF_8)?.use { it.write(text) }
-                ?: throw IllegalStateException("Çıktı dosyası açılamadı.")
+                ?: throw IllegalStateException(tr("Çıktı dosyası açılamadı."))
         }
-        notice = "Transkript kaydedildi."
+        notice = tr("Transkript kaydedildi.")
         saved.remove<String>("audioExportId"); saved.remove<String>("audioExportFormat")
     }
 

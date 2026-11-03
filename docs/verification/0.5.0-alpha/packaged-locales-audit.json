@@ -1,0 +1,19 @@
+{
+  "recordedUtc": "2026-11-03T10:01:37.197423+00:00",
+  "source": "Actual final APK resource table",
+  "apk": "Defter-0.5.0-alpha.apk",
+  "apkSha256": "c01b69aea3eccf9afc4c445191cd1f9ede766a71fedde19e5c04e05461a9f570",
+  "catalogCounts": {
+    "string": 638,
+    "plurals": 10
+  },
+  "requiredConfigurations": [
+    "default",
+    "en",
+    "tr"
+  ],
+  "missing": [],
+  "allCatalogResourcesIncludeRequiredConfigurations": true,
+  "defaultAndEnglishPayloadDifferences": [],
+  "defaultPayloadMatchesExplicitEnglishForEveryCatalogResource": true
+}

@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -83,8 +85,8 @@ class AudioRecorderService : Service() {
         workerHandler = Handler(thread.looper)
         worker = CoroutineScope(SupervisorJob() + workerHandler.asCoroutineDispatcher("DefterAudioRecorder"))
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Ses kaydı", NotificationManager.IMPORTANCE_LOW)
-                .also { it.description = "Devam eden ders kaydı ve kayıt kontrolleri" })
+            NotificationChannel(CHANNEL_ID, tr("Ses kaydı"), NotificationManager.IMPORTANCE_LOW)
+                .also { it.description = tr("Devam eden ders kaydı ve kayıt kontrolleri") })
         worker.launch {
             for (command in commands) {
                 if (destroyed && command.action != "destroy") continue
@@ -98,7 +100,7 @@ class AudioRecorderService : Service() {
                         "prepareNext" -> prepareNextPart()
                         "rotated" -> completeRollover()
                         "tick" -> tick()
-                        "interruption" -> pauseRecording(command.error ?: "Mikrofon kaydı kesildi.")
+                        "interruption" -> pauseRecording(command.error ?: tr("Mikrofon kaydı kesildi."))
                         "destroy" -> { preserveOnDestroy(); break }
                     }
                 } catch (error: Exception) {
@@ -123,7 +125,7 @@ class AudioRecorderService : Service() {
             AudioRecorderSession.serviceOwner = this
             try {
                 check(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-                    "Mikrofon izni verilmedi."
+                    tr("Mikrofon izni verilmedi.")
                 }
                 ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(AudioRecorderPhase.STARTING, 0),
                     if (Build.VERSION.SDK_INT >= 30) ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE else 0)
@@ -131,7 +133,7 @@ class AudioRecorderService : Service() {
             } catch (error: Exception) {
                 startupFailureId = intent.getStringExtra(EXTRA_RECORDING_ID)
                 AudioRecorderSession.mutableState.value = AudioRecorderState(intent.getStringExtra(EXTRA_RECORDING_ID),
-                    AudioRecorderPhase.ERROR, error = "Mikrofon kaydı başlatılamadı. İzni kontrol ederek uygulamadan tekrar deneyin.")
+                    AudioRecorderPhase.ERROR, error = tr("Mikrofon kaydı başlatılamadı. İzni kontrol ederek uygulamadan tekrar deneyin."))
                 stopSelf(startId)
                 return START_NOT_STICKY
             }
@@ -142,10 +144,10 @@ class AudioRecorderService : Service() {
 
     private suspend fun startRecording(id: String?) = AudioCaptureFiles.withRecoveryLock {
         if (recordingId != null) return@withRecoveryLock
-        require(!id.isNullOrBlank()) { "Ses kaydı bulunamadı." }
+        require(!id.isNullOrBlank()) { tr("Ses kaydı bulunamadı.") }
         recordingId = id
         val recording = repository.loadAudioRecording(id)
-        require(recording.deletedAt == null) { "Bu ses kaydı silinmiş." }
+        require(recording.deletedAt == null) { tr("Bu ses kaydı silinmiş.") }
         completedMs = recording.durationMs
         clock.settle(completedMs)
         publish(AudioRecorderPhase.STARTING)
@@ -155,20 +157,20 @@ class AudioRecorderService : Service() {
 
     @Suppress("DEPRECATION")
     private fun startPart() {
-        check(!destroyed) { "Ses servisi kapatıldı." }
+        check(!destroyed) { tr("Ses servisi kapatıldı.") }
         check(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            "Mikrofon izni kaldırıldı."
+            tr("Mikrofon izni kaldırıldı.")
         }
         val id = checkNotNull(recordingId)
         val directory = AudioCaptureFiles.directory(applicationContext, id)
-        check(directory.usableSpace >= MIN_FREE_BYTES) { "Ses kaydı için yeterli boş alan yok." }
+        check(directory.usableSpace >= MIN_FREE_BYTES) { tr("Ses kaydı için yeterli boş alan yok.") }
         val file = File(directory, "${UUID.randomUUID()}.m4a")
         pendingFile = file
         val current = if (Build.VERSION.SDK_INT >= 31) MediaRecorder(applicationContext) else MediaRecorder()
         recorder = current
         val token = ++captureGeneration
         current.setOnErrorListener { _, _, _ ->
-            commands.trySend(Command("interruption", token = token, error = "Mikrofon veya kayıt cihazı kesintiye uğradı."))
+            commands.trySend(Command("interruption", token = token, error = tr("Mikrofon veya kayıt cihazı kesintiye uğradı.")))
         }
         current.setOnInfoListener { _, what, _ ->
             when (what) {
@@ -178,7 +180,7 @@ class AudioRecorderService : Service() {
                     commands.trySend(Command("rotated", token = token))
                 MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED ->
                     commands.trySend(Command("interruption", token = token,
-                        error = "Sonraki ses parçası açılamadı. Kayıt güvenli biçimde duraklatıldı."))
+                        error = tr("Sonraki ses parçası açılamadı. Kayıt güvenli biçimde duraklatıldı.")))
             }
         }
         if (Build.VERSION.SDK_INT >= 29) {
@@ -186,7 +188,7 @@ class AudioRecorderService : Service() {
                 object : AudioManager.AudioRecordingCallback() {
                     override fun onRecordingConfigChanged(configs: MutableList<AudioRecordingConfiguration>) {
                         if (configs.any { it.isClientSilenced }) commands.trySend(Command("interruption", token = token,
-                            error = "Mikrofon başka bir işlem veya gizlilik ayarı nedeniyle susturuldu. Kayıt duraklatıldı."))
+                            error = tr("Mikrofon başka bir işlem veya gizlilik ayarı nedeniyle susturuldu. Kayıt duraklatıldı.")))
                     }
                 })
         }
@@ -243,7 +245,7 @@ class AudioRecorderService : Service() {
             file.delete() // Metadata is durable. A leftover is safe because commit uses sourceKey.
             completedFiles.removeFirst()
         }
-        if (invalidPart) throw IllegalStateException("Son ses parçası tamamlanamadı. Kurtarma için cihazda korundu.")
+        if (invalidPart) throw IllegalStateException(tr("Son ses parçası tamamlanamadı. Kurtarma için cihazda korundu."))
     }
 
     private suspend fun pauseRecording(message: String? = null) {
@@ -267,7 +269,7 @@ class AudioRecorderService : Service() {
         if (AudioRecorderSession.state.value.phase != AudioRecorderPhase.RECORDING) return
         if (nextFile != null) return
         val directory = AudioCaptureFiles.directory(applicationContext, checkNotNull(recordingId))
-        check(directory.usableSpace >= MIN_FREE_BYTES) { "Sonraki ses parçası için boş alan yetersiz." }
+        check(directory.usableSpace >= MIN_FREE_BYTES) { tr("Sonraki ses parçası için boş alan yetersiz.") }
         val file = File(directory, "${UUID.randomUUID()}.m4a")
         nextFile = file
         checkNotNull(recorder).setNextOutputFile(file)
@@ -275,7 +277,7 @@ class AudioRecorderService : Service() {
 
     private suspend fun completeRollover() {
         if (AudioRecorderSession.state.value.phase != AudioRecorderPhase.RECORDING) return
-        val successor = checkNotNull(nextFile) { "Sonraki ses parçası takip edilemedi." }
+        val successor = checkNotNull(nextFile) { tr("Sonraki ses parçası takip edilemedi.") }
         pendingFile?.let { completedFiles.addLast(it) }
         pendingFile = successor
         nextFile = null
@@ -304,7 +306,7 @@ class AudioRecorderService : Service() {
         if (now - lastDiskCheck >= 5_000) {
             lastDiskCheck = now
             if ((pendingFile?.parentFile?.usableSpace ?: Long.MAX_VALUE) < MIN_FREE_BYTES) {
-                pauseRecording("Depolama alanı azaldı. Tamamlanan ses korundu ve kayıt duraklatıldı.")
+                pauseRecording(tr("Depolama alanı azaldı. Tamamlanan ses korundu ve kayıt duraklatıldı."))
                 return
             }
         }
@@ -313,12 +315,12 @@ class AudioRecorderService : Service() {
 
     private suspend fun handleFailure(error: Exception) {
         val endingStartId = latestStartId
-        val message = error.message ?: "Ses kaydı işlemi tamamlanamadı."
+        val message = error.message ?: tr("Ses kaydı işlemi tamamlanamadı.")
         // Stop capture before reporting a storage failure; retain the pending valid file for retry.
         if (recorder != null) runCatching { finalizePart() }
         val hasPendingCommit = completedFiles.any { it.exists() } || pendingFile?.exists() == true
         if (hasPendingCommit) {
-            publish(AudioRecorderPhase.FINALIZING, "Ses cihazda korundu, kaydetme tamamlanamadı. Tekrar durdurarak deneyin. $message")
+            publish(AudioRecorderPhase.FINALIZING, tr("Ses cihazda korundu, kaydetme tamamlanamadı. Tekrar durdurarak deneyin. %1\$s", message))
         } else {
             recordingId?.let { runCatching { repository.setAudioState(it, AudioRecordingState.INTERRUPTED) } }
             clock.settle(completedMs)
@@ -350,19 +352,19 @@ class AudioRecorderService : Service() {
         val minutes = elapsed / 60_000
         val seconds = elapsed / 1_000 % 60
         val label = when (phase) {
-            AudioRecorderPhase.PAUSED -> "Kayıt duraklatıldı"
-            AudioRecorderPhase.FINALIZING -> "Ses kaydediliyor"
-            AudioRecorderPhase.STARTING -> "Mikrofon hazırlanıyor"
-            else -> "Ses kaydı sürüyor"
+            AudioRecorderPhase.PAUSED -> tr("Kayıt duraklatıldı")
+            AudioRecorderPhase.FINALIZING -> tr("Ses kaydediliyor")
+            AudioRecorderPhase.STARTING -> tr("Mikrofon hazırlanıyor")
+            else -> tr("Ses kaydı sürüyor")
         }
         return NotificationCompat.Builder(this, CHANNEL_ID).setSmallIcon(R.drawable.ic_audio_recording)
-            .setContentTitle("Defter · $label").setContentText("$minutes:${seconds.toString().padStart(2, '0')}")
+            .setContentTitle(tr("Defter · %1\$s", label)).setContentText("$minutes:${seconds.toString().padStart(2, '0')}")
             .setContentIntent(open).setOnlyAlertOnce(true).setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE).setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .apply {
                 // Resume is deliberately an in-app visible action because microphone access is while-in-use.
-                if (phase == AudioRecorderPhase.RECORDING) addAction(0, "Duraklat", action(ACTION_PAUSE, 1))
-                addAction(0, "Durdur ve kaydet", action(ACTION_STOP, 2))
+                if (phase == AudioRecorderPhase.RECORDING) addAction(0, tr("Duraklat"), action(ACTION_PAUSE, 1))
+                addAction(0, tr("Durdur ve kaydet"), action(ACTION_STOP, 2))
             }.build()
     }
 
@@ -378,7 +380,7 @@ class AudioRecorderService : Service() {
             runCatching { finalizePart() }
             runCatching { repository.setAudioState(id, AudioRecordingState.INTERRUPTED) }
             clock.settle(completedMs)
-            publish(AudioRecorderPhase.ERROR, "Ses kaydı kesildi. Tamamlanan parçalar cihazda korundu.")
+            publish(AudioRecorderPhase.ERROR, tr("Ses kaydı kesildi. Tamamlanan parçalar cihazda korundu."))
         }
         startupFailureId?.let { failedId ->
             // Serialize against a newer Start/recovery. Never overwrite a replacement service's active session.

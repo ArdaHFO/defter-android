@@ -1,5 +1,7 @@
 package dev.defter.app.data
 
+import dev.defter.app.localization.tr
+
 import dev.defter.app.model.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -11,7 +13,7 @@ internal object DocumentJson {
     private val idPattern = Regex("[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}")
 
     fun validId(id: String): String {
-        require(idPattern.matches(id)) { "Geçersiz belge kimliği." }
+        require(idPattern.matches(id)) { tr("Geçersiz belge kimliği.") }
         return id
     }
 
@@ -114,10 +116,10 @@ internal object DocumentJson {
         val id = json.getString("id")
         return when (json.getString("type")) {
             "stroke" -> StrokeElement(id, json.getJSONArray("points").let { points ->
-                require(points.length() <= 500_000) { "Çizgi çok büyük." }
+                require(points.length() <= 500_000) { tr("Çizgi çok büyük.") }
                 List(points.length()) { index ->
                     val point = points.getJSONArray(index)
-                    require(point.length() == 3) { "Geçersiz çizgi noktası." }
+                    require(point.length() == 3) { tr("Geçersiz çizgi noktası.") }
                     InkPoint(point.getDouble(0).toFloat(), point.getDouble(1).toFloat(), point.getDouble(2).toFloat())
                 }
             }, json.getInt("color"), json.number("width"), InkKind.valueOf(json.getString("kind")),
@@ -131,14 +133,14 @@ internal object DocumentJson {
                 json.optDouble("cropRight", 1.0).toFloat(), json.optDouble("cropBottom", 1.0).toFloat())
             "text" -> TextElement(id, json.getString("text"), json.number("x"), json.number("y"),
                 json.number("size"), json.getInt("color"))
-            else -> throw IOException("Bu nesne türü desteklenmiyor.")
+            else -> throw IOException(tr("Bu nesne türü desteklenmiyor."))
         }
     }
 
     fun validateLibrary(library: LibraryData) {
-        require(library.version == VERSION) { "Desteklenmeyen kütüphane sürümü." }
-        require(library.folders.map { it.id }.distinct().size == library.folders.size) { "Tekrarlanan klasör kimliği." }
-        require(library.notebooks.map { it.id }.distinct().size == library.notebooks.size) { "Tekrarlanan defter kimliği." }
+        require(library.version == VERSION) { tr("Desteklenmeyen kütüphane sürümü.") }
+        require(library.folders.map { it.id }.distinct().size == library.folders.size) { tr("Tekrarlanan klasör kimliği.") }
+        require(library.notebooks.map { it.id }.distinct().size == library.notebooks.size) { tr("Tekrarlanan defter kimliği.") }
         val folders = library.folders.associateBy { it.id }
         val resolvedParents = mutableSetOf<String>()
         library.folders.forEach { folder ->
@@ -147,29 +149,29 @@ internal object DocumentJson {
             val path = mutableSetOf<String>()
             var currentId: String? = folder.id
             while (currentId != null && currentId !in resolvedParents) {
-                require(path.add(currentId)) { "Klasör döngüsü bulundu." }
-                val current = requireNotNull(folders[currentId]) { "Üst klasör eksik." }
+                require(path.add(currentId)) { tr("Klasör döngüsü bulundu.") }
+                val current = requireNotNull(folders[currentId]) { tr("Üst klasör eksik.") }
                 currentId = current.parentId
             }
             resolvedParents.addAll(path)
         }
         val pages = mutableSetOf<String>()
-        require(library.audioItems.map { it.id }.distinct().size == library.audioItems.size) { "Tekrarlanan ses kimliği." }
+        require(library.audioItems.map { it.id }.distinct().size == library.audioItems.size) { tr("Tekrarlanan ses kimliği.") }
         val notebookIds = library.notebooks.map { it.id }.toSet()
         library.audioItems.forEach {
             AudioJson.validateItem(it)
-            require(it.folderId == null || it.folderId in folders) { "Ses kaydının klasörü eksik." }
-            require(it.notebookId == null || it.notebookId in notebookIds) { "Ses kaydının defteri eksik." }
+            require(it.folderId == null || it.folderId in folders) { tr("Ses kaydının klasörü eksik.") }
+            require(it.notebookId == null || it.notebookId in notebookIds) { tr("Ses kaydının defteri eksik.") }
         }
         library.notebooks.forEach { notebook ->
             validId(notebook.id)
             validateName(notebook.title)
-            require(notebook.folderId == null || folders.containsKey(notebook.folderId)) { "Defterin klasörü eksik." }
-            require(notebook.pageIds.isNotEmpty()) { "Defterde en az bir sayfa olmalı." }
-            require(notebook.updatedAt >= 0 && (notebook.deletedAt == null || notebook.deletedAt >= 0)) { "Geçersiz tarih." }
+            require(notebook.folderId == null || folders.containsKey(notebook.folderId)) { tr("Defterin klasörü eksik.") }
+            require(notebook.pageIds.isNotEmpty()) { tr("Defterde en az bir sayfa olmalı.") }
+            require(notebook.updatedAt >= 0 && (notebook.deletedAt == null || notebook.deletedAt >= 0)) { tr("Geçersiz tarih.") }
             (notebook.pageIds + notebook.trashedPageIds).forEach {
                 validId(it)
-                require(pages.add(it)) { "Sayfa birden fazla kez kullanılıyor." }
+                require(pages.add(it)) { tr("Sayfa birden fazla kez kullanılıyor.") }
             }
         }
     }
@@ -178,27 +180,27 @@ internal object DocumentJson {
         validId(page.id)
         size(page.width, 100_000f)
         size(page.height, 100_000f)
-        require(page.revision >= 0) { "Geçersiz sayfa sürümü." }
-        require(page.textRecognition.length <= 100_000) { "Tanınan metin çok uzun." }
-        require(page.recognitionRevision == null || page.recognitionRevision in 0..page.revision) { "Geçersiz tanıma sürümü." }
-        require(page.recognitionLanguage == null || page.recognitionLanguage.matches(Regex("[A-Za-z0-9-]{1,80}"))) { "Geçersiz tanıma dili." }
+        require(page.revision >= 0) { tr("Geçersiz sayfa sürümü.") }
+        require(page.textRecognition.length <= 100_000) { tr("Tanınan metin çok uzun.") }
+        require(page.recognitionRevision == null || page.recognitionRevision in 0..page.revision) { tr("Geçersiz tanıma sürümü.") }
+        require(page.recognitionLanguage == null || page.recognitionLanguage.matches(Regex("[A-Za-z0-9-]{1,80}"))) { tr("Geçersiz tanıma dili.") }
         page.pdfBackground?.let {
             validId(it.assetId)
-            require(it.pageIndex in 0 until 2000) { "Geçersiz PDF sayfası." }
+            require(it.pageIndex in 0 until 2000) { tr("Geçersiz PDF sayfası.") }
             size(it.widthPoints, 100_000f); size(it.heightPoints, 100_000f)
         }
-        require(page.elements.size <= 100_000) { "Sayfa çok büyük." }
+        require(page.elements.size <= 100_000) { tr("Sayfa çok büyük.") }
         val ids = mutableSetOf<String>()
         page.elements.forEach { element ->
             validId(element.id)
-            require(ids.add(element.id)) { "Tekrarlanan nesne kimliği." }
+            require(ids.add(element.id)) { tr("Tekrarlanan nesne kimliği.") }
             when (element) {
                 is StrokeElement -> {
-                    require(element.points.isNotEmpty() && element.points.size <= 500_000) { "Geçersiz çizgi." }
+                    require(element.points.isNotEmpty() && element.points.size <= 500_000) { tr("Geçersiz çizgi.") }
                     size(element.width, 10_000f)
                     element.points.forEach { point ->
                         coordinate(point.x); coordinate(point.y)
-                        require(point.pressure.isFinite() && point.pressure in 0f..10f) { "Geçersiz basınç." }
+                        require(point.pressure.isFinite() && point.pressure in 0f..10f) { tr("Geçersiz basınç.") }
                     }
                 }
                 is ShapeElement -> {
@@ -208,12 +210,12 @@ internal object DocumentJson {
                 is ImageElement -> {
                     validId(element.assetId); coordinate(element.x); coordinate(element.y)
                     size(element.width, 100_000f); size(element.height, 100_000f)
-                    require(element.rotationDegrees.isFinite() && element.rotationDegrees in -360f..360f) { "Geçersiz döndürme açısı." }
+                    require(element.rotationDegrees.isFinite() && element.rotationDegrees in -360f..360f) { tr("Geçersiz döndürme açısı.") }
                     require(listOf(element.cropLeft, element.cropTop, element.cropRight, element.cropBottom).all { it.isFinite() && it in 0f..1f } &&
-                        element.cropLeft < element.cropRight && element.cropTop < element.cropBottom) { "Geçersiz kırpma alanı." }
+                        element.cropLeft < element.cropRight && element.cropTop < element.cropBottom) { tr("Geçersiz kırpma alanı.") }
                 }
                 is TextElement -> {
-                    require(element.text.length <= 100_000) { "Metin çok uzun." }
+                    require(element.text.length <= 100_000) { tr("Metin çok uzun.") }
                     coordinate(element.x); coordinate(element.y); size(element.size, 10_000f)
                 }
             }
@@ -221,18 +223,18 @@ internal object DocumentJson {
     }
 
     fun validateName(name: String) {
-        require(name.isNotBlank() && name.length <= 200) { "Ad 1–200 karakter olmalı." }
+        require(name.isNotBlank() && name.length <= 200) { tr("Ad 1–200 karakter olmalı.") }
     }
 
-    private fun coordinate(value: Float) = require(value.isFinite() && value in -1_000_000f..1_000_000f) { "Geçersiz koordinat." }
-    private fun size(value: Float, maximum: Float) = require(value.isFinite() && value > 0 && value <= maximum) { "Geçersiz boyut." }
+    private fun coordinate(value: Float) = require(value.isFinite() && value in -1_000_000f..1_000_000f) { tr("Geçersiz koordinat.") }
+    private fun size(value: Float, maximum: Float) = require(value.isFinite() && value > 0 && value <= maximum) { tr("Geçersiz boyut.") }
     private fun JSONObject.number(key: String): Float = getDouble(key).toFloat()
     private fun JSONObject.nullableString(key: String): String? = if (isNull(key)) null else getString(key)
     private fun JSONArray.objects(): List<JSONObject> = List(length()) { getJSONObject(it) }
     private fun JSONArray.strings(): List<String> = List(length()) { getString(it) }
-    private fun checkVersion(json: JSONObject) = require(json.getInt("version") in 1..VERSION) { "Desteklenmeyen belge sürümü." }
+    private fun checkVersion(json: JSONObject) = require(json.getInt("version") in 1..VERSION) { tr("Desteklenmeyen belge sürümü.") }
     private inline fun <T> decode(block: () -> T): T = try { block() } catch (e: Exception) {
         if (e is IOException) throw e
-        throw IOException("Belge okunamadı. Mevcut dosya korunuyor.", e)
+        throw IOException(tr("Belge okunamadı. Mevcut dosya korunuyor."), e)
     }
 }

@@ -1,5 +1,7 @@
 package dev.defter.app.audio
 
+import dev.defter.app.localization.tr
+
 /** One continuous playback clock over separately committed recording parts. */
 internal class AudioTimeline(durationsMs: List<Long>) {
     private val durations = durationsMs.toList()
@@ -9,7 +11,7 @@ internal class AudioTimeline(durationsMs: List<Long>) {
     init {
         var total = 0L
         durations.forEachIndexed { index, duration ->
-            require(duration > 0) { "Ses parçasının süresi geçersiz." }
+            require(duration > 0) { tr("Ses parçasının süresi geçersiz.") }
             starts[index] = total
             total = Math.addExact(total, duration)
         }
@@ -36,7 +38,7 @@ internal class AudioTimeline(durationsMs: List<Long>) {
 }
 
 internal fun validatedPlaybackSpeed(value: Float): Float {
-    require(value.isFinite() && value in 0.5f..2f) { "Oynatma hızı 0,5–2 arasında olmalı." }
+    require(value.isFinite() && value in 0.5f..2f) { tr("Oynatma hızı 0,5–2 arasında olmalı.") }
     return value
 }
 

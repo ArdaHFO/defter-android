@@ -17,7 +17,7 @@ import java.nio.ByteOrder
 
 /** Fake inference, real durable repository: these do not claim native speech accuracy. */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33], manifest = Config.NONE)
+@Config(application = dev.defter.app.localization.TurkishTestApplication::class, sdk = [33], manifest = Config.NONE)
 class TranscriptionRunnerTest {
     private lateinit var repository: DocumentRepository
     @Before fun setup() {

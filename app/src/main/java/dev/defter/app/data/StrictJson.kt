@@ -1,5 +1,7 @@
 package dev.defter.app.data
 
+import dev.defter.app.localization.tr
+
 import android.util.JsonReader
 import android.util.JsonToken
 import org.json.JSONObject
@@ -12,33 +14,33 @@ internal object StrictJson {
         try {
             JsonReader(StringReader(text)).use { reader ->
                 reader.isLenient = false
-                require(reader.peek() == JsonToken.BEGIN_OBJECT) { "Belge bir JSON nesnesi olmalı." }
+                require(reader.peek() == JsonToken.BEGIN_OBJECT) { tr("Belge bir JSON nesnesi olmalı.") }
                 var depth = 0
                 val names = ArrayDeque<MutableSet<String>?>()
                 while (reader.peek() != JsonToken.END_DOCUMENT) {
                     when (reader.peek()) {
                         JsonToken.BEGIN_OBJECT -> {
-                            require(++depth <= 64) { "Belge yapısı çok derin." }
+                            require(++depth <= 64) { tr("Belge yapısı çok derin.") }
                             reader.beginObject(); names.addLast(mutableSetOf())
                         }
                         JsonToken.BEGIN_ARRAY -> {
-                            require(++depth <= 64) { "Belge yapısı çok derin." }
+                            require(++depth <= 64) { tr("Belge yapısı çok derin.") }
                             reader.beginArray(); names.addLast(null)
                         }
                         JsonToken.END_OBJECT -> { reader.endObject(); names.removeLast(); depth-- }
                         JsonToken.END_ARRAY -> { reader.endArray(); names.removeLast(); depth-- }
-                        JsonToken.NAME -> require(names.last()!!.add(reader.nextName())) { "Tekrarlanan JSON alanı." }
+                        JsonToken.NAME -> require(names.last()!!.add(reader.nextName())) { tr("Tekrarlanan JSON alanı.") }
                         JsonToken.STRING, JsonToken.NUMBER -> reader.nextString()
                         JsonToken.BOOLEAN -> reader.nextBoolean()
                         JsonToken.NULL -> reader.nextNull()
-                        else -> throw IOException("Belge yapısı geçersiz.")
+                        else -> throw IOException(tr("Belge yapısı geçersiz."))
                     }
                 }
-                require(depth == 0) { "Belge tamamlanmamış." }
+                require(depth == 0) { tr("Belge tamamlanmamış.") }
             }
             return JSONObject(text)
         } catch (error: Exception) {
-            throw IOException("Belge dosyası bozuk. Mevcut dosya korunuyor.", error)
+            throw IOException(tr("Belge dosyası bozuk. Mevcut dosya korunuyor."), error)
         }
     }
 }

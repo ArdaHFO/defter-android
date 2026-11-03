@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="quantity_notebooks">
+        <item quantity="one">"%1$s notebook"</item>
+        <item quantity="other">"%1$s notebooks"</item>
+    </plurals>
+    <plurals name="quantity_folders">
+        <item quantity="one">"%1$s folder"</item>
+        <item quantity="other">"%1$s folders"</item>
+    </plurals>
+    <plurals name="quantity_pages">
+        <item quantity="one">"%1$s page"</item>
+        <item quantity="other">"%1$s pages"</item>
+    </plurals>
+    <plurals name="quantity_page_details">
+        <item quantity="one">"%1$s page · %2$s"</item>
+        <item quantity="other">"%1$s pages · %2$s"</item>
+    </plurals>
+    <plurals name="quantity_objects">
+        <item quantity="one">"%1$s object"</item>
+        <item quantity="other">"%1$s objects"</item>
+    </plurals>
+    <plurals name="quantity_search_results">
+        <item quantity="one">"PAGE CONTENT · %1$s result"</item>
+        <item quantity="other">"PAGE CONTENT · %1$s results"</item>
+    </plurals>
+    <plurals name="quantity_notebooks_deleted">
+        <item quantity="one">"%1$d notebook permanently deleted."</item>
+        <item quantity="other">"%1$d notebooks permanently deleted."</item>
+    </plurals>
+    <plurals name="quantity_audio_deleted">
+        <item quantity="one">"%1$d recording permanently deleted."</item>
+        <item quantity="other">"%1$d recordings permanently deleted."</item>
+    </plurals>
+    <plurals name="quantity_confirm_audio">
+        <item quantity="one">"%1$d recording and its transcript will be permanently deleted. This cannot be undone."</item>
+        <item quantity="other">"%1$d recordings and their transcripts will be permanently deleted. This cannot be undone."</item>
+    </plurals>
+    <plurals name="quantity_confirm_notebooks">
+        <item quantity="one">"%1$d notebook and its pages will be permanently deleted. Linked audio recordings are kept, and their links to deleted pages are removed. This cannot be undone."</item>
+        <item quantity="other">"%1$d notebooks and their pages will be permanently deleted. Linked audio recordings are kept, and their links to deleted pages are removed. This cannot be undone."</item>
+    </plurals>
+</resources>

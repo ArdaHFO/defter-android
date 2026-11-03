@@ -1,5 +1,7 @@
 package dev.defter.app.ink
 
+import dev.defter.app.localization.tr
+
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -112,9 +114,9 @@ object PageRenderer {
                 }
                 paint.color = if (darkPaper) 0xFFB4C7BA.toInt() else 0xFF87988D.toInt()
                 paint.textSize = 20f
-                canvas.drawText("KONU / TARİH", margin, 85f, paint)
-                canvas.drawText("ANAHTAR NOTLAR", margin, top + 34f, paint)
-                canvas.drawText("ÖZET", margin, bottom + 38f, paint)
+                canvas.drawText(tr("KONU / TARİH"), margin, 85f, paint)
+                canvas.drawText(tr("ANAHTAR NOTLAR"), margin, top + 34f, paint)
+                canvas.drawText(tr("ÖZET"), margin, bottom + 38f, paint)
             }
         }
     }
@@ -170,7 +172,7 @@ object PageRenderer {
                     canvas.drawRect(state.rect, paint)
                     paint.color = 0xFF617568.toInt()
                     paint.textSize = 22f
-                    canvas.drawText("Görsel", element.x + 16f, element.y + 34f, paint)
+                    canvas.drawText(tr("Görsel"), element.x + 16f, element.y + 34f, paint)
                 }
                 canvas.restoreToCount(save)
             }
