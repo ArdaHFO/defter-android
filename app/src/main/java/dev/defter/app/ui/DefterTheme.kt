@@ -8,6 +8,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -20,41 +21,47 @@ import dev.defter.app.R
 
 /** Shared visual language for the library, writing desk, and audio workspace. */
 object DefterDesign {
-    val Accent = Color(0xFF5B50D6)
-    val AccentSoft = Color(0xFFEFEDFC)
-    val Ink = Color(0xFF19243A)
-    val Muted = Color(0xFF68758A)
-    val Canvas = Color(0xFFF5F6FA)
-    val Workspace = Color(0xFFEAEFF5)
-    val Outline = Color(0xFFE2E7F0)
-    val Mint = Color(0xFF337C71)
-    val MintSoft = Color(0xFFE3F3EE)
-    val Brand = Color(0xFF30295F)
+    val Accent = Color(0xFF005AC1)
+    val AccentSoft = Color(0xFFE8F1FF)
+    val Ink = Color(0xFF1C1C1E)
+    val Muted = Color(0xFF60646C)
+    val Canvas = Color(0xFFF5F5F7)
+    val Workspace = Color(0xFFE9EBEF)
+    val Surface = Color.White
+    val Outline = Color(0xFFD8DAE0)
+    val ControlOutline = Color(0xFF8B9099)
+    val Mint = Color(0xFF247455)
+    val MintSoft = Color(0xFFE8F5EC)
+    val Brand = Color(0xFF193451)
+    val ControlShape = RoundedCornerShape(12.dp)
+    val CardShape = RoundedCornerShape(18.dp)
+    val MinTouchTarget = 48.dp
+    val Space = 8.dp
 
     val Shapes = Shapes(
         extraSmall = RoundedCornerShape(6.dp),
-        small = RoundedCornerShape(12.dp),
-        medium = RoundedCornerShape(18.dp),
-        large = RoundedCornerShape(26.dp),
-        extraLarge = RoundedCornerShape(32.dp)
+        small = RoundedCornerShape(10.dp),
+        medium = ControlShape,
+        large = CardShape,
+        extraLarge = RoundedCornerShape(24.dp)
     )
 
     val Typography = Typography(
-        displayLarge = type(54, 62, FontWeight.SemiBold, -1.2f),
-        displayMedium = type(44, 52, FontWeight.SemiBold, -0.8f),
-        displaySmall = type(36, 44, FontWeight.SemiBold, -0.6f),
-        headlineLarge = type(32, 40, FontWeight.SemiBold, -0.6f),
-        headlineMedium = type(28, 36, FontWeight.SemiBold, -0.4f),
-        headlineSmall = type(24, 32, FontWeight.SemiBold, -0.3f),
-        titleLarge = type(21, 28, FontWeight.SemiBold, -0.2f),
-        titleMedium = type(16, 24, FontWeight.SemiBold),
-        titleSmall = type(14, 20, FontWeight.SemiBold),
-        bodyLarge = type(16, 25, FontWeight.Normal),
-        bodyMedium = type(14, 22, FontWeight.Normal),
-        bodySmall = type(12, 18, FontWeight.Normal, 0.1f),
-        labelLarge = type(14, 20, FontWeight.SemiBold, 0.1f),
-        labelMedium = type(12, 17, FontWeight.Medium, 0.2f),
-        labelSmall = type(11, 16, FontWeight.Medium, 0.3f)
+        displayLarge = type(48, 56, FontWeight.SemiBold, -0.8f),
+        displayMedium = type(40, 48, FontWeight.SemiBold, -0.6f),
+        displaySmall = type(34, 42, FontWeight.SemiBold, -0.4f),
+        headlineLarge = type(30, 38, FontWeight.SemiBold, -0.4f),
+        headlineMedium = type(26, 34, FontWeight.SemiBold, -0.3f),
+        headlineSmall = type(23, 31, FontWeight.SemiBold, -0.2f),
+        titleLarge = type(20, 28, FontWeight.SemiBold),
+        titleMedium = type(17, 25, FontWeight.SemiBold),
+        titleSmall = type(15, 22, FontWeight.SemiBold),
+        bodyLarge = type(17, 26, FontWeight.Normal),
+        bodyMedium = type(15, 23, FontWeight.Normal),
+        bodySmall = type(13, 19, FontWeight.Normal),
+        labelLarge = type(15, 22, FontWeight.Medium),
+        labelMedium = type(13, 18, FontWeight.Medium),
+        labelSmall = type(12, 17, FontWeight.Medium)
     )
 
     private fun type(size: Int, lineHeight: Int, weight: FontWeight, tracking: Float = 0f) = TextStyle(
@@ -70,12 +77,12 @@ private val DefterColors = lightColorScheme(
     primary = DefterDesign.Accent,
     onPrimary = Color.White,
     primaryContainer = DefterDesign.AccentSoft,
-    onPrimaryContainer = Color(0xFF342B87),
+    onPrimaryContainer = Color(0xFF064A9D),
     secondary = DefterDesign.Mint,
     onSecondary = Color.White,
     secondaryContainer = DefterDesign.MintSoft,
-    onSecondaryContainer = Color(0xFF245C54),
-    tertiary = Color(0xFF8E6E43),
+    onSecondaryContainer = Color(0xFF18583E),
+    tertiary = Color(0xFF7E602E),
     onTertiary = Color.White,
     tertiaryContainer = Color(0xFFF7EEDC),
     onTertiaryContainer = Color(0xFF654B29),
@@ -86,19 +93,19 @@ private val DefterColors = lightColorScheme(
     surfaceVariant = DefterDesign.Workspace,
     onSurfaceVariant = DefterDesign.Muted,
     surfaceTint = DefterDesign.Accent,
-    surfaceDim = Color(0xFFE6E9F1),
+    surfaceDim = Color(0xFFE3E5E9),
     surfaceBright = Color.White,
     surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFFAFAFD),
+    surfaceContainerLow = Color(0xFFFAFAFC),
     surfaceContainer = DefterDesign.Canvas,
-    surfaceContainerHigh = Color(0xFFF0F1F7),
+    surfaceContainerHigh = Color(0xFFF0F1F4),
     surfaceContainerHighest = DefterDesign.Workspace,
-    outline = DefterDesign.Outline,
-    outlineVariant = Color(0xFFEDF0F5),
+    outline = DefterDesign.ControlOutline,
+    outlineVariant = DefterDesign.Outline,
     inverseSurface = DefterDesign.Ink,
     inverseOnSurface = Color(0xFFF3F5FA),
-    inversePrimary = Color(0xFFC5BEFF),
-    error = Color(0xFFB63F53),
+    inversePrimary = Color(0xFFADCFFF),
+    error = Color(0xFFB32632),
     onError = Color.White,
     errorContainer = Color(0xFFFDECEF),
     onErrorContainer = Color(0xFF6B2430),
@@ -107,12 +114,15 @@ private val DefterColors = lightColorScheme(
 
 @Composable
 fun DefterTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = DefterColors,
-        typography = DefterDesign.Typography,
-        shapes = DefterDesign.Shapes,
-        content = content
-    )
+    val animationsEnabled = rememberDefterAnimationsEnabled()
+    CompositionLocalProvider(LocalDefterAnimationsEnabled provides animationsEnabled) {
+        MaterialTheme(
+            colorScheme = DefterColors,
+            typography = DefterDesign.Typography,
+            shapes = DefterDesign.Shapes,
+            content = content
+        )
+    }
 }
 
 /** Decorative mark. The adjacent Defter wordmark supplies its accessible name. */

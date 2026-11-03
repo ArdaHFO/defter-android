@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -13,6 +14,8 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.ViewConfiguration
+import android.view.VelocityTracker
+import android.widget.OverScroller
 import dev.defter.app.localization.tr
 import dev.defter.app.model.*
 import kotlin.math.abs
@@ -28,9 +31,9 @@ class NotebookCanvas(context: Context) : View(context) {
             val changedContent = field?.elements != value?.elements
             field = value
             if (changedPage) {
-                cancelGesture()
+                if (!continuous || (pointerId >= 0 && mode != Mode.PAN && !multiTouch)) cancelGesture()
                 select(null)
-                resetViewport()
+                if (!continuous) resetViewport()
             } else {
                 if (changedContent && pointerId >= 0) {
                     // An undo or another editor update must not be overwritten by staged input.
@@ -57,9 +60,11 @@ class NotebookCanvas(context: Context) : View(context) {
 
     var isReadOnly: Boolean = false
         set(value) {
+            val wasContinuous = continuous
             if (field != value) cancelGesture()
             field = value
             if (value) select(null)
+            if (wasContinuous != continuous) resetViewport()
             invalidate()
         }
 
@@ -73,6 +78,141 @@ class NotebookCanvas(context: Context) : View(context) {
     var onContextMenuRequested: ((Float, Float) -> Unit)? = null
     var onPageEdgeGesture: ((PageEdgeDirection) -> Unit)? = null
     var onPageEdgeProgress: ((PageEdgeProgress?) -> Unit)? = null
+    /** Called with intersecting page IDs and the page nearest the viewport center. */
+    var onVisiblePagesChanged: ((List<String>, String?) -> Unit)? = null
+    /** Must synchronously activate a cached page in the model before an edit can begin. */
+    var onPageActivationRequested: ((String) -> Boolean)? = null
+    private var pageOrder: List<String> = emptyList()
+    private var suppliedPageOrder: List<String>? = null
+    private var pageIdSet: Set<String> = emptySet()
+    // An edit on a partially visible page owns Undo until the user actually scrolls again.
+    private var inputPagePinned = false
+    private var windowDocuments: Map<String, PageDocument> = emptyMap()
+    private var windowAssets: Map<String, Map<String, Bitmap>> = emptyMap()
+    private val knownSizes = mutableMapOf<String, PageStripLayout.Size>()
+    private val strip = PageStripLayout()
+    private val continuous: Boolean get() = pageOrder.isNotEmpty() && !isReadOnly
+    private var lastNavigationToken: Long? = null
+    private var pendingNavigation: Pair<String, Boolean>? = null
+    private var viewportNotification: Runnable? = null
+    private var lastVisibleIds: List<String> = emptyList()
+    private var lastCenterId: String? = null
+    private val placeholderPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val scroller = OverScroller(context)
+    private var velocity: VelocityTracker? = null
+    private val minimumFling = ViewConfiguration.get(context).scaledMinimumFlingVelocity
+    private val maximumFling = ViewConfiguration.get(context).scaledMaximumFlingVelocity
+
+    /** Atomic window update. Empty order restores the original single-page editor. */
+    fun setPageWindow(pageIds: List<String>, documents: Map<String, PageDocument>, assetsByPage: Map<String, Map<String, Bitmap>>) {
+        val wasContinuous = continuous
+        // The caller supplies immutable page-order snapshots. Color, save-status and ink
+        // recompositions must not allocate or walk the complete notebook's ID list.
+        val orderChanged = pageIds !== suppliedPageOrder && pageIds != pageOrder
+        val order = if (orderChanged) pageIds.distinct() else pageOrder
+        suppliedPageOrder = pageIds
+        val ids = if (orderChanged) order.toHashSet() else pageIdSet
+        val geometryChanged = orderChanged || documents.values.any {
+            it.id in ids && knownSizes[it.id] != PageStripLayout.Size(it.width, it.height)
+        }
+        val anchor = if (geometryChanged) captureAnchor() else null
+        val changedBook = orderChanged && pageOrder.isNotEmpty() && order.none { it in pageIdSet }
+        if (changedBook) {
+            cancelGesture()
+            lastNavigationToken = null
+            pendingNavigation = null
+        }
+        pageOrder = order
+        pageIdSet = ids
+        windowDocuments = documents.filterKeys { it in ids }.mapValues { (id, incoming) ->
+            windowDocuments[id]?.takeIf { it.revision > incoming.revision && !changedBook } ?: incoming
+        }
+        windowAssets = assetsByPage.filterKeys { it in windowDocuments }
+        if (orderChanged) knownSizes.keys.retainAll(ids)
+        windowDocuments.values.forEach { knownSizes[it.id] = PageStripLayout.Size(it.width, it.height) }
+        if (geometryChanged) strip.rebuild(order, knownSizes)
+        if (wasContinuous != continuous || (continuous && changedBook)) resetViewport()
+        else if (continuous && geometryChanged) restoreAnchor(anchor)
+        if (pendingNavigation != null) applyPendingNavigation()
+        notifyViewport()
+        invalidate()
+    }
+
+    /** Call only for an explicit navigation request. Reusing a token never resets natural scroll. */
+    fun navigateToPage(pageId: String, token: Long, atBottom: Boolean = false) {
+        if (lastNavigationToken == token) return
+        inputPagePinned = true
+        lastNavigationToken = token
+        pendingNavigation = pageId to atBottom
+        applyPendingNavigation()
+    }
+
+    private fun applyPendingNavigation() {
+        val (id, bottom) = pendingNavigation ?: return
+        if (!continuous || width <= 0 || height <= 0) return
+        val slot = strip.slot(id) ?: return
+        cancelGesture()
+        offsetY = if (bottom) height - 24f * resources.displayMetrics.density - slot.bottom * scale
+            else 16f * resources.displayMetrics.density - slot.top * scale
+        constrainViewport()
+        pendingNavigation = null
+        notifyViewport()
+        invalidate()
+    }
+
+    internal fun pageBoundsInView(pageId: String): RectF? = strip.slot(pageId)?.let {
+        RectF(offsetX, offsetY + it.top * scale, offsetX + PageStripLayout.WIDTH * scale, offsetY + it.bottom * scale)
+    }
+
+    private fun captureAnchor(): PageStripLayout.Anchor? {
+        if (!continuous || scale <= 0f) return null
+        val screenY = if (stylusActive) lastFocusY else height / 2f
+        val y = (screenY - offsetY) / scale
+        val slot = strip.nearest(y) ?: return null
+        return PageStripLayout.Anchor(slot.id, (y - slot.top) / slot.height, screenY)
+    }
+
+    private fun restoreAnchor(anchor: PageStripLayout.Anchor?) {
+        anchor?.let { strip.slot(it.id)?.let { slot -> offsetY = it.screenY - (slot.top + slot.height * it.fraction) * scale } }
+        constrainViewport()
+    }
+
+    private fun notifyViewport() {
+        if (!continuous || width <= 0 || height <= 0) return
+        viewportNotification?.let(gestureHandler::removeCallbacks)
+        val task = Runnable {
+            viewportNotification = null
+            if (!continuous) return@Runnable
+            val visible = strip.visible(-offsetY / scale, (height - offsetY) / scale).map { it.id }
+            val center = strip.nearest((height / 2f - offsetY) / scale)?.id
+            if (visible != lastVisibleIds || center != lastCenterId) {
+                lastVisibleIds = visible
+                lastCenterId = center
+                onVisiblePagesChanged?.invoke(visible, center)
+            }
+            if (isEnabled && !inputPagePinned && pointerId < 0 && !multiTouch && !contextMenuShown && center != null && selection.isEmpty()) activatePage(center)
+        }
+        viewportNotification = task
+        gestureHandler.post(task)
+    }
+
+    private fun activatePage(id: String): Boolean {
+        val loaded = windowDocuments[id] ?: return false
+        if (document?.id == id) return true
+        if (onPageActivationRequested?.invoke(id) != true) return false
+        document = loaded
+        return true
+    }
+
+    private fun inputPageAt(x: Float, y: Float): PageStripLayout.Slot? {
+        if ((x - offsetX) / scale !in 0f..PageStripLayout.WIDTH) return null
+        return strip.at((y - offsetY) / scale)
+    }
+
+    private val pageScale: Float get() = if (continuous) scale * (document?.let { PageStripLayout.WIDTH / it.width } ?: 1f) else scale
+    private val pageOffsetY: Float get() = offsetY + if (continuous) (document?.id?.let(strip::slot)?.top ?: 0f) * scale else 0f
+    private fun pageX(x: Float): Float = (x - offsetX) / pageScale
+    private fun pageY(y: Float): Float = (y - pageOffsetY) / pageScale
     var edgeNavigationEnabled: Boolean = false
         set(value) { if (field != value) resetEdgePull(); field = value }
     var canNavigatePrevious: Boolean = false
@@ -140,6 +280,7 @@ class NotebookCanvas(context: Context) : View(context) {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             if (stylusActive) return false
             val newZoom = (zoom * detector.scaleFactor).coerceIn(1f, 6f)
+            if (newZoom != zoom) inputPagePinned = false
             val logicalX = (detector.focusX - offsetX) / scale
             val logicalY = (detector.focusY - offsetY) / scale
             zoom = newZoom
@@ -161,24 +302,34 @@ class NotebookCanvas(context: Context) : View(context) {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
+        val anchor = captureAnchor()
         cancelGesture()
-        resetViewport()
+        if (continuous && oldw > 0 && oldh > 0) {
+            baseScale = ((w - 32f * resources.displayMetrics.density) / PageStripLayout.WIDTH).coerceAtLeast(.01f)
+            restoreAnchor(anchor)
+            notifyViewport()
+        } else resetViewport()
+        applyPendingNavigation()
     }
 
     fun resetViewport(atBottom: Boolean = false) {
         cancelGesture()
+        inputPagePinned = true
         val page = document ?: return
         if (width <= 0 || height <= 0) return
         val padding = 16f * resources.displayMetrics.density
         // 100% means fit page width. In landscape this keeps handwriting readable;
         // the rest of the page is reached by vertical panning rather than shrinking it.
-        baseScale = ((width - padding * 2f) / page.width).coerceAtLeast(0.01f)
+        val logicalWidth = if (continuous) PageStripLayout.WIDTH else page.width
+        baseScale = ((width - padding * 2f) / logicalWidth).coerceAtLeast(0.01f)
         zoom = 1f
-        offsetX = (width - page.width * scale) / 2f
+        offsetX = (width - logicalWidth * scale) / 2f
         val margin = 24f * resources.displayMetrics.density
-        val pageHeight = page.height * scale
-        offsetY = if (atBottom && pageHeight > height - margin * 2f) height - pageHeight - margin else padding
+        val slot = if (continuous) strip.slot(page.id) ?: pageOrder.firstOrNull()?.let(strip::slot) else null
+        val pageHeight = (slot?.height ?: page.height) * scale
+        offsetY = (if (atBottom && pageHeight > height - margin * 2f) height - pageHeight - margin else padding) - (slot?.top ?: 0f) * scale
         onZoomChanged?.invoke(zoom)
+        notifyViewport()
         invalidate()
     }
 
@@ -189,21 +340,47 @@ class NotebookCanvas(context: Context) : View(context) {
         // AndroidView may share an unclipped Compose drawing surface with sibling controls.
         // Clip in view coordinates before applying the document viewport transform.
         canvas.clipRect(0, 0, width, height)
+        if (continuous) {
+            for (slot in strip.visible(-offsetY / scale, (height - offsetY) / scale)) {
+                val pageSave = canvas.save()
+                canvas.translate(offsetX, offsetY + slot.top * scale)
+                canvas.scale(scale * slot.localScale, scale * slot.localScale)
+                canvas.clipRect(0f, 0f, slot.size.width, slot.size.height)
+                val loaded = if (slot.id == page.id) page else windowDocuments[slot.id]
+                if (loaded != null) drawPageContents(canvas, loaded, windowAssets[slot.id] ?: if (slot.id == page.id) assets else emptyMap(), slot.id == page.id)
+                else {
+                    placeholderPaint.color = 0xFFFFFEF9.toInt()
+                    canvas.drawRect(0f, 0f, slot.size.width, slot.size.height, placeholderPaint)
+                    placeholderPaint.color = 0xFF8793A2.toInt()
+                    placeholderPaint.textSize = 24f / slot.localScale
+                    canvas.drawText("${strip.index(slot.id) + 1}", 32f / slot.localScale, 50f / slot.localScale, placeholderPaint)
+                }
+                canvas.restoreToCount(pageSave)
+            }
+            canvas.restoreToCount(saved)
+            return
+        }
         canvas.translate(offsetX, offsetY)
         canvas.scale(scale, scale)
         canvas.clipRect(0f, 0f, page.width, page.height)
+        drawPageContents(canvas, page, assets, true)
+        canvas.restoreToCount(saved)
+    }
+
+    private fun drawPageContents(canvas: Canvas, page: PageDocument, pageAssets: Map<String, Bitmap>, active: Boolean) {
+        if (!active) { PageRenderer.draw(canvas, page, pageAssets); return }
         val previewPage = if (draggedPreviews.isNotEmpty()) {
             val replacements = draggedPreviews.associateBy { it.id }
             page.copy(elements = (stagedElements ?: page.elements).map { replacements[it.id] ?: it })
         } else stagedElements?.let { page.copy(elements = it) } ?: page
-        PageRenderer.draw(canvas, previewPage, assets)
-        previewStroke?.let { PageRenderer.drawElement(canvas, it, assets) }
-        previewShape?.let { PageRenderer.drawElement(canvas, it, assets) }
+        PageRenderer.draw(canvas, previewPage, pageAssets)
+        previewStroke?.let { PageRenderer.drawElement(canvas, it, pageAssets) }
+        previewShape?.let { PageRenderer.drawElement(canvas, it, pageAssets) }
         val selectedBounds = if (selection.isEmpty()) null else InkEditing.groupBounds(previewPage.elements.filter { it.id in selection })
         if (selectedBounds != null && !isTemporaryEraserActive) {
             val bounds = selectedBounds
-            bounds.inset(-8f / scale, -8f / scale)
-            selectionPaint.strokeWidth = 1.5f / scale
+            bounds.inset(-8f / pageScale, -8f / pageScale)
+            selectionPaint.strokeWidth = 1.5f / pageScale
             canvas.drawRect(bounds, selectionPaint)
         }
         if (mode == Mode.LASSO && points.isNotEmpty()) {
@@ -211,10 +388,9 @@ class NotebookCanvas(context: Context) : View(context) {
             lassoPath.moveTo(points.first().x, points.first().y)
             for (index in 1 until points.size) lassoPath.lineTo(points[index].x, points[index].y)
             lassoPath.close()
-            selectionPaint.strokeWidth = 1.5f / scale
+            selectionPaint.strokeWidth = 1.5f / pageScale
             canvas.drawPath(lassoPath, selectionPaint)
         }
-        canvas.restoreToCount(saved)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean = guardEditing { handleTouchEvent(event) }
@@ -234,6 +410,7 @@ class NotebookCanvas(context: Context) : View(context) {
             return false
         }
         if (document == null) return false
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) stopFling()
         parent?.requestDisallowInterceptTouchEvent(true)
         if (event.actionMasked == MotionEvent.ACTION_CANCEL) {
             cancelGesture()
@@ -260,10 +437,12 @@ class NotebookCanvas(context: Context) : View(context) {
 
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             cancelGesture()
+            if (continuous && toolType == MotionEvent.TOOL_TYPE_FINGER) velocity = VelocityTracker.obtain().also { it.addMovement(event) }
             scaleDetector.onTouchEvent(event)
             beginGesture(event, actionIndex, false)
             return true
         }
+        velocity?.addMovement(event)
 
         if (event.actionMasked == MotionEvent.ACTION_POINTER_DOWN && event.pointerCount >= 2) {
             // The initial finger line remains transient, so pinch never leaves a stray mark.
@@ -279,6 +458,7 @@ class NotebookCanvas(context: Context) : View(context) {
         if (multiTouch) {
             if (event.actionMasked == MotionEvent.ACTION_MOVE) {
                 val focus = focus(event)
+                if (focus.first != lastFocusX || focus.second != lastFocusY) inputPagePinned = false
                 offsetX += focus.first - lastFocusX
                 offsetY += focus.second - lastFocusY
                 lastFocusX = focus.first
@@ -292,7 +472,7 @@ class NotebookCanvas(context: Context) : View(context) {
                 val focus = focus(event, excluding)
                 lastFocusX = focus.first
                 lastFocusY = focus.second
-                if (event.actionMasked == MotionEvent.ACTION_UP) cancelGesture()
+                if (event.actionMasked == MotionEvent.ACTION_UP) { cancelGesture(); notifyViewport() }
             }
             return true
         }
@@ -302,6 +482,12 @@ class NotebookCanvas(context: Context) : View(context) {
     }
 
     private fun beginGesture(event: MotionEvent, index: Int, isStylus: Boolean) {
+        if (continuous) {
+            val fingerPan = !isStylus && !config.touchDrawing
+            val target = inputPageAt(event.getX(index), event.getY(index))
+            if (!fingerPan && config.tool != DrawingTool.HAND && (target == null || !activatePage(target.id))) return
+            if (!fingerPan && config.tool != DrawingTool.HAND) inputPagePinned = true
+        }
         pointerId = event.getPointerId(index)
         stylusActive = isStylus
         gestureConfig = config
@@ -316,8 +502,8 @@ class NotebookCanvas(context: Context) : View(context) {
         gestureTool = effectiveTool(event, index)
         lastFocusX = event.getX(index)
         lastFocusY = event.getY(index)
-        startX = (lastFocusX - offsetX) / scale
-        startY = (lastFocusY - offsetY) / scale
+        startX = pageX(lastFocusX)
+        startY = pageY(lastFocusY)
         lastInkX = startX
         lastInkY = startY
         if (gestureTool == DrawingTool.HAND || (!stylusActive && !gestureConfig.touchDrawing)) {
@@ -360,7 +546,7 @@ class NotebookCanvas(context: Context) : View(context) {
             }
             DrawingTool.SELECT, DrawingTool.LASSO -> {
                 val elements = stagedElements ?: page.elements
-                val element = elements.lastOrNull { ElementGeometry.hitTest(it, startX, startY, 12f / scale) }
+                val element = elements.lastOrNull { ElementGeometry.hitTest(it, startX, startY, 12f / pageScale) }
                 val selected = elements.filter { it.id in selection }
                 val groupBounds = InkEditing.groupBounds(selected)
                 val inGroup = element?.id in selection || (tool == DrawingTool.LASSO && groupBounds?.contains(startX, startY) == true)
@@ -400,6 +586,8 @@ class NotebookCanvas(context: Context) : View(context) {
                 if (event.getPointerId(event.actionIndex) != pointerId) return
                 val canceled = Build.VERSION.SDK_INT >= 33 && event.flags and MotionEvent.FLAG_CANCELED != 0
                 var edgeDirection: PageEdgeDirection? = null
+                var flingX = 0f
+                var flingY = 0f
                 val wasContextMenuShown = contextMenuShown
                 if (!canceled) {
                     // A release reported only on UP must not create a new pen dot or
@@ -407,8 +595,14 @@ class NotebookCanvas(context: Context) : View(context) {
                     if (effectiveTool(event, index) == gestureTool) updateGesture(event, index)
                     if (mode == Mode.PAN && fingerPanEligible && !contextMenuShown && edgeNavigationEnabled) {
                         edgeDirection = edgePull.finish()?.takeIf {
-                            if (it == PageEdgeDirection.PREVIOUS) canNavigatePrevious else canNavigateNext || canAddPageAtEnd
+                            if (continuous) it == PageEdgeDirection.NEXT && canAddPageAtEnd
+                            else if (it == PageEdgeDirection.PREVIOUS) canNavigatePrevious else canNavigateNext || canAddPageAtEnd
                         }
+                    }
+                    if (continuous && mode == Mode.PAN && fingerPanMoved && !contextMenuShown && edgeDirection == null) {
+                        velocity?.computeCurrentVelocity(1000, maximumFling.toFloat())
+                        flingX = velocity?.getXVelocity(pointerId) ?: 0f
+                        flingY = velocity?.getYVelocity(pointerId) ?: 0f
                     }
                     finishGesture()
                 }
@@ -416,7 +610,11 @@ class NotebookCanvas(context: Context) : View(context) {
                 invalidate()
                 // Clear the contact before external code can switch pages or open a dialog.
                 if (!canceled && !wasContextMenuShown) performClick()
-                edgeDirection?.let { onPageEdgeGesture?.invoke(it) }
+                edgeDirection?.let {
+                    if (!continuous || pageOrder.lastOrNull()?.let(::activatePage) == true) onPageEdgeGesture?.invoke(it)
+                }
+                if (!canceled && edgeDirection == null) startFling(flingX, flingY)
+                notifyViewport()
             }
         }
     }
@@ -495,13 +693,13 @@ class NotebookCanvas(context: Context) : View(context) {
         val screenX = event.getX(index)
         val screenY = event.getY(index)
         if (!screenX.isFinite() || !screenY.isFinite()) { cancelGesture(); return }
-        val x = (screenX - offsetX) / scale
-        val y = (screenY - offsetY) / scale
+        val x = pageX(screenX)
+        val y = pageY(screenY)
         when (mode) {
             Mode.INK -> {
                 for (history in 0 until event.historySize) {
-                    appendPoint((event.getHistoricalX(index, history) - offsetX) / scale,
-                        (event.getHistoricalY(index, history) - offsetY) / scale,
+                    appendPoint(pageX(event.getHistoricalX(index, history)),
+                        pageY(event.getHistoricalY(index, history)),
                         if (stylusActive) event.getHistoricalPressure(index, history).coerceIn(0f, 1f) else 1f)
                 }
                 appendPoint(x, y, pressure(event, index))
@@ -509,16 +707,16 @@ class NotebookCanvas(context: Context) : View(context) {
             Mode.SHAPE -> if (x.isFinite() && y.isFinite()) previewShape = previewShape?.let { InkEditing.snapped(it, x, y, gestureConfig.shapeSnap, gestureConfig.snapAngleDegrees) }
             Mode.ERASE -> {
                 for (history in 0 until event.historySize) {
-                    eraseTo((event.getHistoricalX(index, history) - offsetX) / scale,
-                        (event.getHistoricalY(index, history) - offsetY) / scale)
+                    eraseTo(pageX(event.getHistoricalX(index, history)),
+                        pageY(event.getHistoricalY(index, history)))
                 }
                 eraseTo(x, y)
             }
             Mode.DRAG -> if (x.isFinite() && y.isFinite()) draggedPreviews = draggedOriginals.map { ElementGeometry.translated(it, x - startX, y - startY) }
             Mode.LASSO -> {
                 for (history in 0 until event.historySize) {
-                    appendPoint((event.getHistoricalX(index, history) - offsetX) / scale,
-                        (event.getHistoricalY(index, history) - offsetY) / scale, 1f)
+                    appendPoint(pageX(event.getHistoricalX(index, history)),
+                        pageY(event.getHistoricalY(index, history)), 1f)
                 }
                 appendPoint(x, y, 1f)
             }
@@ -541,19 +739,22 @@ class NotebookCanvas(context: Context) : View(context) {
             if (hypot(totalX, totalY) <= touchSlop) return
             fingerPanMoved = true
             cancelContextLongPress()
+            if (continuous) select(null)
         }
         val trackEdge = fingerPanEligible && edgeNavigationEnabled &&
             abs(totalY) > abs(totalX) * 1.2f
         if (trackEdge) deltaY = edgePull.consumeReversal(deltaY) else resetEdgePull()
         val beforeY = offsetY
+        val beforeX = offsetX
         offsetX += deltaX
         offsetY += deltaY
         constrainViewport()
+        if (continuous && (beforeX != offsetX || beforeY != offsetY)) inputPagePinned = false
         if (trackEdge) {
             val unconsumed = deltaY - (offsetY - beforeY)
             // Normal panning consumes the delta completely and cannot arm navigation.
             if (abs(unconsumed) > 0.01f) {
-                edgePull.addUnconsumed(unconsumed, canNavigatePrevious, canNavigateNext || canAddPageAtEnd)
+                edgePull.addUnconsumed(unconsumed, !continuous && canNavigatePrevious, if (continuous) canAddPageAtEnd else canNavigateNext || canAddPageAtEnd)
             }
             publishEdgeProgress()
         }
@@ -561,22 +762,28 @@ class NotebookCanvas(context: Context) : View(context) {
 
     private fun scheduleLongPress() {
         cancelContextLongPress()
-        val page = document ?: return
-        if (isReadOnly || onContextMenuRequested == null || startX !in 0f..page.width || startY !in 0f..page.height) return
+        val target = if (continuous) inputPageAt(panStartScreenX, panStartScreenY) ?: return else null
+        val page = if (target != null) windowDocuments[target.id] ?: return else document ?: return
+        val targetScale = if (target != null) scale * target.localScale else scale
+        val targetY = offsetY + (target?.top ?: 0f) * scale
+        val pageX = (panStartScreenX - offsetX) / targetScale
+        val pageY = (panStartScreenY - targetY) / targetScale
+        if (isReadOnly || onContextMenuRequested == null || pageX !in 0f..page.width || pageY !in 0f..page.height) return
         val sequence = gestureSequence
         val pageId = page.id
-        val pageX = startX
-        val pageY = startY
         val task = Runnable {
             longPressTask = null
             guardEditing {
                 val callback = onContextMenuRequested ?: return@guardEditing false
-                if (sequence != gestureSequence || document?.id != pageId || !isEnabled || isReadOnly ||
+                if (sequence != gestureSequence || !isEnabled || isReadOnly ||
                     pointerId < 0 || stylusActive || multiTouch || !fingerPanEligible || fingerPanMoved || mode != Mode.PAN) return@guardEditing false
+                if (continuous && !activatePage(pageId)) return@guardEditing false
+                if (document?.id != pageId) return@guardEditing false
+                inputPagePinned = true
                 contextMenuShown = true
                 mode = Mode.NONE
                 resetEdgePull()
-                val hit = document?.elements?.lastOrNull { ElementGeometry.hitTest(it, pageX, pageY, 12f / scale) }
+                val hit = document?.elements?.lastOrNull { ElementGeometry.hitTest(it, pageX, pageY, 12f / pageScale) }
                 if (hit?.id !in selection) select(hit?.id)
                 invalidate()
                 callback(pageX, pageY)
@@ -618,6 +825,7 @@ class NotebookCanvas(context: Context) : View(context) {
 
     private fun appendPoint(x: Float, y: Float, pressure: Float) {
         if (!x.isFinite() || !y.isFinite()) return
+        if (continuous && mode == Mode.INK && document?.let { x !in 0f..it.width || y !in 0f..it.height } == true) return
         val last = points.lastOrNull()
         if (last == null || abs(last.x - x) + abs(last.y - y) > 0.2f) {
             points.add(InkPoint(x, y, if (pressure.isFinite()) pressure.coerceIn(0f, 1f) else 1f))
@@ -659,6 +867,7 @@ class NotebookCanvas(context: Context) : View(context) {
 
     private fun commit(updated: PageDocument) {
         if (isReadOnly) return
+        if (continuous) windowDocuments = windowDocuments + (updated.id to updated)
         document = updated
         onDocumentChanged?.invoke(updated)
     }
@@ -748,6 +957,9 @@ class NotebookCanvas(context: Context) : View(context) {
     }
 
     private fun cancelGesture() {
+        stopFling()
+        velocity?.recycle()
+        velocity = null
         cancelContextLongPress()
         resetEdgePull()
         gestureSequence++
@@ -790,12 +1002,37 @@ class NotebookCanvas(context: Context) : View(context) {
     private fun constrainViewport() {
         val page = document ?: return
         val margin = 24f * resources.displayMetrics.density
-        val pageWidth = page.width * scale
-        val pageHeight = page.height * scale
+        val pageWidth = (if (continuous) PageStripLayout.WIDTH else page.width) * scale
+        val pageHeight = (if (continuous) strip.height else page.height) * scale
         offsetX = if (pageWidth <= width - margin * 2) (width - pageWidth) / 2f
             else offsetX.coerceIn(width - pageWidth - margin, margin)
         offsetY = if (pageHeight <= height - margin * 2) 16f * resources.displayMetrics.density
             else offsetY.coerceIn(height - pageHeight - margin, margin)
+        notifyViewport()
+    }
+
+    private fun stopFling() { if (!scroller.isFinished) scroller.abortAnimation() }
+
+    private fun startFling(x: Float, y: Float) {
+        if (!continuous || !isEnabled || max(abs(x), abs(y)) < minimumFling) return
+        val margin = 24f * resources.displayMetrics.density
+        val minX = minOf(offsetX, width - PageStripLayout.WIDTH * scale - margin).toInt()
+        val maxX = maxOf(offsetX, margin).toInt()
+        val minY = minOf(offsetY, height - strip.height * scale - margin).toInt()
+        val maxY = maxOf(offsetY, margin).toInt()
+        scroller.fling(offsetX.toInt(), offsetY.toInt(), x.toInt(), y.toInt(), minX, maxX, minY, maxY)
+        postInvalidateOnAnimation()
+    }
+
+    override fun computeScroll() {
+        super.computeScroll()
+        if (!continuous || !isEnabled) { stopFling(); return }
+        if (scroller.computeScrollOffset()) {
+            offsetX = scroller.currX.toFloat()
+            offsetY = scroller.currY.toFloat()
+            constrainViewport()
+            postInvalidateOnAnimation()
+        }
     }
 
     private fun pressure(event: MotionEvent, index: Int): Float =
@@ -821,6 +1058,8 @@ class NotebookCanvas(context: Context) : View(context) {
 
     override fun onDetachedFromWindow() {
         cancelGesture()
+        viewportNotification?.let(gestureHandler::removeCallbacks)
+        viewportNotification = null
         super.onDetachedFromWindow()
     }
 }

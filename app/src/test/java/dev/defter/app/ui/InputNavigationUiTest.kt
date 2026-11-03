@@ -165,12 +165,9 @@ class InputNavigationUiTest {
         assertEquals(listOf(pasted), model.page!!.elements)
     }
 
-    @Test fun pageEdgeGestureAppendsOnceNavigatesExistingPageAndLandsAtPreviousBottom() {
+    @Test fun continuousPagesOverlapAndStylusEditsTheTouchedPageAfterOneAppend() {
         val model = openNotebook()
-        compose.runOnIdle { model.changePage(model.page!!.copy(height = 4000f)) }
-        awaitIdle(model)
         val firstId = model.page!!.id
-
         val appendTouch = beginEdgePull(PageEdgeDirection.NEXT)
         compose.onNodeWithText("Yeni sayfa eklemek için bırak").assertIsDisplayed()
         capture("input-add-page-phone.png")
@@ -179,35 +176,68 @@ class InputNavigationUiTest {
         assertEquals(2, model.notebook!!.pageIds.size)
         val secondId = model.page!!.id
         assertNotEquals(firstId, secondId)
-        // A duplicate platform UP is ignored by the canvas, including after page replacement.
         release(appendTouch)
         awaitIdle(model)
-        assertEquals(2, model.notebook!!.pageIds.size)
-
-        val previousTouch = beginEdgePull(PageEdgeDirection.PREVIOUS)
-        compose.onNodeWithText("Önceki sayfa için bırak").assertIsDisplayed()
-        release(previousTouch)
-        awaitIdle(model)
-        assertEquals(firstId, model.page!!.id)
+        assertEquals("A duplicate release must never append again", 2, model.notebook!!.pageIds.size)
+        compose.waitUntil(20_000) { shadowOf(Looper.getMainLooper()).idle(); model.loadedPages.keys.containsAll(listOf(firstId, secondId)) }
         compose.runOnIdle {
             val view = canvas()
-            // Do not reset viewport here: this dot checks the UI's previous-page bottom landing.
-            send(view, MotionEvent.ACTION_DOWN, MotionEvent.TOOL_TYPE_STYLUS, view.width / 2f, 40f)
-            send(view, MotionEvent.ACTION_UP, MotionEvent.TOOL_TYPE_STYLUS, view.width / 2f, 40f)
+            view.resetViewport()
+            val x = view.width / 2f
+            val start = view.height * .30f
+            send(view, MotionEvent.ACTION_DOWN, MotionEvent.TOOL_TYPE_FINGER, x, start)
+            send(view, MotionEvent.ACTION_MOVE, MotionEvent.TOOL_TYPE_FINGER, x, start + view.height * .48f)
+            val first = requireNotNull(view.pageBoundsInView(firstId))
+            val second = requireNotNull(view.pageBoundsInView(secondId))
+            assertTrue("The lower part of page one must be on screen", first.bottom > 60f)
+            assertTrue("The upper part of page two must be on screen", second.top < view.height - 60f)
+            assertTrue("Separate papers must have a visible gap", second.top > first.bottom)
+            send(view, MotionEvent.ACTION_CANCEL, MotionEvent.TOOL_TYPE_FINGER, x, start + view.height * .48f)
         }
         awaitIdle(model)
-        val point = (model.page!!.elements.single() as StrokeElement).points.single()
-        assertTrue("Previous-page navigation must land near its bottom, not at its top", point.y > 1000f)
-
-        val nextTouch = beginEdgePull(PageEdgeDirection.NEXT)
-        compose.onNodeWithText("Sonraki sayfa için bırak").assertIsDisplayed()
-        release(nextTouch)
+        compose.onNodeWithText("Önceki sayfa için bırak").assertDoesNotExist()
+        compose.onNodeWithText("Sonraki sayfa için bırak").assertDoesNotExist()
+        capture("continuous-pages-phone.png")
+        for ((id, nearBottom) in listOf(firstId to true, secondId to false)) {
+            compose.runOnIdle {
+                val view = canvas()
+                val rect = requireNotNull(view.pageBoundsInView(id))
+                val y = if (nearBottom) rect.bottom - 30f else rect.top + 30f
+                assertTrue(y in 0f..view.height.toFloat())
+                send(view, MotionEvent.ACTION_DOWN, MotionEvent.TOOL_TYPE_STYLUS, view.width / 2f, y)
+                send(view, MotionEvent.ACTION_UP, MotionEvent.TOOL_TYPE_STYLUS, view.width / 2f + 15f, y + 5f)
+            }
+            awaitIdle(model)
+            assertEquals(id, model.page!!.id)
+            assertEquals(1, model.loadedPages.getValue(id).elements.filterIsInstance<StrokeElement>().size)
+        }
+        // Long-pressing another visible page must activate it without immediately
+        // dismissing the context menu during the resulting Compose update.
+        compose.runOnIdle {
+            val view = canvas()
+            val rect = requireNotNull(view.pageBoundsInView(firstId))
+            send(view, MotionEvent.ACTION_DOWN, MotionEvent.TOOL_TYPE_FINGER, view.width * .3f, rect.bottom - 35f)
+        }
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(ViewConfiguration.getLongPressTimeout().toLong() + 1))
+        compose.waitForIdle()
+        compose.onNodeWithText("Sayfa işlemleri").assertIsDisplayed()
+        assertEquals(firstId, model.page!!.id)
+        compose.onNodeWithText("Kapat").performClick()
+        compose.runOnIdle { model.selectPage(secondId) }
         awaitIdle(model)
-        assertEquals(secondId, model.page!!.id)
+        compose.onNodeWithContentDescription("Önceki sayfa").performClick()
+        awaitIdle(model)
+        assertEquals(firstId, model.page!!.id)
+        val landedView = canvas()
+        val landedBounds = requireNotNull(landedView.pageBoundsInView(firstId))
+        val appliedToken = ReflectionHelpers.getField<Long?>(landedView, "lastNavigationToken")
+        assertTrue("Explicit page navigation starts at its top; bounds=$landedBounds " +
+            "viewPage=${landedView.document?.id} modelPage=${model.page?.id} " +
+            "modelToken=${model.explicitNavigationToken} canvasToken=$appliedToken", landedBounds.top >= 0f)
         assertEquals(2, model.notebook!!.pageIds.size)
     }
 
-    @Test fun failedPreviousSwipeDoesNotChangeLaterManualNavigationLanding() {
+    @Test fun failedPageNavigationDoesNotLoseEditsOrOffsetLaterNavigation() {
         val model = openNotebook()
         compose.runOnIdle { model.changePage(model.page!!.copy(height = 4000f)) }
         awaitIdle(model)
@@ -231,14 +261,14 @@ class InputNavigationUiTest {
             }
             compose.runOnIdle {
                 assertNotNull(model.error)
-                // Deliver the same native callback as a swipe whose outstanding save just failed.
-                canvas().onPageEdgeGesture!!.invoke(PageEdgeDirection.PREVIOUS)
+                // Explicit navigation must preserve the active page when its save has failed.
+                model.selectPage(firstId)
             }
             compose.waitUntil(20_000) {
                 shadowOf(Looper.getMainLooper()).idle()
                 !model.busy && model.error != null
             }
-            compose.waitForIdle() // Let the error path clear any deferred bottom-landing target.
+            compose.waitForIdle()
             assertEquals(secondId, model.page!!.id)
             metadata.writeBytes(intactMetadata)
             restored = true
@@ -262,7 +292,7 @@ class InputNavigationUiTest {
             val strokes = model.page!!.elements.filterIsInstance<StrokeElement>()
             assertEquals("The stylus viewport probe must create one stroke", 1, strokes.size)
             val point = strokes.single().points.single()
-            assertTrue("Manual navigation after a failed swipe must start at page top", point.y < 300f)
+            assertTrue("Manual navigation after a failed save must start at page top", point.y < 300f)
         } finally {
             if (!restored) metadata.writeBytes(intactMetadata)
         }
@@ -327,9 +357,10 @@ class InputNavigationUiTest {
     }
 
     private fun pagePoint(view: NotebookCanvas, x: Float, y: Float): Pair<Float, Float> {
-        val padding = 16f * view.resources.displayMetrics.density
-        val scale = (view.width - padding * 2f) / view.document!!.width
-        return padding + x * scale to padding + y * scale
+        val page = requireNotNull(view.document)
+        val bounds = requireNotNull(view.pageBoundsInView(page.id))
+        val scale = bounds.width() / page.width
+        return bounds.left + x * scale to bounds.top + y * scale
     }
 
     private fun send(view: NotebookCanvas, action: Int, tool: Int, x: Float, y: Float) {
@@ -353,7 +384,7 @@ class InputNavigationUiTest {
         compose.waitUntil(20_000) {
             shadowOf(Looper.getMainLooper()).idle()
             model.error?.let { throw AssertionError("Input workflow failed: $it") }
-            !model.loading && !model.busy && model.pendingSaves == 0
+            !model.loading && !model.busy && !model.pageWindowLoading && model.pendingSaves == 0
         }
         compose.runOnIdle { assertNull(model.error); assertFalse(model.unsaved) }
     }

@@ -1,0 +1,9 @@
+{
+  "fullComposeVisualReview": "passed, Robolectric native renders",
+  "nativeCanvasPixelAssertions": "passed on Android15 x86_64",
+  "nativeCanvasArtifact": "continuous-pages-native-canvas.png",
+  "fullEmulatorDisplayCapture": "not validated: all black including Android home in swiftshader and swangle",
+  "physicalDeviceClaim": false,
+  "testMethodCount": 7,
+  "mainApkUnchangedAfterTestOnlyBuild": true
+}

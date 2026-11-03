@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,6 +38,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -184,17 +184,17 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
         val wide = maxWidth >= 840.dp
         Row(Modifier.fillMaxSize()) {
             if (wide) {
-                Column(Modifier.width(240.dp).fillMaxHeight().background(Color.White).padding(20.dp)) {
+                Column(Modifier.width(if (LocalDensity.current.fontScale > 1.3f) 300.dp else 240.dp).fillMaxHeight().background(Color(0xFFF0F1F4)).verticalScroll(rememberScrollState()).padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Brand(Modifier.weight(1f))
                         IconButton(onClick = onLanguage) { Icon(Icons.Outlined.Language, tr("Uygulama dili"), Modifier.size(21.dp), tint = Muted) }
                     }
-                    Spacer(Modifier.height(32.dp))
-                    Text(tr("ÇALIŞMA ALANIN"), Modifier.padding(start = 14.dp, bottom = 12.dp), fontSize = 10.sp, letterSpacing = 1.5.sp, color = Muted, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(28.dp))
+                    Text(tr("ÇALIŞMA ALANIN"), Modifier.padding(start = 14.dp, bottom = 12.dp), fontSize = 11.sp, letterSpacing = .6.sp, color = Muted, fontWeight = FontWeight.SemiBold)
                     NavigationRow(Icons.Outlined.AutoStories, tr("Kütüphane"), !showTrash) { showTrash = false; model.navigateFolder(null); query = "" }
                     if (audioModel != null) NavigationRow(Icons.Outlined.GraphicEq, tr("Sesler"), false) { audioModel.open(folderId = model.folderId) }
                     NavigationRow(Icons.Outlined.DeleteOutline, tr("Çöp kutusu"), showTrash) { showTrash = true; query = "" }
-                    Spacer(Modifier.weight(1f))
+                    Spacer(Modifier.height(24.dp))
                     NavigationRow(Icons.Outlined.PictureAsPdf, tr("PDF içe aktar"), false, onImportPdf)
                     NavigationRow(Icons.Outlined.FindInPage, tr("El yazısı ve arama"), false, onHandwriting)
                     NavigationRow(Icons.Outlined.FileUpload, tr("Yedek al"), false, onBackup)
@@ -232,8 +232,7 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (folder != null && !showTrash) IconButton(onClick = { model.navigateFolder(folder.parentId) }) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Üst klasör")) }
                     Column(Modifier.weight(1f)) {
-                        if (wide) Text(if (showTrash) tr("KÜTÜPHANEYİ DÜZENLE") else tr("FİKİRLERİNE YER AÇ"), fontSize = 10.sp, letterSpacing = 1.6.sp, color = Accent, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 9.dp))
-                        Text(if (showTrash) tr("Çöp kutusu") else folder?.name ?: tr("Kütüphanen"), fontSize = if (wide) 36.sp else 30.sp, letterSpacing = (-1).sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(if (showTrash) tr("Çöp kutusu") else folder?.name ?: tr("Kütüphanen"), fontSize = if (wide) 34.sp else 30.sp, letterSpacing = (-.65).sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Spacer(Modifier.height(7.dp))
                         Text(if (showTrash) tr("Silinen defterlerini buradan geri getirebilirsin.") else quantity("%1\$s defter", books.size) + " · " + quantity("%1\$s klasör", folders.size), color = Muted, fontSize = 14.sp)
                     }
@@ -270,7 +269,8 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                     onSelectAll = { trashSelection = books.map { it.id } }, onClear = { trashSelection = emptyList() },
                     onDelete = { deleteSelection = trashSelection.toList() })
                 if (books.isEmpty() && folders.isEmpty()) {
-                    Column(Modifier.fillMaxSize().padding(bottom = 40.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).heightIn(min = maxHeight).padding(bottom = 40.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(Modifier.size(106.dp).clip(RoundedCornerShape(30.dp)).background(AccentSoft), contentAlignment = Alignment.Center) {
                             if (showTrash || query.isNotBlank()) Icon(if (showTrash) Icons.Outlined.DeleteOutline else Icons.Outlined.Search, null, Modifier.size(44.dp), tint = Accent)
                             else DefterBrandMark(Modifier.size(80.dp))
@@ -283,6 +283,7 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                             Spacer(Modifier.height(24.dp))
                             Button(onClick = { create = true }, contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text(tr("İlk defterini oluştur")) }
                         }
+                    }
                     }
                 } else {
                     LazyVerticalGrid(columns = GridCells.Adaptive(if (wide) 200.dp else 145.dp), verticalArrangement = Arrangement.spacedBy(20.dp), horizontalArrangement = Arrangement.spacedBy(18.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -346,7 +347,7 @@ private fun Brand(modifier: Modifier = Modifier) {
         DefterBrandMark(Modifier.size(44.dp))
         Column {
             Text("defter", fontSize = 27.sp, letterSpacing = (-1).sp, fontWeight = FontWeight.Bold, color = Ink)
-            Text(tr("DÜŞÜN. YAZ. HATIRLA."), fontSize = 8.sp, letterSpacing = 1.1.sp, color = Muted, fontWeight = FontWeight.Medium)
+            Text(tr("DÜŞÜN. YAZ. HATIRLA."), fontSize = 10.sp, letterSpacing = .4.sp, color = Muted, fontWeight = FontWeight.Medium)
         }
     }
 }
@@ -354,7 +355,7 @@ private fun Brand(modifier: Modifier = Modifier) {
 @Composable
 private fun LibrarySectionHeading(title: String, count: Int) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(title, fontSize = 10.sp, letterSpacing = 1.5.sp, color = Muted, fontWeight = FontWeight.SemiBold)
+        Text(title, fontSize = 11.sp, letterSpacing = .6.sp, color = Muted, fontWeight = FontWeight.SemiBold)
         Box(Modifier.background(Outline.copy(alpha = .65f), RoundedCornerShape(6.dp)).padding(horizontal = 7.dp, vertical = 3.dp)) {
             Text(count.toString(), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Muted)
         }
@@ -364,8 +365,8 @@ private fun LibrarySectionHeading(title: String, count: Int) {
 
 @Composable
 private fun NavigationRow(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
-    val fill by animateColorAsState(if (selected) AccentSoft else Color.Transparent, tween(180), label = "navigation-fill")
-    val tint by animateColorAsState(if (selected) Accent else Muted, tween(180), label = "navigation-ink")
+    val fill by animateColorAsState(if (selected) AccentSoft else Color.Transparent, defterTween(180), label = "navigation-fill")
+    val tint by animateColorAsState(if (selected) Accent else Muted, defterTween(180), label = "navigation-ink")
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).clip(RoundedCornerShape(15.dp)).background(fill).clickable(onClick = onClick).semantics { this.selected = selected }.padding(horizontal = 14.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Icon(icon, null, Modifier.size(21.dp), tint = tint)
         Text(label, color = tint, fontSize = 14.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f))
@@ -378,11 +379,11 @@ private fun NotebookCard(book: Notebook, trash: Boolean, onOpen: () -> Unit, onR
     var menu by remember { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) .975f else 1f, tween(150), label = "cover-press")
-    val stroke by animateColorAsState(if (pressed || selectedForDeletion == true) Accent.copy(alpha = .6f) else Outline, tween(150), label = "cover-outline")
+    val scale by animateFloatAsState(if (pressed) .985f else 1f, defterTween(150), label = "cover-press")
+    val stroke by animateColorAsState(if (pressed || selectedForDeletion == true) Accent.copy(alpha = .6f) else Outline, defterTween(150), label = "cover-outline")
     val language = AppLanguage.selectedTag
     val updated = remember(book.updatedAt, language) { SimpleDateFormat("d MMM", Locale.forLanguageTag(language)).format(Date(book.updatedAt)) }
-    Surface(modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }, shape = RoundedCornerShape(23.dp), color = Color.White, border = BorderStroke(1.dp, stroke), shadowElevation = 1.dp) {
+    Surface(modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }, shape = RoundedCornerShape(20.dp), color = Color.White, border = BorderStroke(.5.dp, stroke), shadowElevation = 1.dp) {
         Column(Modifier.padding(9.dp)) {
         Box(Modifier.fillMaxWidth().aspectRatio(1.06f).clip(RoundedCornerShape(16.dp)).background(Brush.linearGradient(listOf(Color(book.coverColor), androidx.compose.ui.graphics.lerp(Color(book.coverColor), Ink, .18f)))).clickable(interactionSource = interaction, indication = ripple(), enabled = !trash || selectedForDeletion != null, onClick = if (trash) onSelectionChange else onOpen)) {
             Box(Modifier.width(9.dp).fillMaxHeight().background(Color.Black.copy(alpha = .10f)))
@@ -441,7 +442,6 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     var temporaryEraser by remember { mutableStateOf(false) }
     var contextPoint by remember { mutableStateOf<PageContextPoint?>(null) }
     var edgeProgress by remember { mutableStateOf<PageEdgeProgress?>(null) }
-    var enterAtBottomForPage by remember { mutableStateOf<String?>(null) }
     var toolWidths by rememberSaveable { mutableStateOf(DrawingTool.entries.map { if (it == DrawingTool.HIGHLIGHTER) 24f else 3.5f }) }
     var pageDialog by rememberSaveable { mutableStateOf(false) }
     var templateDialog by rememberSaveable { mutableStateOf(false) }
@@ -450,16 +450,18 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     var textDialog by rememberSaveable { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
     val current = model.page
+    // AndroidView observes snapshot reads separately from this composition. Capture
+    // the page and its navigation token together so a new token cannot target an old page.
+    val navigationToken = model.explicitNavigationToken
+    val canvasPageIds = model.notebook?.pageIds.orEmpty()
+    val canvasPages = model.loadedPages
+    val canvasPageAssets = model.loadedPageAssets
+    val canvasConfig = model.config
+    val canvasAssets = model.assets
+    val canvasEnabled = !model.busy && contextPoint == null
     LaunchedEffect(current?.id) {
-        contextPoint = null
+        if (contextPoint?.pageId != current?.id) contextPoint = null
         edgeProgress = null
-        if (current?.id != null && current.id == enterAtBottomForPage) {
-            canvas?.resetViewport(atBottom = true)
-            enterAtBottomForPage = null
-        }
-    }
-    LaunchedEffect(model.busy, model.error) {
-        if (!model.busy && model.error != null) enterAtBottomForPage = null
     }
     LaunchedEffect(model.config.tool, model.config.width) {
         toolWidths = toolWidths.toMutableList().also { it[model.config.tool.ordinal] = model.config.width }
@@ -517,7 +519,7 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
         HorizontalDivider(color = Outline)
         NotebookTabs(model) { chooseTab = true }
         if (audioModel != null) AudioRecorderStrip(audioModel, model.page?.id?.takeIf { audioModel.library.audioItems.any { item -> item.id == audioModel.recorder.state.value.recordingId && item.notebookId == model.notebookId } }, audioModel::showActiveRecording)
-        Surface(Modifier.widthIn(max = 860.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 12.dp, vertical = 10.dp), color = Color.White, shape = RoundedCornerShape(24.dp), border = BorderStroke(1.dp, Outline.copy(alpha = .85f)), shadowElevation = 3.dp) {
+        Surface(Modifier.widthIn(max = 860.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 12.dp, vertical = 10.dp), color = Color.White, shape = RoundedCornerShape(20.dp), border = BorderStroke(.5.dp, Outline), shadowElevation = 2.dp) {
             Column {
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 DrawingTool.entries.forEach { tool ->
@@ -572,26 +574,36 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
                         model.page?.let { contextPoint = PageContextPoint(it.id, x, y) }
                     }
                     view.onPageEdgeProgress = { edgeProgress = it }
+                    view.onPageActivationRequested = model::activateLoadedPage
+                    view.onVisiblePagesChanged = { visibleIds, centerId ->
+                        centerId?.let { model.requestPageWindow(it, visibleIds) }
+                    }
+                    // Page boundaries are part of the same scroll surface. Only pulling beyond
+                    // the final page requests a structural operation, after the gesture ends.
                     view.onPageEdgeGesture = { direction ->
-                        model.page?.id?.let { pageId ->
-                            enterAtBottomForPage = if (direction == PageEdgeDirection.PREVIOUS) model.notebook?.pageIds?.getOrNull(model.pageIndex - 1) else null
-                            model.navigatePageBySwipe(pageId, direction)
+                        if (direction == PageEdgeDirection.NEXT) {
+                            model.notebook?.pageIds?.lastOrNull()?.let { lastId ->
+                                if (model.activateLoadedPage(lastId)) model.navigatePageBySwipe(lastId, direction)
+                            }
                         }
                     }
                     temporaryEraser = view.isTemporaryEraserActive
                 } }, update = { view ->
+                    view.setPageWindow(canvasPageIds, canvasPages, canvasPageAssets)
                     view.document = current
-                    view.config = model.config
-                    view.assets = model.assets
+                    view.config = canvasConfig
+                    view.assets = canvasAssets
+                    view.setBackgroundColor(Workspace.toArgb())
                     view.edgeNavigationEnabled = true
-                    view.canNavigatePrevious = model.pageIndex > 0
-                    view.canNavigateNext = model.pageIndex < (model.notebook?.pageIds?.lastIndex ?: 0)
-                    view.canAddPageAtEnd = model.pageIndex == model.notebook?.pageIds?.lastIndex
-                    view.isEnabled = !model.busy && contextPoint == null
+                    view.canNavigatePrevious = false
+                    view.canNavigateNext = false
+                    view.canAddPageAtEnd = canvasPageIds.isNotEmpty()
+                    view.isEnabled = canvasEnabled
+                    view.navigateToPage(current.id, navigationToken)
                 }, modifier = Modifier.fillMaxSize())
                 edgeProgress?.let { edge ->
                     val previous = edge.direction == PageEdgeDirection.PREVIOUS
-                    val adding = !previous && model.pageIndex == model.notebook?.pageIds?.lastIndex
+                    val adding = !previous
                     val instruction = if (edge.armed) {
                         if (previous) tr("Önceki sayfa için bırak") else if (adding) tr("Yeni sayfa eklemek için bırak") else tr("Sonraki sayfa için bırak")
                     } else {
@@ -632,14 +644,23 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
         }
         }
         HorizontalDivider(color = Outline)
-        Row(Modifier.fillMaxWidth().height(60.dp).background(Color.White).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = { canvas?.resetViewport() }) { Text("${(zoom * 100).toInt()}%", fontSize = 12.sp) }
-            Spacer(Modifier.weight(1f))
-            IconButton(onClick = { model.notebook?.pageIds?.getOrNull(model.pageIndex - 1)?.let(model::selectPage) }, enabled = model.pageIndex > 0) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Önceki sayfa"), Modifier.size(19.dp)) }
-            TextButton(onClick = { pageDialog = true }, modifier = Modifier.background(AccentSoft, RoundedCornerShape(14.dp)).semantics { contentDescription = tr("Sayfaları göster") }) { Icon(Icons.Outlined.GridView, null, Modifier.size(16.dp)); Spacer(Modifier.width(7.dp)); Text("${model.pageIndex + 1} / ${model.notebook?.pageIds?.size ?: 0}", fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
-            IconButton(onClick = { model.notebook?.pageIds?.getOrNull(model.pageIndex + 1)?.let(model::selectPage) }, enabled = model.pageIndex < (model.notebook?.pageIds?.lastIndex ?: 0)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, tr("Sonraki sayfa"), Modifier.size(19.dp)) }
-            Spacer(Modifier.weight(1f))
-            FilledIconButton(onClick = { model.addPage(current?.template ?: PaperTemplate.DOTS) }, modifier = Modifier.size(48.dp), shape = RoundedCornerShape(16.dp)) { Icon(Icons.AutoMirrored.Outlined.NoteAdd, tr("Yeni sayfa"), Modifier.size(21.dp)) }
+        BoxWithConstraints(Modifier.fillMaxWidth().background(Color.White).padding(horizontal = 8.dp)) {
+            val stacked = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
+            val pageNavigation: @Composable () -> Unit = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                    IconButton(onClick = { model.notebook?.pageIds?.getOrNull(model.pageIndex - 1)?.let(model::selectPage) }, enabled = model.pageIndex > 0, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Önceki sayfa"), Modifier.size(19.dp)) }
+                    TextButton(onClick = { pageDialog = true }, modifier = Modifier.widthIn(max = 180.dp).heightIn(min = 48.dp).background(AccentSoft, RoundedCornerShape(14.dp)).semantics { contentDescription = tr("Sayfaları göster") }) { Icon(Icons.Outlined.GridView, null, Modifier.size(16.dp)); Spacer(Modifier.width(7.dp)); Text("${model.pageIndex + 1} / ${model.notebook?.pageIds?.size ?: 0}", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    IconButton(onClick = { model.notebook?.pageIds?.getOrNull(model.pageIndex + 1)?.let(model::selectPage) }, enabled = model.pageIndex < (model.notebook?.pageIds?.lastIndex ?: 0), modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, tr("Sonraki sayfa"), Modifier.size(19.dp)) }
+                }
+            }
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(Modifier.fillMaxWidth().heightIn(min = 60.dp), verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { canvas?.resetViewport() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("${(zoom * 100).toInt()}%", fontSize = 12.sp) }
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { if (!stacked) pageNavigation() }
+                    FilledIconButton(onClick = { model.addPage(current?.template ?: PaperTemplate.DOTS) }, modifier = Modifier.size(48.dp), shape = RoundedCornerShape(16.dp)) { Icon(Icons.AutoMirrored.Outlined.NoteAdd, tr("Yeni sayfa"), Modifier.size(21.dp)) }
+                }
+                if (stacked) pageNavigation()
+            }
         }
     }
     contextPoint?.takeIf { it.pageId == current?.id }?.let { point ->
@@ -702,8 +723,8 @@ private fun HistoryControls(model: DefterViewModel) {
 
 @Composable
 private fun HistoryButton(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit) {
-    val fill by animateColorAsState(if (enabled) AccentSoft else Paper, tween(180), label = "history-fill")
-    val tint by animateColorAsState(if (enabled) Accent else Muted.copy(alpha = .65f), tween(180), label = "history-ink")
+    val fill by animateColorAsState(if (enabled) AccentSoft else Paper, defterTween(180), label = "history-fill")
+    val tint by animateColorAsState(if (enabled) Accent else Muted.copy(alpha = .65f), defterTween(180), label = "history-ink")
     FilledTonalButton(
         onClick = onClick,
         enabled = enabled,
@@ -739,17 +760,17 @@ private fun toolIcon(tool: DrawingTool): ImageVector = when (tool) {
 private fun ToolButton(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val fill by animateColorAsState(if (selected) Accent else Color.Transparent, tween(180), label = "tool-fill")
-    val tint by animateColorAsState(if (selected) Color.White else Muted, tween(180), label = "tool-ink")
-    val scale by animateFloatAsState(if (pressed) .9f else 1f, tween(130), label = "tool-press")
-    IconButton(onClick = onClick, interactionSource = interaction, modifier = Modifier.size(48.dp).background(fill, RoundedCornerShape(15.dp)).semantics { this.selected = selected }) {
+    val fill by animateColorAsState(if (selected) AccentSoft else Color.Transparent, defterTween(160), label = "tool-fill")
+    val tint by animateColorAsState(if (selected) Accent else Muted, defterTween(160), label = "tool-ink")
+    val scale by animateFloatAsState(if (pressed) .95f else 1f, defterTween(130), label = "tool-press")
+    IconButton(onClick = onClick, interactionSource = interaction, modifier = Modifier.size(48.dp).background(fill, RoundedCornerShape(12.dp)).semantics { this.selected = selected }) {
         Icon(icon, label, Modifier.size(21.dp).graphicsLayer { scaleX = scale; scaleY = scale }, tint = tint)
     }
 }
 
 @Composable
 private fun ColorDot(color: Int, selected: Boolean, size: Int, onClick: () -> Unit) {
-    val ring by animateColorAsState(if (selected) Accent else Color.Transparent, tween(180), label = "ink-color-ring")
+    val ring by animateColorAsState(if (selected) Accent else Color.Transparent, defterTween(180), label = "ink-color-ring")
     val label = when (color) {
         0xFF24344B.toInt() -> tr("Lacivert")
         0xFF356859.toInt() -> tr("Yeşil")

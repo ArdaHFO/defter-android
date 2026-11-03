@@ -1,0 +1,38 @@
+{
+  "recordedUtc": "2026-11-03T20:02:12.086030+00:00",
+  "apk": "Defter-0.6.0-alpha.apk (separate development artifact)",
+  "bytes": 62120071,
+  "sha256": "da6851c42ebdf35d8903c0de05167b7ec61a0dd6a11caba6e9ef691bbc1e8ed3",
+  "package": "dev.defter.app",
+  "versionCode": 6,
+  "versionName": "0.6.0-alpha",
+  "minimumAndroidApi": 26,
+  "targetAndroidApi": 35,
+  "signatureVerified": true,
+  "certificateSha256": "d5e6f0e12f7c1521fd3f54c657f75b0d5ded990e411dc18c9ec306d6a3672dec",
+  "sameCertificateAsExistingApk": true,
+  "zip16KiBAlignmentVerified": true,
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86",
+    "x86_64"
+  ],
+  "nativeLibraries": 16,
+  "packaged64BitLibraries": 8,
+  "allPackaged64BitElfs16KiBAligned": true,
+  "allAbisHaveWhisperAndCppRuntime": true,
+  "privateKeyArtifactsIdentified": false,
+  "whisperModelBundled": false,
+  "knownNonModelBinaryResources": [
+    {
+      "entry": "DebugProbesKt.bin",
+      "bytes": 1733,
+      "kind": "Java class",
+      "magic": "CAFEBABE"
+    }
+  ],
+  "unclassifiedModelFilenameCandidates": [],
+  "apkUnchangedDuringAudit": true,
+  "scope": "Independent inspection of an already-built APK. No build, signing, device execution, source edits, or Desktop copy performed."
+}

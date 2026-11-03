@@ -11,7 +11,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -32,11 +30,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import dev.defter.app.DefterViewModel
 import dev.defter.app.audio.*
@@ -81,7 +79,7 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background), horizontalAlignment = Alignment.CenterHorizontally) {
         Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Row(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 12.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = audio::back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Seslerden geri dön")) }
                     Column(Modifier.weight(1f).padding(horizontal = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(selected?.title ?: if (owner != null) tr("Defter sesleri") else tr("Sesler"), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -91,9 +89,10 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
                 }
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         AudioRecorderStrip(audio, notes.page?.id?.takeIf { notes.notebookId == audio.scopeNotebookId }, audio::showActiveRecording)
         if (work.running) {
-            Surface(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+            Surface(Modifier.widthIn(max = 1080.dp).fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.secondaryContainer) {
                 Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                     Text(tr("Metne çevriliyor · %1\$s / %2\$s", TranscriptTools.clock(work.completedMs), TranscriptTools.clock(work.totalMs)), Modifier.weight(1f).padding(start = 10.dp), style = MaterialTheme.typography.bodySmall)
@@ -120,13 +119,13 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
             LazyColumn(Modifier.widthIn(max = 1080.dp).fillMaxWidth().weight(1f), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 item {
                     Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(onClick = { create = true }, enabled = !audio.busy && !capture.isBusy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) { Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Kayıt başlat")) }
-                        OutlinedButton(onClick = { audio.prepareImport(); picker { importAudio.launch(arrayOf("audio/*")) } }, enabled = !audio.busy, modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) { Icon(Icons.Outlined.AudioFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Ses içe aktar")) }
+                        Button(onClick = { create = true }, enabled = !audio.busy && !capture.isBusy, modifier = Modifier.heightIn(min = 50.dp), shape = DefterDesign.ControlShape, contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)) { Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Kayıt başlat")) }
+                        OutlinedButton(onClick = { audio.prepareImport(); picker { importAudio.launch(arrayOf("audio/*")) } }, enabled = !audio.busy, modifier = Modifier.heightIn(min = 50.dp), shape = DefterDesign.ControlShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) { Icon(Icons.Outlined.AudioFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(tr("Ses içe aktar")) }
                     }
                 }
                 item {
                     OutlinedTextField(audio.query, audio::search, Modifier.fillMaxWidth(), placeholder = { Text(tr("Ses veya transkript ara")) }, singleLine = true,
-                        leadingIcon = { Icon(Icons.Outlined.Search, null) }, trailingIcon = { if (audio.searching) CircularProgressIndicator(Modifier.size(20.dp)) }, shape = RoundedCornerShape(18.dp),
+                        leadingIcon = { Icon(Icons.Outlined.Search, null) }, trailingIcon = { if (audio.searching) CircularProgressIndicator(Modifier.size(20.dp)) }, shape = DefterDesign.CardShape,
                         colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = MaterialTheme.colorScheme.surface, focusedContainerColor = MaterialTheme.colorScheme.surface, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant))
                 }
                 item {
@@ -142,9 +141,9 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
                         onDelete = { pendingPurge = trashSelection.filter { it in selectableIds }.takeIf { it.isNotEmpty() } })
                 }
                 if (records.isEmpty()) item {
-                    Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(26.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Surface(Modifier.fillMaxWidth(), shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                         Column(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 42.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+                            Surface(shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.primaryContainer) {
                                 Icon(Icons.Outlined.GraphicEq, null, Modifier.padding(20.dp).size(40.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                             Spacer(Modifier.height(22.dp))
@@ -155,17 +154,17 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
                 }
                 items(records, key = { it.id }) { item ->
                     var menu by remember { mutableStateOf(false) }
-                    Surface(onClick = { if (showTrash) toggleTrash(item.id) else audio.select(item.id) }, enabled = !audio.busy && (!showTrash || item.id in selectableIds), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, if (showTrash && item.id in trashSelection) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)) {
-                        Row(Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Surface(onClick = { if (showTrash) toggleTrash(item.id) else audio.select(item.id) }, enabled = !audio.busy && (!showTrash || item.id in selectableIds), modifier = Modifier.fillMaxWidth(), shape = DefterDesign.CardShape, color = if (showTrash && item.id in trashSelection) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, if (showTrash && item.id in trashSelection) MaterialTheme.colorScheme.primary.copy(alpha = .4f) else MaterialTheme.colorScheme.outlineVariant)) {
+                        Row(Modifier.padding(start = 16.dp, top = 14.dp, bottom = 14.dp, end = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                             if (showTrash) Checkbox(checked = item.id in trashSelection, onCheckedChange = { toggleTrash(item.id) },
                                 enabled = !audio.busy && item.id in selectableIds,
                                 modifier = Modifier.semantics { contentDescription = tr("Ses kaydını seç: %1\$s", item.title) })
-                            Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer) {
-                                Icon(Icons.Outlined.GraphicEq, null, Modifier.padding(13.dp).size(24.dp), tint = MaterialTheme.colorScheme.primary)
+                            Surface(shape = DefterDesign.ControlShape, color = MaterialTheme.colorScheme.surfaceContainer) {
+                                Icon(Icons.Outlined.GraphicEq, null, Modifier.padding(12.dp).size(22.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                                 Text(item.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                Text("${TranscriptTools.clock(item.durationMs)} · ${audio.library.notebooks.firstOrNull { it.id == item.notebookId }?.title ?: tr("Bağımsız ses")}", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("${TranscriptTools.clock(item.durationMs)} · ${audio.library.notebooks.firstOrNull { it.id == item.notebookId }?.title ?: tr("Bağımsız ses")}", Modifier.padding(top = 4.dp), maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Box {
                                 IconButton(onClick = { menu = true }, enabled = !audio.busy) { Icon(Icons.Outlined.MoreVert, tr("Ses seçenekleri %1\$s", item.title)) }
@@ -216,11 +215,11 @@ fun AudioRecorderStrip(audio: AudioViewModel, pageId: String?, onOpen: () -> Uni
     if (!capture.isBusy && capture.error == null) return
     val stripColor by animateColorAsState(
         if (capture.phase == AudioRecorderPhase.PAUSED) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primaryContainer,
-        animationSpec = tween(200), label = "recordingStateColor"
+        animationSpec = defterTween(200), label = "recordingStateColor"
     )
     Surface(modifier = Modifier.fillMaxWidth(), color = stripColor) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Column(Modifier.widthIn(max = 1080.dp).fillMaxWidth().animateContentSize(tween(200))) {
+            Column(Modifier.widthIn(max = 1080.dp).fillMaxWidth().animateContentSize(defterTween(200))) {
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     TextButton(onClick = onOpen, modifier = Modifier.heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)) {
                         Icon(Icons.Outlined.Mic, null, Modifier.size(20.dp))
@@ -254,21 +253,16 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
     val active = recording.deletedAt == null
     LazyColumn(Modifier.widthIn(max = 960.dp).fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
-            Surface(shape = RoundedCornerShape(26.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            Surface(shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                 Column(Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        val playing = playback.isPlaying && playback.recordingId == recording.id
-                        val playColor by animateColorAsState(if (playing) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary, tween(180), label = "playbackControlColor")
-                        val playContent by animateColorAsState(if (playing) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimary, tween(180), label = "playbackControlContent")
-                        FilledIconButton(onClick = audio::togglePlayback, enabled = recording.parts.isNotEmpty() && !capture.isBusy, modifier = Modifier.size(60.dp), shape = RoundedCornerShape(20.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = playColor, contentColor = playContent)) {
-                            Icon(if (playing) Icons.Outlined.Pause else Icons.Outlined.PlayArrow, tr("Sesi oynat veya duraklat"), Modifier.size(30.dp))
-                        }
-                        Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                            Text("${TranscriptTools.clock(position)} / ${TranscriptTools.clock(recording.durationMs)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                            Text(if (recording.state == AudioRecordingState.INTERRUPTED) tr("Kesintiden kurtarılan kayıt") else tr("Cihazında saklanıyor"), Modifier.padding(top = 3.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        TextButton(onClick = { audio.player.setSpeed(if (playback.speed >= 2f) .75f else playback.speed + .25f) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("${playback.speed}×", fontWeight = FontWeight.SemiBold) }
-                    }
+                    DefterPlaybackHeader(
+                        time = "${TranscriptTools.clock(position)} / ${TranscriptTools.clock(recording.durationMs)}",
+                        status = if (recording.state == AudioRecordingState.INTERRUPTED) tr("Kesintiden kurtarılan kayıt") else tr("Cihazında saklanıyor"),
+                        speed = playback.speed, playing = playback.isPlaying && playback.recordingId == recording.id,
+                        enabled = recording.parts.isNotEmpty() && !capture.isBusy,
+                        onPlayPause = audio::togglePlayback,
+                        onSpeed = { audio.player.setSpeed(if (playback.speed >= 2f) .75f else playback.speed + .25f) }
+                    )
                     Slider(value = position.toFloat().coerceIn(0f, recording.durationMs.coerceAtLeast(1).toFloat()), onValueChange = { audio.player.seekTo(it.toLong()) }, valueRange = 0f..recording.durationMs.coerceAtLeast(1).toFloat(), enabled = recording.durationMs > 0 && !capture.isBusy, modifier = Modifier.padding(top = 8.dp))
                     if (playback.error != null && playback.recordingId == recording.id) Text(playback.error.orEmpty(), color = MaterialTheme.colorScheme.error)
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 4.dp))
@@ -283,7 +277,7 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
             }
         }
         if (active) item {
-            Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            Surface(shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("tr" to tr("Türkçe"), "en" to tr("İngilizce"), "auto" to tr("Otomatik")).forEach { (tag, title) -> AudioFilterChip(language == tag, { language = tag }, title, enabled = !processing) }
@@ -293,10 +287,10 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                             if (model.status != WhisperModelStatus.READY) onModel()
                             else if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE || (recording.transcribedUntilMs > 0 && language != recording.transcriptionLanguage)) confirmRestart = true
                             else audio.transcribe(language)
-                        }, enabled = !audio.busy && !work.running && !capture.isBusy && recording.parts.isNotEmpty(), modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp)) {
+                        }, enabled = !audio.busy && !work.running && !capture.isBusy && recording.parts.isNotEmpty(), modifier = Modifier.heightIn(min = 50.dp), shape = DefterDesign.ControlShape) {
                             Icon(Icons.Outlined.Transcribe, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text(if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE) tr("Yeniden metne çevir") else if (recording.transcribedUntilMs > 0) tr("Çevirmeye devam et") else tr("Metne çevir"))
                         }
-                        OutlinedButton(onClick = { audio.addBookmark(notes.page?.id?.takeIf { notes.notebookId == recording.notebookId }) }, enabled = recording.parts.isNotEmpty() && !audio.busy && (!capture.isBusy || capture.recordingId == recording.id), modifier = Modifier.heightIn(min = 50.dp), shape = RoundedCornerShape(16.dp), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) { Text(tr("İşaret koy")) }
+                        OutlinedButton(onClick = { audio.addBookmark(notes.page?.id?.takeIf { notes.notebookId == recording.notebookId }) }, enabled = recording.parts.isNotEmpty() && !audio.busy && (!capture.isBusy || capture.recordingId == recording.id), modifier = Modifier.heightIn(min = 50.dp), shape = DefterDesign.ControlShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) { Text(tr("İşaret koy")) }
                     }
                     recording.transcriptionError?.let { Text(it, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
                     if (recording.transcriptionStatus == TranscriptionStatus.COMPLETE && recording.transcript.isEmpty()) Text(tr("Bu kayıtta tanınan konuşma bulunamadı."), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodyMedium)
@@ -306,7 +300,7 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
         if (recording.bookmarks.isNotEmpty()) {
             item { Text(tr("Zaman işaretleri"), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
             items(recording.bookmarks, key = { "bookmark-${it.id}" }) { mark ->
-                Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                Surface(Modifier.fillMaxWidth(), shape = DefterDesign.CardShape, color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                     Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                         TextButton(onClick = { audio.playAt(mark.positionMs) }, modifier = Modifier.heightIn(min = 48.dp)) {
                             Icon(Icons.Outlined.BookmarkBorder, null, Modifier.size(20.dp))
@@ -333,9 +327,9 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
         }
         items(recording.transcript, key = { it.id }) { segment ->
             val current = playback.isPlaying && playback.recordingId == recording.id && position in segment.startMs..segment.endMs
-            val segmentColor by animateColorAsState(if (current) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, tween(220), label = "transcriptSegmentColor")
-            val segmentBorder by animateColorAsState(if (current) MaterialTheme.colorScheme.primary.copy(alpha = .35f) else MaterialTheme.colorScheme.outlineVariant, tween(220), label = "transcriptSegmentBorder")
-            Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(22.dp), color = segmentColor, border = BorderStroke(1.dp, segmentBorder)) {
+            val segmentColor by animateColorAsState(if (current) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, defterTween(220), label = "transcriptSegmentColor")
+            val segmentBorder by animateColorAsState(if (current) MaterialTheme.colorScheme.primary.copy(alpha = .45f) else MaterialTheme.colorScheme.outlineVariant, defterTween(220), label = "transcriptSegmentBorder")
+            Surface(Modifier.fillMaxWidth().semantics { selected = current }, shape = DefterDesign.CardShape, color = segmentColor, border = BorderStroke(1.dp, segmentBorder)) {
                 Column(Modifier.padding(horizontal = 18.dp, vertical = 12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { audio.playAt(segment.startMs) }, modifier = Modifier.heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)) { Text(TranscriptTools.clock(segment.startMs), fontWeight = FontWeight.SemiBold); Spacer(Modifier.width(4.dp)); Icon(Icons.Outlined.PlayArrow, null, Modifier.size(18.dp)) }
@@ -343,7 +337,7 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
                         if (active && !processing) IconButton(onClick = { editId = segment.id; editText = segment.text }) { Icon(Icons.Outlined.Edit, tr("Transkript bölümünü düzenle")) }
                         if (notes.page != null && active) IconButton(onClick = { notes.addText(segment.text); audio.close() }) { Icon(Icons.Outlined.PostAdd, tr("Transkripti açık sayfaya ekle")) }
                     }
-                    SelectionContainer { Text(segment.text, Modifier.padding(top = 2.dp, bottom = 8.dp), style = MaterialTheme.typography.bodyLarge, lineHeight = 25.sp) }
+                    SelectionContainer { Text(segment.text, Modifier.padding(top = 2.dp, bottom = 8.dp), style = MaterialTheme.typography.bodyLarge) }
                     if (segment.edited) Text(tr("Düzenlendi"), Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
@@ -357,12 +351,13 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
 
 @Composable
 private fun AudioFilterChip(selected: Boolean, onClick: () -> Unit, title: String, enabled: Boolean = true) {
-    val container by animateColorAsState(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, tween(180), label = "audioFilterContainer")
-    val content by animateColorAsState(if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant, tween(180), label = "audioFilterContent")
-    val border by animateColorAsState(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .18f) else MaterialTheme.colorScheme.outlineVariant, tween(180), label = "audioFilterBorder")
-    FilterChip(selected = selected, onClick = onClick, enabled = enabled, modifier = Modifier.heightIn(min = 48.dp), label = { Text(title, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) }, shape = RoundedCornerShape(14.dp),
+    val container by animateColorAsState(if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, defterTween(180), label = "audioFilterContainer")
+    val content by animateColorAsState(if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant, defterTween(180), label = "audioFilterContent")
+    val border by animateColorAsState(if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .18f) else MaterialTheme.colorScheme.outlineVariant, defterTween(180), label = "audioFilterBorder")
+    FilterChip(selected = selected, onClick = onClick, enabled = enabled, modifier = Modifier.heightIn(min = DefterDesign.MinTouchTarget), label = { Text(title, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium) }, shape = DefterDesign.ControlShape,
         colors = FilterChipDefaults.filterChipColors(containerColor = container, selectedContainerColor = container, labelColor = content, selectedLabelColor = content),
-        border = FilterChipDefaults.filterChipBorder(enabled = enabled, selected = selected, borderColor = border, selectedBorderColor = border))
+        border = FilterChipDefaults.filterChipBorder(enabled = enabled, selected = selected, borderColor = border, selectedBorderColor = border),
+        leadingIcon = if (selected) { { Icon(Icons.Outlined.Check, null, Modifier.size(16.dp)) } } else null)
 }
 
 @Composable

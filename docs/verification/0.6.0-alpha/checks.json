@@ -1,0 +1,25 @@
+{
+  "unitIntegrationUi": {
+    "tests": 342,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": 56,
+  "lint": {
+    "Warning": 18,
+    "Information": 1
+  },
+  "lintWarningsById": {
+    "OldTargetApi": 1,
+    "AppBundleLocaleChanges": 1,
+    "ObsoleteSdkInt": 1,
+    "StaticFieldLeak": 2,
+    "UsableSpace": 3,
+    "MonochromeLauncherIcon": 2,
+    "UseKtx": 7,
+    "ClickableViewAccessibility": 1
+  },
+  "sourceStageFilesMatched": 1596,
+  "physicalDeviceClaim": false
+}

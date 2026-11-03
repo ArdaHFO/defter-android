@@ -3,8 +3,6 @@ package dev.defter.app.ui
 import dev.defter.app.localization.tr
 import dev.defter.app.localization.quantity
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -23,10 +21,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,37 +32,14 @@ import dev.defter.app.model.DrawingTool
 
 @Composable
 fun NotebookTabs(model: DefterViewModel, onChoose: () -> Unit) {
-    Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         model.openTabs.forEach { id ->
             model.library.notebooks.firstOrNull { it.id == id && it.deletedAt == null }?.let { book ->
-                val isSelected = model.notebookId == id
-                val tabColor by animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                    animationSpec = tween(180), label = "Notebook tab selection"
-                )
-                val tabOutline by animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = .22f) else MaterialTheme.colorScheme.outlineVariant,
-                    animationSpec = tween(180), label = "Notebook tab outline"
-                )
-                Surface(color = tabColor, border = BorderStroke(1.dp, tabOutline),
-                    shape = RoundedCornerShape(14.dp), modifier = Modifier.padding(end = 8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(onClick = { model.openNotebook(id) }, enabled = !model.busy,
-                            colors = ButtonDefaults.textButtonColors(contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant),
-                            modifier = Modifier.widthIn(max = 200.dp).semantics { contentDescription = tr("Sekme %1\$s", book.title); selected = isSelected }) {
-                            Icon(Icons.Outlined.AutoStories, null, Modifier.size(17.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(book.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                                modifier = Modifier.clearAndSetSemantics {})
-                        }
-                        IconButton(onClick = { model.closeTab(id) }, enabled = !model.busy) { Icon(Icons.Outlined.Close, tr("%1\$s sekmesini kapat", book.title), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    }
-                }
+                DefterNotebookTab(book.title, model.notebookId == id, !model.busy,
+                    onSelect = { model.openNotebook(id) }, onClose = { model.closeTab(id) })
             }
         }
-        FilledTonalIconButton(onClick = onChoose, enabled = !model.busy, shape = RoundedCornerShape(14.dp)) { Icon(Icons.Outlined.Add, tr("Sekme aç"), Modifier.size(20.dp)) }
+        FilledTonalIconButton(onClick = onChoose, enabled = !model.busy, modifier = Modifier.size(DefterDesign.MinTouchTarget), shape = DefterDesign.ControlShape) { Icon(Icons.Outlined.Add, tr("Sekme aç"), Modifier.size(20.dp)) }
     }
 }
 
@@ -118,18 +89,19 @@ private fun ReferencePane(model: DefterViewModel) {
     val book = model.library.notebooks.firstOrNull { it.id == model.referenceNotebookId }
     val index = book?.pageIds?.indexOf(doc.id) ?: -1
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceContainer)) {
-        Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(start = 16.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(10.dp)) {
-                Icon(Icons.Outlined.AutoStories, null, Modifier.padding(9.dp).size(18.dp), tint = MaterialTheme.colorScheme.primary)
+        Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(start = 12.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = RoundedCornerShape(10.dp)) {
+                Icon(Icons.Outlined.AutoStories, null, Modifier.padding(9.dp).size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(book?.title.orEmpty(), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(tr("Referans · %1\$s/%2\$s", index + 1, book?.pageIds?.size ?: 0), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            IconButton(onClick = model::swapPanes, enabled = !model.busy) { Icon(Icons.Outlined.SwapHoriz, tr("Referansı düzenlemeye geç")) }
-            IconButton(onClick = model::closeReference, enabled = !model.busy) { Icon(Icons.Outlined.Close, tr("Referansı kapat")) }
+            IconButton(onClick = model::swapPanes, enabled = !model.busy, modifier = Modifier.size(DefterDesign.MinTouchTarget)) { Icon(Icons.Outlined.SwapHoriz, tr("Referansı düzenlemeye geç"), tint = MaterialTheme.colorScheme.primary) }
+            IconButton(onClick = model::closeReference, enabled = !model.busy, modifier = Modifier.size(DefterDesign.MinTouchTarget)) { Icon(Icons.Outlined.Close, tr("Referansı kapat")) }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         AndroidView(factory = { NotebookCanvas(it) }, update = { view ->
             view.document = doc
             view.assets = model.referenceAssets
@@ -137,11 +109,11 @@ private fun ReferencePane(model: DefterViewModel) {
             view.isReadOnly = true
             view.isEnabled = !model.busy
         }, modifier = Modifier.weight(1f).fillMaxWidth())
-        Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface), horizontalArrangement = Arrangement.Center) {
-            IconButton(onClick = { model.stepReference(-1) }, enabled = !model.busy && index > 0) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Referansta önceki sayfa")) }
-            Icon(Icons.Outlined.PanTool, null, Modifier.align(Alignment.CenterVertically).size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(tr("Kaydır ve yakınlaştır"), Modifier.align(Alignment.CenterVertically).padding(horizontal = 7.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            IconButton(onClick = { model.stepReference(1) }, enabled = !model.busy && index >= 0 && index < (book?.pageIds?.lastIndex ?: 0)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, tr("Referansta sonraki sayfa")) }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { model.stepReference(-1) }, enabled = !model.busy && index > 0, modifier = Modifier.size(DefterDesign.MinTouchTarget)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Referansta önceki sayfa")) }
+            Text(tr("Kaydır ve yakınlaştır"), Modifier.weight(1f).padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.labelSmall, textAlign = androidx.compose.ui.text.style.TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            IconButton(onClick = { model.stepReference(1) }, enabled = !model.busy && index >= 0 && index < (book?.pageIds?.lastIndex ?: 0), modifier = Modifier.size(DefterDesign.MinTouchTarget)) { Icon(Icons.AutoMirrored.Outlined.ArrowForward, tr("Referansta sonraki sayfa")) }
         }
     }
 }

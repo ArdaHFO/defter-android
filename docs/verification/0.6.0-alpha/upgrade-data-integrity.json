@@ -1,0 +1,8 @@
+{
+  "fromVersion": "0.5.0-alpha",
+  "toVersion": "0.6.0-alpha",
+  "unchangedFiles": 9,
+  "byteExact": true,
+  "appDataCleared": false,
+  "verifiedBeforeAddingNewTestFixtures": true
+}

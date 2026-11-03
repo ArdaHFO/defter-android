@@ -29,6 +29,8 @@ import dev.defter.app.recognition.HandwritingRecognizer
 import dev.defter.app.recognition.MlKitHandwritingRecognizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -42,6 +44,10 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     var notebookId by mutableStateOf<String?>(null); private set
     var page by mutableStateOf<PageDocument?>(null); private set
     var assets by mutableStateOf<Map<String, Bitmap>>(emptyMap()); private set
+    var loadedPages by mutableStateOf<Map<String, PageDocument>>(emptyMap()); private set
+    var loadedPageAssets by mutableStateOf<Map<String, Map<String, Bitmap>>>(emptyMap()); private set
+    var pageWindowLoading by mutableStateOf(false); private set
+    var explicitNavigationToken by mutableStateOf(0L); private set
     private val editorPreferences = application.getSharedPreferences("editor_preferences", Context.MODE_PRIVATE)
     private var drawingConfig by mutableStateOf(DrawingConfig(touchDrawing = editorPreferences.getBoolean("finger_draws", false)))
     var config: DrawingConfig
@@ -80,8 +86,17 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     private var searchJob: Job? = null
     private var searchGeneration = 0L
     private val tabPages = mutableMapOf<String, String>()
-    private val undo = ArrayDeque<PageDocument>()
-    private val redo = ArrayDeque<PageDocument>()
+    private var undo = ArrayDeque<PageDocument>()
+    private var redo = ArrayDeque<PageDocument>()
+    private data class PageHistory(val undo: ArrayDeque<PageDocument>, val redo: ArrayDeque<PageDocument>)
+    private val pageHistories = mutableMapOf<String, PageHistory>()
+    private data class WindowRequest(val generation: Long, val notebookId: String, val centerId: String, val visibleIds: List<String>, val ids: List<String>)
+    private var cachedNotebookId: String? = null
+    private var windowGeneration = 0L
+    private var windowRequest: WindowRequest? = null
+    private var windowJob: Job? = null
+    private var windowCenterId: String? = null
+    private var windowVisibleIds: List<String> = emptyList()
     private val failedSaves = mutableMapOf<String, PageDocument>()
     private var lastSave: Job? = null
     private var copiedElements: List<PageElement> = emptyList()
@@ -118,7 +133,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
                 }
             }
             catch (e: Exception) { error = message(e) }
-            finally { loading = false; persistSession() }
+            finally { loading = false; reconcilePageWindow(); persistSession() }
         }
     }
 
@@ -148,11 +163,12 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     private fun operation(block: suspend () -> Unit) {
         if (loading) { viewModelScope.launch { startup.join(); operation(block) }; return }
         if (busy) return
+        invalidateWindowRequest()
         busy = true
         viewModelScope.launch {
             try { block() }
             catch (e: Exception) { error = message(e) }
-            finally { busy = false; progress = ""; persistSession() }
+            finally { busy = false; progress = ""; reconcilePageWindow(); persistSession() }
         }
     }
 
@@ -162,6 +178,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     private fun save(snapshot: PageDocument) {
+        cacheEditedPage(snapshot)
         if ((latestSnapshots[snapshot.id]?.revision ?: -1) > snapshot.revision) return
         latestSnapshots[snapshot.id] = snapshot
         val previous = lastSave
@@ -292,12 +309,203 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     private suspend fun loadPage(id: String) { activatePage(repository.loadPage(id)) }
     private suspend fun activatePage(next: PageDocument) {
         val decoded = withContext(Dispatchers.IO) { decodeAssets(next) }
+        storePageHistory()
         page = next; assets = decoded
         committedRevisions[next.id] = next.revision
         latestSnapshots.remove(next.id)
+        // Explicit page navigation keeps its existing fresh-history behavior. Natural scroll
+        // activation below restores the page's in-session history instead.
+        pageHistories.remove(next.id)
+        restorePageHistory(next.id)
+        windowCenterId = next.id
+        windowVisibleIds = emptyList()
+        explicitNavigationToken++
+    }
+    private fun resetHistory() {
+        undo = ArrayDeque(); redo = ArrayDeque(); canUndo = false; canRedo = false
+    }
+
+    private fun storePageHistory() {
+        page?.id?.let { pageHistories[it] = PageHistory(undo, redo) }
+    }
+
+    private fun restorePageHistory(id: String) {
+        val history = pageHistories.getOrPut(id) { PageHistory(ArrayDeque(), ArrayDeque()) }
+        undo = history.undo; redo = history.redo
+        canUndo = undo.isNotEmpty(); canRedo = redo.isNotEmpty()
+    }
+
+    /** Main-thread only, used before pen-down/selection and idle viewport-center changes. */
+    fun activateLoadedPage(id: String): Boolean {
+        val book = notebook ?: return false
+        if (busy || loading || book.deletedAt != null || id !in book.pageIds || cachedNotebookId != book.id) return false
+        val cached = loadedPages[id] ?: return false
+        val decoded = loadedPageAssets[id] ?: return false
+        val current = latestSnapshots[id] ?: failedSaves[id] ?: cached
+        if (page?.id != id) {
+            storePageHistory()
+            page = current; assets = decoded
+            restorePageHistory(id)
+            tabPages[book.id] = id
+            persistSession()
+        }
+        return true
+    }
+
+    private fun invalidateWindowRequest() {
+        windowGeneration++
+        windowRequest = null
+        pageWindowLoading = false
+    }
+
+    /** Finger-pan only changes the desired working set; no disk access or global busy lock. */
+    fun requestPageWindow(centerPageId: String, visiblePageIds: List<String> = emptyList()) {
+        if (loading || busy) return
+        val book = notebook?.takeIf { it.deletedAt == null } ?: return
+        if (centerPageId !in book.pageIds) return
+        windowCenterId = centerPageId
+        windowVisibleIds = visiblePageIds.toList()
+        val ids = NotebookPageWindow.select(book.pageIds, centerPageId, visiblePageIds, page?.id)
+        if (cachedNotebookId != book.id) resetWindowForNotebook(book.id)
+        if (windowRequest?.let { it.notebookId == book.id && it.ids == ids } == true &&
+            (pageWindowLoading || ids.all { it in loadedPages && it in loadedPageAssets })) return
+        trimWindow(ids.toSet())
+        val request = WindowRequest(++windowGeneration, book.id, centerPageId, visiblePageIds.toList(), ids)
+        windowRequest = request
+        pageWindowLoading = true
+        if (windowJob?.isActive == true) return
+        // One loader processes the latest request. Superseding a window does not spawn another
+        // decoder or cancel away ownership of an allocated-but-not-yet-returned bitmap.
+        windowJob = viewModelScope.launch {
+            var processed = -1L
+            try {
+                while (isActive) {
+                    val next = windowRequest ?: break
+                    if (next.generation == processed) break
+                    try { loadPageWindow(next) }
+                    catch (cancelled: CancellationException) { throw cancelled }
+                    catch (failure: Exception) { if (isCurrentWindow(next)) error = message(failure) }
+                    finally {
+                        processed = next.generation
+                        if (isCurrentWindow(next)) pageWindowLoading = false
+                    }
+                }
+            } finally { if (windowRequest?.generation == processed) pageWindowLoading = false }
+        }
+    }
+
+    private fun isCurrentWindow(request: WindowRequest): Boolean =
+        !busy && !loading && notebookId == request.notebookId && windowRequest?.generation == request.generation
+
+    private suspend fun loadPageWindow(request: WindowRequest) {
+        val fresh = repository.loadLibrary()
+        if (!isCurrentWindow(request)) return
+        val book = fresh.notebooks.firstOrNull { it.id == request.notebookId && it.deletedAt == null }
+        library = fresh
+        if (book == null) {
+            invalidateWindowRequest()
+            loadedPages = emptyMap(); loadedPageAssets = emptyMap()
+            page = null; assets = emptyMap(); notebookId = null
+            resetHistory(); persistSession()
+            return
+        }
+        val center = request.centerId.takeIf { it in book.pageIds } ?: book.pageIds.first()
+        val ids = NotebookPageWindow.select(book.pageIds, center, request.visibleIds, page?.id)
+        trimWindow(ids.toSet())
+        if (page?.id !in book.pageIds) { page = null; assets = emptyMap(); resetHistory() }
+        for (id in ids) {
+            if (!isCurrentWindow(request) || id !in notebook?.pageIds.orEmpty()) return
+            if (id in loadedPages && id in loadedPageAssets) continue
+            val disk = repository.loadPage(id)
+            if (!isCurrentWindow(request)) return
+            // Reading the library again guards deletion/move while a slow page read was pending.
+            val latestLibrary = repository.loadLibrary()
+            if (!isCurrentWindow(request)) return
+            val currentOwner = latestLibrary.notebooks.firstOrNull { it.id == request.notebookId && it.deletedAt == null }
+            if (currentOwner == null || id !in currentOwner.pageIds) {
+                library = latestLibrary
+                reconcilePageWindow()
+                return
+            }
+            var document = latestSnapshots[id] ?: failedSaves[id] ?: disk
+            val decoded = decodeAssets(document, 1024)
+            if (!isCurrentWindow(request) || id !in notebook?.pageIds.orEmpty()) {
+                decoded.values.forEach(Bitmap::recycle)
+                return
+            }
+            val finalIndex = try { repository.loadLibrary() } catch (failure: Exception) {
+                decoded.values.forEach(Bitmap::recycle)
+                throw failure
+            }
+            if (!isCurrentWindow(request)) { decoded.values.forEach(Bitmap::recycle); return }
+            val finalOwner = finalIndex.notebooks.firstOrNull { it.id == request.notebookId && it.deletedAt == null }
+            if (finalOwner == null || id !in finalOwner.pageIds) {
+                decoded.values.forEach(Bitmap::recycle)
+                library = finalIndex
+                reconcilePageWindow()
+                return
+            }
+            library = finalIndex
+            val newer = latestSnapshots[id] ?: failedSaves[id] ?: loadedPages[id]
+            if (newer != null && newer.revision > document.revision) {
+                if (assetKeys(newer) != assetKeys(document)) {
+                    decoded.values.forEach(Bitmap::recycle)
+                    windowRequest = request.copy(generation = ++windowGeneration)
+                    return
+                }
+                document = newer
+            }
+            if ((committedRevisions[id] ?: -1L) > document.revision) {
+                // A queued local save may have completed after the disk read and removed its
+                // pending snapshot. Re-read instead of publishing that older disk snapshot.
+                decoded.values.forEach(Bitmap::recycle)
+                windowRequest = request.copy(generation = ++windowGeneration)
+                return
+            }
+            if (id !in latestSnapshots && id !in failedSaves)
+                committedRevisions[id] = maxOf(committedRevisions[id] ?: disk.revision, disk.revision)
+            loadedPages = loadedPages + (id to document)
+            loadedPageAssets = loadedPageAssets + (id to decoded)
+        }
+        if (isCurrentWindow(request) && page == null) activateLoadedPage(center)
+    }
+
+    private fun assetKeys(document: PageDocument): Set<String> =
+        document.elements.filterIsInstance<ImageElement>().map { it.assetId }.toSet() +
+            listOfNotNull(document.pdfBackground?.let { "pdf:${it.assetId}:${it.pageIndex}" })
+
+    private fun cacheEditedPage(document: PageDocument) {
+        if (document.id in loadedPages) loadedPages = loadedPages + (document.id to document)
+    }
+
+    private fun resetWindowForNotebook(id: String?) {
+        invalidateWindowRequest()
+        cachedNotebookId = id
+        loadedPages = emptyMap(); loadedPageAssets = emptyMap()
+        pageHistories.clear()
         resetHistory()
     }
-    private fun resetHistory() { undo.clear(); redo.clear(); canUndo = false; canRedo = false }
+
+    private fun trimWindow(ids: Set<String>) {
+        // Published bitmaps can still be held by the previous AndroidView frame. Drop references
+        // instead of recycling underneath that frame; unpublished obsolete decodes are recycled.
+        loadedPages = loadedPages.filterKeys { it in ids }
+        loadedPageAssets = loadedPageAssets.filterKeys { it in ids }
+        pageHistories.keys.retainAll(ids + latestSnapshots.keys + failedSaves.keys)
+    }
+
+    private fun reconcilePageWindow() {
+        val book = notebook?.takeIf { it.deletedAt == null }
+        if (book == null) { resetWindowForNotebook(null); return }
+        if (cachedNotebookId != book.id) resetWindowForNotebook(book.id)
+        val current = page?.takeIf { it.id in book.pageIds }
+        if (current != null) {
+            loadedPages = loadedPages + (current.id to current)
+            loadedPageAssets = loadedPageAssets + (current.id to assets)
+        }
+        val center = windowCenterId?.takeIf { it in book.pageIds } ?: current?.id ?: book.pageIds.first()
+        requestPageWindow(center, windowVisibleIds)
+    }
 
     fun selectPage(id: String) = operation {
         awaitSaves(); require(id in (notebook?.pageIds ?: emptyList())) { tr("Sayfa bu defterde değil.") }
@@ -411,12 +619,18 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     private fun refreshAssets(document: PageDocument) {
+        val requestedBook = notebookId
         viewModelScope.launch {
             try {
                 val decoded = withContext(Dispatchers.IO) { decodeAssets(document) }
-                if (page?.id == document.id && page?.revision == document.revision) assets = decoded
-                else decoded.values.forEach(Bitmap::recycle)
-            } catch (e: Exception) { error = message(e) }
+                val active = notebookId == requestedBook && page?.id == document.id && page?.revision == document.revision
+                val cached = cachedNotebookId == requestedBook && loadedPages[document.id]?.revision == document.revision
+                if (active) assets = decoded
+                if (cached) loadedPageAssets = loadedPageAssets + (document.id to decoded)
+                if (!active && !cached) decoded.values.forEach(Bitmap::recycle)
+            } catch (e: Exception) {
+                if (notebookId == requestedBook && (page?.id == document.id || document.id in loadedPages)) error = message(e)
+            }
         }
     }
 
@@ -601,7 +815,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     suspend fun pageThumbnail(id: String): Bitmap {
-        val visibleSnapshot = page?.takeIf { it.id == id }
+        val visibleSnapshot = latestSnapshots[id] ?: failedSaves[id] ?: loadedPages[id] ?: page?.takeIf { it.id == id }
         return withContext(Dispatchers.IO) {
         val doc = visibleSnapshot ?: repository.loadPage(id)
         val decoded = decodeAssets(doc, 384)
@@ -672,7 +886,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
         recognitionCandidates = candidates; recognitionSourcePage = doc.id; recognitionSourceRevision = doc.revision; recognitionStrokeIds = strokes.map { it.id }.toSet()
         if (selectedIds.isEmpty()) {
             val indexed = doc.copy(revision = doc.revision + 1, recognitionRevision = doc.revision + 1, textRecognition = candidates.first(), recognitionLanguage = recognitionLanguage)
-            repository.savePage(indexed, doc.revision); committedRevisions[doc.id] = indexed.revision; page = indexed
+            repository.savePage(indexed, doc.revision); committedRevisions[doc.id] = indexed.revision; page = indexed; cacheEditedPage(indexed)
             recognitionSourceRevision = indexed.revision; refreshReferenceIfSame(indexed)
         }
     }
@@ -704,6 +918,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
             val indexed = doc.copy(revision = doc.revision + 1, recognitionRevision = doc.revision + 1, textRecognition = text, recognitionLanguage = recognitionLanguage)
             repository.savePage(indexed, doc.revision); committedRevisions[id] = indexed.revision
             if (page?.id == id) page = indexed
+            cacheEditedPage(indexed)
             refreshReferenceIfSame(indexed)
         }
         library = repository.loadLibrary(); notice = tr("El yazısı dizini güncellendi. Kütüphaneden içerik arayabilirsin.")

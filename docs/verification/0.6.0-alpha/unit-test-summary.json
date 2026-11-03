@@ -1,0 +1,450 @@
+[
+  {
+    "name": "dev.defter.app.audio.AudioCaptureRecoveryTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.069"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioDecoderTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.085"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioPermanentDeletionTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.766"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioPlaybackControllerTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.24"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioRecorderServiceTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.504"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioSearchViewModelTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.964"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioTimelineTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.008"
+  },
+  {
+    "name": "dev.defter.app.audio.AudioTranscriptionServiceTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.437"
+  },
+  {
+    "name": "dev.defter.app.audio.TranscriptionRunnerTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "5.317"
+  },
+  {
+    "name": "dev.defter.app.audio.TranscriptToolsTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.011"
+  },
+  {
+    "name": "dev.defter.app.audio.WhisperModelManagerTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.208"
+  },
+  {
+    "name": "dev.defter.app.audio.WhisperTranscriberTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.681"
+  },
+  {
+    "name": "dev.defter.app.ContinuousNotebookViewModelTest",
+    "tests": "8",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "14.346"
+  },
+  {
+    "name": "dev.defter.app.data.AudioImportTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.359"
+  },
+  {
+    "name": "dev.defter.app.data.AudioStorageTest",
+    "tests": "14",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "6.094"
+  },
+  {
+    "name": "dev.defter.app.data.DocumentRepositoryTest",
+    "tests": "15",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.234"
+  },
+  {
+    "name": "dev.defter.app.data.PermanentDeletionTest",
+    "tests": "13",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "8.083"
+  },
+  {
+    "name": "dev.defter.app.data.ProStorageTest",
+    "tests": "17",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.342"
+  },
+  {
+    "name": "dev.defter.app.data.StrictJsonTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.078"
+  },
+  {
+    "name": "dev.defter.app.data.SyncRepositoryTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "5.296"
+  },
+  {
+    "name": "dev.defter.app.DefterViewModelTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.139"
+  },
+  {
+    "name": "dev.defter.app.EditorNavigationViewModelTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "8.17"
+  },
+  {
+    "name": "dev.defter.app.ink.AdvancedCanvasTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.475"
+  },
+  {
+    "name": "dev.defter.app.ink.AdvancedInkEditingTest",
+    "tests": "12",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.309"
+  },
+  {
+    "name": "dev.defter.app.ink.AdvancedRendererTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.1"
+  },
+  {
+    "name": "dev.defter.app.ink.ContinuousNotebookCanvasTest",
+    "tests": "14",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.611"
+  },
+  {
+    "name": "dev.defter.app.ink.ElementGeometryTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.161"
+  },
+  {
+    "name": "dev.defter.app.ink.FingerNavigationTest",
+    "tests": "17",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.457"
+  },
+  {
+    "name": "dev.defter.app.ink.GeometryBudgetTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.145"
+  },
+  {
+    "name": "dev.defter.app.ink.NotebookCanvasTest",
+    "tests": "16",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.401"
+  },
+  {
+    "name": "dev.defter.app.ink.PageEdgeGestureTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.002"
+  },
+  {
+    "name": "dev.defter.app.ink.PageRendererTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.12"
+  },
+  {
+    "name": "dev.defter.app.ink.PageStripLayoutTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.008"
+  },
+  {
+    "name": "dev.defter.app.ink.SmoothedHitGeometryTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.138"
+  },
+  {
+    "name": "dev.defter.app.ink.StylusButtonTest",
+    "tests": "16",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.409"
+  },
+  {
+    "name": "dev.defter.app.localization.LanguageSelectionUiTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.919"
+  },
+  {
+    "name": "dev.defter.app.localization.LocalizationTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.2"
+  },
+  {
+    "name": "dev.defter.app.model.NotebookPageWindowTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.017"
+  },
+  {
+    "name": "dev.defter.app.ProViewModelMemoryTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.796"
+  },
+  {
+    "name": "dev.defter.app.ProViewModelTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.524"
+  },
+  {
+    "name": "dev.defter.app.recognition.HandwritingRecognizerTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.063"
+  },
+  {
+    "name": "dev.defter.app.ui.AudioTrashSelectionTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.319"
+  },
+  {
+    "name": "dev.defter.app.ui.AudioWorkspaceTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "7.818"
+  },
+  {
+    "name": "dev.defter.app.ui.BulkTrashUiTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.87"
+  },
+  {
+    "name": "dev.defter.app.ui.DefterUiTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.734"
+  },
+  {
+    "name": "dev.defter.app.ui.FolderWorkflowTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.133"
+  },
+  {
+    "name": "dev.defter.app.ui.HigDesignTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.236"
+  },
+  {
+    "name": "dev.defter.app.ui.HistoryControlsTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.37"
+  },
+  {
+    "name": "dev.defter.app.ui.InputNavigationUiTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.061"
+  },
+  {
+    "name": "dev.defter.app.ui.ModernPreviewTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.601"
+  },
+  {
+    "name": "dev.defter.app.ui.ModernUiStateTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.533"
+  },
+  {
+    "name": "dev.defter.app.ui.ProEditorDialogsTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.395"
+  },
+  {
+    "name": "dev.defter.app.ui.ProPageManagerTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.555"
+  },
+  {
+    "name": "dev.defter.app.ui.ProSelectionStateTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.109"
+  },
+  {
+    "name": "dev.defter.app.ui.ProWorkspaceUiTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.921"
+  },
+  {
+    "name": "dev.defter.app.ui.ResponsiveWorkspaceTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "1.468"
+  }
+]

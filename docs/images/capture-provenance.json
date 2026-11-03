@@ -1,52 +1,47 @@
 {
-  "version": "0.5.0-alpha",
+  "version": "0.6.0-alpha",
   "capture_date": "2026-11-03",
   "locale": "en-US",
-  "renderer": "Actual MainActivity and Jetpack Compose UI; Robolectric 4.14.1 SDK 33 NATIVE graphics; native decorView.draw(Canvas(bitmap)).",
-  "synthetic_data": "English demo notebooks, vector lesson drawings, generated 60-second silent WAV fixtures, and manually seeded English transcript text.",
-  "limitations": [
-    "Not physical-device or emulator screenshots.",
-    "Not microphone recording, handwriting recognition, or speech transcription accuracy evidence."
-  ],
-  "production_source_unchanged": true,
-  "source_matches_capture_stage": true,
-  "capture_test_sha256": "58c30c31dd4a587ae4886f6809a4a34f504e542167fae0c55712b2638d7c9b59",
+  "renderer": "Actual MainActivity/Compose UI, Robolectric SDK33 NATIVE graphics, decorView.draw(Canvas(bitmap))",
+  "synthetic_data": "English demonstration notebooks and silent WAV with manually seeded transcript",
   "tests": {
-    "initial_capture_executed": 4,
-    "transcript_refinement_executed": 1,
-    "failures": 0,
-    "errors": 0
+    "executed": 4,
+    "failures": 0
   },
-  "gradle_task": ":app:testDebugUnitTest --tests dev.defter.app.ui.GithubEnglishPreviewTest",
   "apk_built_or_installed": false,
+  "production_source_unchanged": true,
+  "capture_test_sha256": "e5b960b7c3014999380aacc07622b98b2b15f553ffb07c5b61c88526fab5ef0e",
+  "limitations": [
+    "Not physical-device screenshots or speech/handwriting accuracy evidence"
+  ],
   "images": [
-    {
-      "file": "library-tablet.png",
-      "width": 1280,
-      "height": 800,
-      "bytes": 177549,
-      "sha256": "5f8d473e7b20a084a8c13e87f5cb300e2340b39c098e6dfee76170f2a24d8209"
-    },
-    {
-      "file": "editor-split.png",
-      "width": 1280,
-      "height": 800,
-      "bytes": 102061,
-      "sha256": "14879a75d1da2b1becd8895f0ea3141570f615e395daafa3bcc74518e5adf90a"
-    },
     {
       "file": "audio-phone-library.png",
       "width": 393,
       "height": 851,
-      "bytes": 36242,
-      "sha256": "21a6513eb5ec9c7decf7aed164512d297348ef019d01be8deebec31105ee747d"
+      "bytes": 37628,
+      "sha256": "1c58460637578cd1dc9932c932aea5a860ad404d21d88a49a93b3e17fa10dca3"
     },
     {
       "file": "audio-tablet-transcript.png",
       "width": 1280,
       "height": 900,
-      "bytes": 64377,
-      "sha256": "94aaa5dca454d0152638a9d9554ab1b61f2defecd7ec51a5bd021273fa46c35d"
+      "bytes": 66742,
+      "sha256": "287f87a74042a818ac9e1e6d471c978689ca5fe5d1981778c7452250d37fd809"
+    },
+    {
+      "file": "editor-split.png",
+      "width": 1280,
+      "height": 800,
+      "bytes": 100391,
+      "sha256": "c2c8af037677a0eb91f159063701f729696f97e79a49ff25e447a92f51f5a8db"
+    },
+    {
+      "file": "library-tablet.png",
+      "width": 1280,
+      "height": 800,
+      "bytes": 178678,
+      "sha256": "0d046b497a6109bafaa0cd08f2b203c3b8b200970a21b211b781f69c18de9dd9"
     }
   ]
 }

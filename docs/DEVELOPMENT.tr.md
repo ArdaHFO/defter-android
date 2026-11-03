@@ -1,4 +1,4 @@
-# Defter 0.5.0-alpha kullanım ve geliştirme notları
+# Defter 0.6.0-alpha kullanım ve geliştirme notları
 
 Tam özellik listesi [Türkçe README](../README.tr.md) ve [English README](../README.md) içindedir. Arayüz varsayılan olarak İngilizce açılır. **App language → Türkçe → Apply** seçimi kalıcıdır. Kullanıcının notları, defter adları ve transkriptleri çevrilmez.
 
@@ -10,9 +10,9 @@ Kalemin yan düğmesine basılı tutmak seçili silgi ayarlarını geçici olara
 
 Taşıma modunda uzun basmak sayfa işlemlerini açar. Kopyala, kes, yapıştır, tümünü seç ve seçimi sil kullanılabilir. Mürekkep, görsel ve metin seçimleri açık uygulama oturumunda sayfalar/defterler arasında düzenlenebilir olarak yapıştırılır. Süreç kapanınca bu iç pano kaybolur. Android panosundan dış metin ve görseller de yapıştırılabilir.
 
-Sayfanın alt sınırında biraz daha yukarı çekip ipucu hazır olduğunda bırakmak sonraki sayfaya geçer. Son sayfada bir yeni sayfa ekler. Üst sınırdan aşağı çekmek önceki sayfanın altını açar. Bu özellik sayfa sonunda geçiştir, kesintisiz uzun sayfa akışı değildir. Sayfa okları ve sayfa yöneticisi de kullanılabilir.
+Sayfalar kesintisiz bir dikey yüzeyde akar. İki sayfanın parçaları aynı anda görünür. Kalem dokunulan sayfayı düzenler. Son sayfanın altından ek çekip ipucu hazır olduğunda bırakmak tek yeni sayfa ekler. Oklar ve sayfa yöneticisi doğrudan hedef sayfanın başına gider.
 
-Geri al/yinele açık sayfa oturumundaki son 60 işlemi tutar. Sayfa değişince geçmiş sıfırlanır. Sayfa yöneticisi önizleme, sürükleyerek veya oklarla sıralama, çoğaltma, taşıma, kopyalama, silme ve geri getirme sağlar. Defterde en az bir aktif sayfa kalır.
+Geri al/yinele sayfa başına son 60 işlemi tutar. Doğal geçişte bellekteki sayfaların geçmişi korunur. Doğrudan gezinme hedef geçmişini sıfırlar; temiz sayfa bellek penceresinden çıkınca geçmişi bırakılabilir. Kaydı süren veya başarısız değişiklikler ayrı korunur. Sayfa yöneticisinde sıralama, çoğaltma, taşıma, kopyalama, silme ve geri getirme bulunur.
 
 Sekmelerde birden fazla defter açılır. Referans bölmesinde bağımsız gezinme ve yakınlaştırma yapılabilir. Düzenlemek için panellerin yerini değiştirin. Telefonda paneller üst üste yerleşir. Referans tarafı salt okunurdur.
 
@@ -51,4 +51,6 @@ Uygulama yerel çalışır. Bulut eşitleme ve ortak düzenleme yoktur. ML Kit G
 
 JDK 17, Gradle 8.13, SDK 35, Build Tools 35.0.0, NDK 28.2.13676358 ve CMake 3.22.1 kullanılır. [Derleme komutları](../README.md#build-from-source) ve [doğrulama kapsamı](VALIDATION.md) ayrı tutulur. `Check` test ve Lint çalıştırır, `Build` APK üretir. Özel imza anahtarını koruyun ve GitHub'a göndermeyin.
 
-Güncel tamamlanmış kontrol 309 test / 50 sınıf, sıfır başarısızlık ve sıfır Lint hatası / 27 uyarı kaydeder. Bu sonuçlar bütün Android cihazlarında veya fiziksel kalemde doğrulama anlamına gelmez.
+Güncel tamamlanmış kontrol 342 test / 56 sınıf, sıfır başarısızlık ve sıfır Lint hatası / 18 uyarı / 1 bilgi kaydeder. Bu sonuçlar bütün Android cihazlarında veya fiziksel kalemde doğrulama anlamına gelmez.
+
+Android 15 x86_64 üzerinde yedi instrumentation testi de geçti. İki sayfanın native Canvas piksel doğrulaması, sentetik kalem yönlendirmesi, geri alma, ekleme, yeniden açma ve gerçek PDF/ses motoru kontrolleri bu gruptadır. Ayrıntılar [doğrulama raporunda](VALIDATION.md).

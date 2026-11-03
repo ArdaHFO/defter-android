@@ -1,0 +1,11 @@
+
+dev.defter.app.ContinuousNotebookDeviceTest:.
+dev.defter.app.PdfExportTest:.
+dev.defter.app.PdfImportTest:.
+dev.defter.app.audio.WhisperNativeTest:....
+
+Time: 4.326
+
+OK (7 tests)
+
+

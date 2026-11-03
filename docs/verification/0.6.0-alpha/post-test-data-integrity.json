@@ -1,0 +1,6 @@
+{
+  "originalNoteAndAssetFiles": 5,
+  "allOriginalNoteAndAssetHashesUnchanged": true,
+  "scope": "Existing page and asset bytes only; test fixtures and their exports intentionally added.",
+  "libraryIndexExcludedBecauseTestsAddSyntheticNotebooks": true
+}

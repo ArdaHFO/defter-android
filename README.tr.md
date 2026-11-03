@@ -12,7 +12,7 @@ Basınca duyarlı kalem, PDF üzerinde çalışma, yerel yedekler ve cihaz üzer
 
 [Başlangıç](#başlangıç) · [Dil desteği](#dil-desteği) · [Kaynaktan derleme](#kaynaktan-derleme) · [Doğrulama](docs/VALIDATION.md) · [Sorun bildir](https://github.com/ArdaHFO/defter-android/issues)
 
-![Durum](https://img.shields.io/badge/durum-0.5.0--alpha-orange)
+![Durum](https://img.shields.io/badge/durum-0.6.0--alpha-orange)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)
 ![Arayüz](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4)
@@ -23,9 +23,9 @@ Basınca duyarlı kalem, PDF üzerinde çalışma, yerel yedekler ve cihaz üzer
 
 Defter, el yazısı sayfaları, içe aktarılan belgeleri ve sesleri yerel bir kütüphanede birleştirir. Defterlerinizi klasörlere ayırabilir, bir referans belgenin yanında çalışabilir ve ses kaydını kullandığınız sayfaya bağlayabilirsiniz. İsteğe bağlı el yazısı ve konuşma modelleri indirildikten sonra cihaz üzerinde çalışır. Hesap, transkripsiyon API anahtarı veya abonelik gerekmez.
 
-Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.5.0-alpha** kaynağını içerir. Uygulama, cihazın dilinden bağımsız olarak **İngilizce** açılır. **App language → Türkçe → Apply** ile Türkçe seçilir ve tercih korunur. Defter adları, notlar, ses başlıkları ve transkriptlerin içeriği değiştirilmez.
+Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.6.0-alpha** kaynağını içerir. Uygulama, cihazın dilinden bağımsız olarak **İngilizce** açılır. **App language → Türkçe → Apply** ile Türkçe seçilir ve tercih korunur. Defter adları, notlar, ses başlıkları ve transkriptlerin içeriği değiştirilmez.
 
-0.5 sürümü kalıcı parmakla çizme/taşıma seçimi, uzun basma düzenleme menüsü, sayfalar arasında düzenlenebilir seçim kopyalama/kesme/yapıştırma, sayfa sınırından gezinme ve yeni sayfa oluşturma, defter ve ses çöp kutusunda onaylı toplu silme ekler. Önceki telefon/tablet yerleşimi, indigo/mint teması, defter kapakları, ortak ses arayüzü, uyarlanabilir ikon ve seçim/basma animasyonları korunur.
+0.6 sürümü gerçek kesintisiz dikey kaydırma ekler. Komşu sayfaların parçaları aynı anda görünür, kalem dokunulan sayfayı düzenler. Parmakla sürükleme/atalet, iki parmakla yakınlaştırma ve son sayfanın altından çekerek tek sayfa ekleme çalışır. Mavi/gri arayüzde daha net hiyerarşi, büyük yazıya uyarlanan yerleşim, ayrı sekme kapatma alanları ve sistemin animasyon ayarını izleyen kısa geçişler bulunur. PDF, ses, tanıma, pano, klasör ve çöp kutusu özellikleri korunur.
 
 ## Görünüm
 
@@ -42,7 +42,7 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.5.0-alpha** kaynağını i
 
 ## Uygulanan özellikler
 
-| Alan | 0.5 sürümünde bulunanlar |
+| Alan | 0.6 sürümünde bulunanlar |
 | --- | --- |
 | Kütüphane düzeni | Klasör ve alt klasör oluşturma, klasörü yeniden adlandırma. Kapak rengiyle defter oluşturma, yeniden adlandırma, klasörler arasında taşıma, defter adı ve dizinlenmiş sayfa içeriğinde arama. |
 | Defter ve ses çöp kutusu | Çöpe taşıma ve geri getirme. Görünür öğeleri çoklu seçme, tümünü seçme, seçimi temizleme ve onayla kalıcı silme. Defter silinirken bağlı sesler korunur, silinen sayfalara bağlantıları kaldırılır. Etkilenen ses kaydını durdurun; etkin transkripsiyonu duraklatın veya durdurun. |
@@ -54,7 +54,7 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.5.0-alpha** kaynağını i
 | Seçim ve pano | Tek nesne seçimi veya kementle grup seçme. Taşıma, çoğaltma, renklendirme, ölçekleme ve silme. Mürekkep, şekil, görsel ve metni sayfalar/defterler arasında düzenlenebilir olarak kopyalama, kesme ve yapıştırma. Seçilen düz metin Android panosuna da aktarılır. |
 | Görsel ve metin | Dosyadan veya galeriden görsel ekleme, desteklenen görsel/metni yapıştırma ve Android paylaşımını alma. Görsel kırpma, döndürme ve oranı koruyarak boyutlandırma. Var olan metnin içeriğini, boyutunu ve rengini düzenleme. Düzenleme ve kırpma taslakları ekran dönünce korunur. |
 | Dokunma ve kalem | Varsayılan **Finger: pan / Parmak: taşı** modunda parmak gezinir, kalem seçili araçla çalışır. **Finger: draw / Parmak: çiz** modunda parmak da aynı aracı kullanır. Tercih korunur. İki parmakla yakınlaştırma ve genişliğe sığdırma bulunur. Parmak olarak algılanan pasif kalem çizim modunu kullanır. |
-| Hızlı düzenleme ve gezinme | Taşıma modunda parmakla uzun basarak kopyala, kes, yapıştır, tümünü seç veya seçimi sil menüsü. Sayfa sınırını geçip bırakınca gezinme. Son sayfanın altından çekip bırakınca tek sayfa ekleme. İlerleme ve bırakma ipucu görünür. |
+| Hızlı düzenleme ve gezinme | Taşıma modunda parmakla uzun basarak kopyala, kes, yapıştır, tümünü seç veya seçimi sil menüsü. Sayfalar arasında kesintisiz kaydırma; iki komşu sayfayı aynı anda görme ve dokunulan sayfaya yazma. Son sayfanın altından çekip bırakınca tek sayfa ekleme. İlerleme ve bırakma ipucu görünür. |
 | Kalem yan düğmesi | Android'in bildirdiği kalem yan düğmesine basılı tutarak geçici silgi. Bırakınca önceki araç, renk ve kalınlığa dönüş. Samsung'a özel SDK yerine standart Android olayları kullanılır. |
 | Geçmiş ve çalışma alanı | Yazılı Geri al/Yinele düğmeleri, defter sekmeleri, sekme başına son sayfa ve bağımsız gezinilen salt okunur referans paneli. Referansı düzenlemek için panelleri değiştirme. Tablette yan yana, dar ekranda üst üste yerleşim. Android etkinliği geri yüklerken sekme/sayfa/referans oturum durumu korunur. |
 | PDF iş akışı | PDF'yi defter sayfaları olarak içe aktarma ve üzerine yazma. Özgün PDF varlığını yerelde koruma. Mürekkep, şekil, metin, görsel ve çizilmiş arka planlarıyla defteri PDF olarak dışa aktarma. |
@@ -66,6 +66,8 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.5.0-alpha** kaynağını i
 | Yerel transkripsiyon | Çok dilli Whisper base modelini indirip doğrulama. Tamamlanan kayıtları cihazda işleme, ilerleme, duraklatma/devam için kayıt noktaları ve transkripti değiştirmeden önce yeniden başlatma onayı. Hizmet ciddi sıcaklık durumunda veya Android işlem süresi dolunca duraklar. Dil kapsamı aşağıda ayrıntılıdır. |
 | Transkript araçları | Ses başlıklarında ve transkript içeriğinde arama, bölümleri düzenleme, zaman damgasından dinleme, bölümü açık not sayfasına ekleme ve TXT/SRT dışa aktarma. |
 | Arayüz dili | Varsayılan İngilizce ve kütüphane/editörden seçilebilen kalıcı Türkçe tercihi. Arayüz, el yazısı ve konuşma dili ayrı seçimlerdir. |
+
+<p align="center"><img src="docs/images/continuous-pages-native-canvas.png" alt="Two adjacent notebook pages rendered together on native Android Canvas" width="850"></p>
 
 ## Dil desteği
 
@@ -93,7 +95,7 @@ Aşağıdaki adımlarla geliştirme APK'sı derleyip Android 8.0+ telefon veya t
 
 1. **New folder** veya **New notebook** seçin. Defteri bir klasörde oluşturmak için önce klasöre girin. Kapak rengini ve ilk sayfanın şablonunu belirleyin.
 2. Parmakla gezinip kalemle yazmak için **Finger: pan** modunda kalın. Parmakla çizmek veya pasif kalem kullanmak için **Finger: draw** seçin. Araç, renk ve kalınlığı ayarlayın. **Eraser options** ve **Math tools** ek seçenekleri açar.
-3. Kütüphaneden **Import PDF** kullanın veya editörden görsel/metin ekleyin. Sayfa numarasına dokunarak **Pages** önizleme, sıralama ve işlemlerini açın. Sayfa sınırından çekerek veya sayfa oklarıyla gezinin.
+3. Kütüphaneden **Import PDF** kullanın veya editörden görsel/metin ekleyin. Sayfa numarasına dokunarak **Pages** önizleme, sıralama ve işlemlerini açın. Sayfalar arasında kaydırın; son sayfanın altından çekip bırakarak tek sayfa ekleyin veya oklarla doğrudan gezinin.
 4. Sekme artısı başka defter açar. **Open side by side** referans ekler, **Edit reference** onu düzenleme tarafına alır. Parmakla taşıma modunda uzun basma pano menüsünü açar.
 5. Kütüphanedeki **Audio** veya defterin mikrofon düğmesinden **Start recording** ya da **Import audio** seçin. Kayıt mikrofon izni ister ve ön plan bildirimi gösterir. Yazarken işaret koyarak kayıt zamanını geçerli sayfaya bağlayın.
 6. Ses ekranından **Speech model → Download model** açın. Model eksikse **Transcribe** de bu pencereyi açar. Yaklaşık **148 MB** indirme sürdürülebilir ve sabit SHA-256 özetiyle doğrulanır. Model hazır olunca kaydı durdurun, **Turkish**, **English** veya **Automatic** seçip **Transcribe** düğmesine basın. Sonucu kullanmadan önce gözden geçirip düzeltin.
@@ -117,9 +119,9 @@ El yazısı tanıma, ayrı ve kullanıcı isteğiyle indirilen dil modelleriyle 
 - Basınç ve yan düğme desteği donanımın Android'e ilettiği olaylara bağlıdır. Uygulama Samsung kalemini uyumsuz donanımda çalıştıramaz. Üreticiye özel uzaktan kumanda davranışı vaat edilmez.
 - Transkripsiyon **kayıt sonrasında** çalışır. Canlı altyazı, konuşmacı ayırma veya çeviri yoktur. Gürültü, uzak mikrofon ve üst üste konuşma hata üretebilir. Yerel ses doğrulaması 99 dilin tamamı için doğruluk ölçümü değildir.
 - El yazısı tanıma fotoğraf veya PDF içindeki basılı yazıyı değil, mürekkep çizgilerini okur. PDF metin katmanında arama, fotoğraf OCR'ı, denklem tanıma/LaTeX, kurşun kalem dokusu, AI çalışma aracı, ortak düzenleme ve bulut eşitleme yoktur. Eşitleme kullanıcı tercihiyle ertelenmiştir.
-- Referans paneli editörle yer değiştirene kadar salt okunurdur. İkinci bağımsız düzenleme oturumu değildir. Sayfa sınırı hareketi ayrı sayfalar arasında geçer, kesintisiz sayfa akışı oluşturmaz.
-- Geri alma, **açık sayfa oturumundaki son 60 düzenlemeyi** tutar ve sayfa değişince sıfırlanır. Düzenlenebilir seçim panosu uygulama sürecine bağlıdır. Süreç kapanırsa seçim yeniden kopyalanmalıdır.
-- Özgün PDF baytları korunur. Ekranda ve PDF çıktısında arka plan raster çizildiği için özgün aranabilir PDF metin katmanı çıktıya taşınmaz. İçe alınan görsellerin yönü düzeltilir ve en fazla 4096 piksel kenar / 8.388.608 piksel olacak şekilde PNG'ye dönüştürülür. Özgün görsel baytları saklanmaz. Her panelin yaklaşık dört milyon piksellik çözme bütçesi görsel/PDF önizleme çözünürlüğünü sınırlar.
+- Referans paneli editörle yer değiştirene kadar salt okunurdur. İkinci bağımsız düzenleme oturumu değildir. Ana editör kesintisiz kayar; referans kendi bağımsız tek sayfa görünümünü korur.
+- Geri alma **sayfa başına son 60 düzenlemeyi** tutar. Doğal geçişte bellekteki sayfanın geçmişi korunur. Doğrudan gezinme hedef geçmişini sıfırlar, temiz sayfa bellekten çıkarılınca geçmişi bırakılabilir. Kaydı süren/başarısız değişiklikler beş sayfalık çözülmüş pencereden bağımsız korunur. Düzenlenebilir seçim panosu uygulama sürecine bağlıdır. Süreç kapanırsa seçim yeniden kopyalanmalıdır.
+- Özgün PDF baytları korunur. Ekranda ve PDF çıktısında arka plan raster çizildiği için özgün aranabilir PDF metin katmanı çıktıya taşınmaz. İçe alınan görsellerin yönü düzeltilir ve en fazla 4096 piksel kenar / 8.388.608 piksel olacak şekilde PNG'ye dönüştürülür. Özgün görsel baytları saklanmaz. Editör en fazla beş çözülmüş sayfa tutar. Komşu sayfalarda düşük önizleme bütçesi, doğrudan açılan etkin sayfada yaklaşık dört milyon piksel kullanılır. Yüklenmeyen yer tutucular çizim kabul etmez.
 - Ses biçimi desteği uzantıdan çok Android'in gerçek çözücüsüne bağlıdır. Mikrofon kaydı yaklaşık 64 kbit/s mono AAC/M4A kullanır ve uzun kayıtları kalıcı parçalara ayırır. Süreç sonlandırılırsa son tamamlanmamış parça kaybolabilir. Çok parçalı kayıt üstverisi daha uzun toplam süreye izin verse de çözümlenen tek ses dosyası 24 saati aşamaz.
 - Teknik sınırlar **tek PDF için 64 MiB / 2.000 sayfa**, **içe alınan tek ses için 256 MiB**, **el yazısı isteği başına 200.000 mürekkep noktası**, **JSON belgesi başına 32 MiB** ve **açılmış yedek toplamında 512 MiB**. Genel yedek girdisi 64 MiB, ses girdisi 256 MiB, arşiv 50.000 girdiyle sınırlıdır. Bunlar kaynak korumalarıdır, aboneliğe bağlı defter/sayfa kotası değildir.
 - V1/V2 belgeler okunur, yeni kayıtlar V3 kullanır. Eski APK'lar V3 okuyamaz. Sürüm değiştirmeden önce uyumlu yedekleri koruyun. Kalıcı silme önce kütüphaneyi günceller, sonra paylaşılmayan dosyaları temizler. Fiziksel temizlik başarısız olursa yedeklere girmeyen, ilişkisiz bir dosya diskte kalabilir. Güvenli fiziksel veri imhası sunulmaz.
@@ -152,9 +154,9 @@ Android instrumentation kaynakları `app/src/androidTest` altındadır. Çalış
 
 ## Doğrulama
 
-**0.5.0-alpha için 3 Kasım 2026 tarihinde tamamlanan doğrulama**, **50 sınıfta 309 başarılı test**, **0 Android Lint hatası / 27 uyarı** ve başarılı Android cihaz testi kaynağı derlemesi kaydeder. Bunlar tamamlanan geliştirme kontrollerinden korunan sonuçlardır, **bu belge güncellemesi için testler yeniden çalıştırılmadı**. README'deki yenilenen İngilizce görseller sentetik arayüz çizimleridir. İşlevsel test, yerel motor, emülatör ve fiziksel cihaz kanıtlarıyla ayrı değerlendirilir.
+**0.6.0-alpha** doğrulamasında **56 sınıfta 342 test**, **0 Lint hatası / 18 uyarı / 1 bilgi** ve **Android 15 x86_64 üzerinde 7 instrumentation testi** geçti. Yeni sentetik veriler eklenmeden önce yükseltme envanterindeki dokuz dosya birebir korundu. Native Canvas piksel kontrolü iki sayfayı ve aralarındaki boşluğu doğrular.
 
-[Doğrulama kapsamı ve korunan kanıtlar](docs/VALIDATION.md), güncel kontrolleri önceki APK/güncelleme kontrolleri ve tarihsel yerel ses düzeneğinden ayırır. Otomatik test başarısı fiziksel Tab S10 FE/S Pen gecikmesini, mikrofon güvenilirliğini, el yazısı doğruluğunu veya bütün Android cihazlarında transkripsiyon performansını kanıtlamaz. Önceki yerel ses sonuçları yeni 0.5 çıkarım testi olarak sunulmaz.
+[Doğrulama kapsamı ve kanıtlar](docs/VALIDATION.md) düzeltmeleri, APK bütünlüğünü ve emülatör ekran yakalama sınırını açıklar. Sonuçlar tamamlanan geliştirmeden korunur; yayın için tüm regresyon paketi tekrar çalıştırılmadı. Fiziksel Tab S10 FE/S Pen ve tanıma doğruluğu ayrıca test edilmelidir. Tarihsel ses çıkarımı yeni 0.6 testi olarak sunulmaz.
 
 ## Proje haritası
 
