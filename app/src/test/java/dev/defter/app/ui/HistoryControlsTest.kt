@@ -39,7 +39,7 @@ class HistoryControlsTest {
 
     @Test
     @Config(application = dev.defter.app.localization.TurkishTestApplication::class, qualifiers = "tr-rTR-w393dp-h851dp-port-mdpi")
-    fun enlargedSystemTextMovesHistoryBelowTheNotebookTitle() {
+    fun enlargedSystemTextKeepsPinnedHistoryVisibleWithoutResizingTheToolbar() {
         // Robolectric 4.14.1 forwards setFontScale's system configuration directly to
         // Activity.resources.updateConfiguration, replacing per-context locale overrides.
         // Match this Turkish layout fixture's system language; locale independence has
@@ -64,24 +64,24 @@ class HistoryControlsTest {
             println(compose.onRoot(useUnmergedTree = true).printToString())
             captureLargeTextHeader()
             compose.runOnIdle { assertEquals(2f, compose.activity.resources.configuration.fontScale, 0f) }
-            val title = compose.onNodeWithText("Büyük yazı").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
-            val statusNode = compose.onNodeWithText("Cihazına kaydedildi")
+            val title = compose.onNodeWithContentDescription("Sekme Büyük yazı").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+            val statusNode = compose.onNodeWithContentDescription("Cihazına kaydedildi")
             val status = statusNode.fetchSemanticsNode().boundsInRoot
             println("Large-text header title=$title status=$status root=${compose.onRoot().fetchSemanticsNode().boundsInRoot} " +
                 "window=${compose.activity.window.decorView.width}x${compose.activity.window.decorView.height} " +
                 "configuration=${compose.activity.resources.configuration}")
             statusNode.assertIsDisplayed()
             for (label in listOf("Geri al", "Yinele")) {
-                val bounds = compose.onNodeWithText(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
-                assertTrue("Large text needs a separate history row", bounds.top >= title.bottom && bounds.top >= status.bottom)
+                val bounds = compose.onNodeWithContentDescription(label).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+                assertTrue("Pinned history must remain below the compact document header", bounds.top >= title.bottom && bounds.top >= status.bottom)
                 assertTrue(bounds.left >= 0f && bounds.right <= compose.activity.window.decorView.width)
             }
             compose.runOnIdle { model.addText("Büyük yazıyla not") }
             awaitIdle(model)
-            compose.onNodeWithText("Geri al").assertIsEnabled().performClick()
+            compose.onNodeWithContentDescription("Geri al").assertIsEnabled().performClick()
             awaitIdle(model)
             compose.runOnIdle { assertTrue(model.page!!.elements.isEmpty()) }
-            compose.onNodeWithText("Yinele").assertIsEnabled().performClick()
+            compose.onNodeWithContentDescription("Yinele").assertIsEnabled().performClick()
             awaitIdle(model)
             compose.runOnIdle { assertEquals(1, model.page!!.elements.size) }
         } finally {
@@ -97,8 +97,8 @@ class HistoryControlsTest {
         compose.runOnIdle { model.createNotebook("İşlem geçmişi", PaperTemplate.LINED, 0xFF7162C9.toInt()) }
         awaitIdle(model)
         val bookId = model.notebookId!!
-        val undo = compose.onNodeWithText("Geri al")
-        val redo = compose.onNodeWithText("Yinele")
+        val undo = compose.onNodeWithContentDescription("Geri al")
+        val redo = compose.onNodeWithContentDescription("Yinele")
         undo.assertIsDisplayed().assertIsNotEnabled()
         redo.assertIsDisplayed().assertIsNotEnabled()
         for (button in listOf(undo, redo)) {

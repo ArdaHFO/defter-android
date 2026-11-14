@@ -38,7 +38,7 @@ class DefterUiTest {
         compose.onNode(hasSetTextAction() and hasText("Defter adı")).assertTextContains("Lineer Cebir")
         compose.onNodeWithText("Defteri oluştur").assertIsEnabled().performClick()
         awaitModel(model, "create notebook from dialog") { model.page != null && !model.busy }
-        compose.onNodeWithText("Lineer Cebir").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Sekme Lineer Cebir").assertIsDisplayed()
         compose.onNodeWithContentDescription("Kalem").assertIsDisplayed()
         compose.onNodeWithContentDescription("Yeni sayfa").assertIsDisplayed()
 
@@ -68,13 +68,13 @@ class DefterUiTest {
         }
         awaitModel(model, "save sample document") { model.pendingSaves == 0 && !model.busy }
         compose.runOnIdle { assertFalse(model.unsaved); assertNull(model.error); assertTrue(model.canUndo) }
-        compose.onNodeWithText("Cihazına kaydedildi").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Cihazına kaydedildi").assertIsDisplayed()
         capture("editor-tablet.png")
 
         compose.onNodeWithContentDescription("Kütüphaneye dön").performClick()
         awaitModel(model, "return to library") { model.notebookId == null && !model.busy }
         compose.onNodeWithText("Kütüphanen").assertIsDisplayed()
-        compose.onAllNodesWithText("Lineer Cebir").assertCountEquals(2)
+        compose.onAllNodesWithText("Lineer Cebir").assertCountEquals(1)
         capture("library-tablet.png")
 
         // Reopen via the actual card. Content must have survived the save/reload boundary.

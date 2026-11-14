@@ -1,17 +1,25 @@
 package dev.defter.app.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import android.app.Activity
+import android.content.ContextWrapper
+import dev.defter.app.model.ThemeMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -112,12 +120,41 @@ private val DefterColors = lightColorScheme(
     scrim = DefterDesign.Ink
 )
 
+private val DefterDarkColors = darkColorScheme(
+    primary = Color(0xFFA9CAFF), onPrimary = Color(0xFF07315F),
+    primaryContainer = Color(0xFF173C68), onPrimaryContainer = Color(0xFFD6E5FF),
+    secondary = Color(0xFF9CD5BB), onSecondary = Color(0xFF123C2E),
+    secondaryContainer = Color(0xFF224B3B), onSecondaryContainer = Color(0xFFBDEED4),
+    background = Color(0xFF111419), onBackground = Color(0xFFE5E9F1),
+    surface = Color(0xFF191D24), onSurface = Color(0xFFE5E9F1),
+    surfaceVariant = Color(0xFF242A34), onSurfaceVariant = Color(0xFFB6BFCD),
+    surfaceContainerLowest = Color(0xFF0D1015), surfaceContainerLow = Color(0xFF151920),
+    surfaceContainer = Color(0xFF20252E), surfaceContainerHigh = Color(0xFF2B323E),
+    surfaceContainerHighest = Color(0xFF353E4C),
+    outline = Color(0xFF8C98AA), outlineVariant = Color(0xFF465160),
+    error = Color(0xFFFFB4BA), onError = Color(0xFF641B27),
+    errorContainer = Color(0xFF7D2938), onErrorContainer = Color(0xFFFFDADC),
+    inverseSurface = Color(0xFFE5E9F1), inverseOnSurface = Color(0xFF242A34), inversePrimary = DefterDesign.Accent
+)
+
 @Composable
-fun DefterTheme(content: @Composable () -> Unit) {
+fun DefterTheme(mode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () -> Unit) {
+    val dark = when (mode) { ThemeMode.SYSTEM -> isSystemInDarkTheme(); ThemeMode.DARK -> true; ThemeMode.LIGHT -> false }
+    val view = LocalView.current
+    SideEffect {
+        var context = view.context
+        while (context is ContextWrapper && context !is Activity) context = context.baseContext
+        (context as? Activity)?.let { activity ->
+            WindowCompat.getInsetsController(activity.window, view).apply {
+                isAppearanceLightStatusBars = !dark
+                isAppearanceLightNavigationBars = !dark
+            }
+        }
+    }
     val animationsEnabled = rememberDefterAnimationsEnabled()
     CompositionLocalProvider(LocalDefterAnimationsEnabled provides animationsEnabled) {
         MaterialTheme(
-            colorScheme = DefterColors,
+            colorScheme = if (dark) DefterDarkColors else DefterColors,
             typography = DefterDesign.Typography,
             shapes = DefterDesign.Shapes,
             content = content

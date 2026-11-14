@@ -12,7 +12,7 @@ Basınca duyarlı kalem, PDF üzerinde çalışma, yerel yedekler ve cihaz üzer
 
 [Başlangıç](#başlangıç) · [Dil desteği](#dil-desteği) · [Kaynaktan derleme](#kaynaktan-derleme) · [Doğrulama](docs/VALIDATION.md) · [Sorun bildir](https://github.com/ArdaHFO/defter-android/issues)
 
-![Durum](https://img.shields.io/badge/durum-0.6.0--alpha-orange)
+![Durum](https://img.shields.io/badge/durum-0.8.0--alpha-orange)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)
 ![Arayüz](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4)
@@ -23,26 +23,33 @@ Basınca duyarlı kalem, PDF üzerinde çalışma, yerel yedekler ve cihaz üzer
 
 Defter, el yazısı sayfaları, içe aktarılan belgeleri ve sesleri yerel bir kütüphanede birleştirir. Defterlerinizi klasörlere ayırabilir, bir referans belgenin yanında çalışabilir ve ses kaydını kullandığınız sayfaya bağlayabilirsiniz. İsteğe bağlı el yazısı ve konuşma modelleri indirildikten sonra cihaz üzerinde çalışır. Hesap, transkripsiyon API anahtarı veya abonelik gerekmez.
 
-Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.6.0-alpha** kaynağını içerir. Uygulama, cihazın dilinden bağımsız olarak **İngilizce** açılır. **App language → Türkçe → Apply** ile Türkçe seçilir ve tercih korunur. Defter adları, notlar, ses başlıkları ve transkriptlerin içeriği değiştirilmez.
+Bu depo, **14 Kasım 2026** tarihinde güncellenen **0.8.0-alpha** kaynağını içerir. Uygulama, cihazın dilinden bağımsız olarak **İngilizce** açılır. **App language → Türkçe → Apply** ile Türkçe seçilir ve tercih korunur. Defter adları, notlar, ses başlıkları ve transkriptlerin içeriği değiştirilmez.
 
-0.6 sürümü gerçek kesintisiz dikey kaydırma ekler. Komşu sayfaların parçaları aynı anda görünür, kalem dokunulan sayfayı düzenler. Parmakla sürükleme/atalet, iki parmakla yakınlaştırma ve son sayfanın altından çekerek tek sayfa ekleme çalışır. Mavi/gri arayüzde daha net hiyerarşi, büyük yazıya uyarlanan yerleşim, ayrı sekme kapatma alanları ve sistemin animasyon ayarını izleyen kısa geçişler bulunur. PDF, ses, tanıma, pano, klasör ve çöp kutusu özellikleri korunur.
+0.8 sürümü uzun defterler için küçük sayfa haritası ve çubukları gizleyen tam ekran odak modu ekler. Sabit araç satırı, kalem/silgiye göre ayarlar, gerçek sayfa önizlemeli kartlar, açık/koyu/sistem teması, temas noktasında açılan pano menüsü, kaydırma ipuçları, kalem üzerinde bekleyince açıklamalar ve çalışmayı engellemeyen bildirimler ortak tasarım sistemini kullanır. Sayfa/ses paneli genişliği ve referans oranı ayarlanabilir. Tema, notların kâğıt ve mürekkebini değiştirmez. Arka plan çizimi ve sınırlı sayfa penceresi korunur.
 
 ## Görünüm
 
 <p align="center">
-  <img src="docs/images/editor-split.png" alt="Tablette referans sayfanın yanında İngilizce Defter editörü" width="850">
-  <img src="docs/images/library-tablet.png" alt="Klasör ve defter kapaklarıyla İngilizce Defter kütüphanesi" width="850">
+  <img src="docs/images/editor-map-tablet.png" alt="English 0.8 tablet editor with compact page map" width="850">
+  <img src="docs/images/focus-map-tablet.png" alt="Focus mode hides toolbars while retaining the page map and exit control" width="850">
+  <img src="docs/images/library-tablet.png" alt="English library with real first-page notebook previews" width="850">
 </p>
 <p align="center">
-  <img src="docs/images/audio-phone-library.png" alt="Örnek kaydın bulunduğu İngilizce telefon ses kütüphanesi" width="220">
-  <img src="docs/images/audio-tablet-transcript.png" alt="Düzenlenebilir metin ve zaman damgalı oynatma sunan İngilizce tablet transkripti" width="650">
+  <img src="docs/images/editor-phone.png" alt="English phone editor with fixed tool row" width="220">
+  <img src="docs/images/audio-phone-library.png" alt="English standalone audio archive" width="220">
+  <img src="docs/images/appearance-phone-large-text.png" alt="Appearance settings with enlarged system text" width="220">
+</p>
+<p align="center">
+  <img src="docs/images/editor-split.png" alt="English editable notebook beside an independent reference page" width="850">
+  <img src="docs/images/audio-tablet-transcript.png" alt="English audio transcript with synthetic demonstration text" width="850">
+  <img src="docs/images/eraser-dark-tablet.png" alt="Dark eraser options with mode, filter, and size" width="272">
 </p>
 
-Önizlemeler İngilizce arayüzü sentetik defter ve ses içeriğiyle gösterir. Robolectric üzerinden alınmış yerel çizimlerdir. Fiziksel cihaz ekran görüntüsü veya konuşma tanıma doğruluğunun kanıtı değildir. Çekim yöntemi ve kapsamı [görsel kaynak bilgileri](docs/images/README.md) dosyasında açıklanır.
+Bu görseller gerçek İngilizce arayüzün sentetik not, sessiz ses dosyası ve elle eklenmiş transkript örnekleriyle alınmış native çizimleridir. Fiziksel cihaz ekran görüntüsü veya konuşma doğruluğu kanıtı değildir. [Görsel kaynağı ve kapsamı](docs/images/README.md) kayıtlıdır.
 
 ## Uygulanan özellikler
 
-| Alan | 0.6 sürümünde bulunanlar |
+| Alan | 0.8 sürümünde bulunanlar |
 | --- | --- |
 | Kütüphane düzeni | Klasör ve alt klasör oluşturma, klasörü yeniden adlandırma. Kapak rengiyle defter oluşturma, yeniden adlandırma, klasörler arasında taşıma, defter adı ve dizinlenmiş sayfa içeriğinde arama. |
 | Defter ve ses çöp kutusu | Çöpe taşıma ve geri getirme. Görünür öğeleri çoklu seçme, tümünü seçme, seçimi temizleme ve onayla kalıcı silme. Defter silinirken bağlı sesler korunur, silinen sayfalara bağlantıları kaldırılır. Etkilenen ses kaydını durdurun; etkin transkripsiyonu duraklatın veya durdurun. |
@@ -56,7 +63,7 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.6.0-alpha** kaynağını i
 | Dokunma ve kalem | Varsayılan **Finger: pan / Parmak: taşı** modunda parmak gezinir, kalem seçili araçla çalışır. **Finger: draw / Parmak: çiz** modunda parmak da aynı aracı kullanır. Tercih korunur. İki parmakla yakınlaştırma ve genişliğe sığdırma bulunur. Parmak olarak algılanan pasif kalem çizim modunu kullanır. |
 | Hızlı düzenleme ve gezinme | Taşıma modunda parmakla uzun basarak kopyala, kes, yapıştır, tümünü seç veya seçimi sil menüsü. Sayfalar arasında kesintisiz kaydırma; iki komşu sayfayı aynı anda görme ve dokunulan sayfaya yazma. Son sayfanın altından çekip bırakınca tek sayfa ekleme. İlerleme ve bırakma ipucu görünür. |
 | Kalem yan düğmesi | Android'in bildirdiği kalem yan düğmesine basılı tutarak geçici silgi. Bırakınca önceki araç, renk ve kalınlığa dönüş. Samsung'a özel SDK yerine standart Android olayları kullanılır. |
-| Geçmiş ve çalışma alanı | Yazılı Geri al/Yinele düğmeleri, defter sekmeleri, sekme başına son sayfa ve bağımsız gezinilen salt okunur referans paneli. Referansı düzenlemek için panelleri değiştirme. Tablette yan yana, dar ekranda üst üste yerleşim. Android etkinliği geri yüklerken sekme/sayfa/referans oturum durumu korunur. |
+| Geçmiş ve çalışma alanı | Erişilebilir adları olan Geri al/Yinele düğmeleri, defter sekmeleri, sekme başına son sayfa ve bağımsız gezinilen salt okunur referans paneli. Referansı düzenlemek için panelleri değiştirme. Tablette yan yana, dar ekranda üst üste yerleşim. Android etkinliği geri yüklerken sekme/sayfa/referans oturum durumu korunur. |
 | PDF iş akışı | PDF'yi defter sayfaları olarak içe aktarma ve üzerine yazma. Özgün PDF varlığını yerelde koruma. Mürekkep, şekil, metin, görsel ve çizilmiş arka planlarıyla defteri PDF olarak dışa aktarma. |
 | El yazısı tanıma | Türkçe veya İngilizce model indirme. Seçili çizgileri veya bütün sayfayı tanıma, sonucu gözden geçirip düzeltme ve istenirse özgün mürekkebin yerine koyma. Tanınan el yazısını dizinleyip metin kutularıyla birlikte arama. |
 | Yerel kayıt ve kurtarma | Görünür durumla otomatik kayıt, eski editörün daha yeni kaydı sessizce ezmesini önleyen sürüm denetimi, yeniden kayıt denemesi ve kaydedilemeyen değişiklikleri ayrı kopya olarak kurtarma. Bozuk veya desteklenmeyen belgeler boş not gibi açılmak yerine hata verir. |
@@ -65,9 +72,13 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.6.0-alpha** kaynağını i
 | Dinleme | Kayıt içinde gezinme, işaret veya transkript zaman damgasına atlama, 0,5–2× oynatma hızı. |
 | Yerel transkripsiyon | Çok dilli Whisper base modelini indirip doğrulama. Tamamlanan kayıtları cihazda işleme, ilerleme, duraklatma/devam için kayıt noktaları ve transkripti değiştirmeden önce yeniden başlatma onayı. Hizmet ciddi sıcaklık durumunda veya Android işlem süresi dolunca duraklar. Dil kapsamı aşağıda ayrıntılıdır. |
 | Transkript araçları | Ses başlıklarında ve transkript içeriğinde arama, bölümleri düzenleme, zaman damgasından dinleme, bölümü açık not sayfasına ekleme ve TXT/SRT dışa aktarma. |
+| Sayfa haritası | Görünür sayfaların küçük önizlemelerini, bulunduğun alanı ve etkin sayfayı gösterir. Küçük sayfaya dokunarak veya kaydırıcıyı bırakarak gezinilir. Kısa pencerede kaydırıcı gizlenir, önizleme işleri en fazla iki eşzamanlı çalışır. |
+| Odak modu | Başlık, araç, alt ve sistem çubuklarını gizler. Aynı native çizim alanında yazılır. Geri veya yüzen çıkış düğmesi çubukları geri getirir. Harita isteğe bağlıdır, aktif kayda erişim korunur. Ekran yeniden oluşturulunca odak durumu korunur. |
+| Görünüm ve kartlar | Kâğıt/mürekkepten bağımsız açık, koyu ve sistem teması. İlk sayfa önizlemeli ızgara/liste kartları ve ayrı seçenekler. Ortak tipografi, dokunma alanları, seçili çerçeve, ölçülü gölgeler ve sistem ayarını izleyen kısa geçişler. |
+| Bağlama göre araçlar | Kalemde renk/kalınlık/çizgi örneği, silgide biçim/filtre/boyut. Uzun basma ve desteklenen kalem beklemesinde açıklama. Sekme/araç taşma ipuçları. Ek bildirimler düzenlemeyi engellemez ve açık menü/diyalog arkasında bekler. |
+| Ayarlanabilir paneller | Görünüm ayarlarından sayfa/ses genişliği ve referans oranı kaydedilir. Paneller alana uyarlanır. Referansı açma/kapatma ve yeniden boyutlandırma düzenlenebilir native View'ı korur. |
 | Arayüz dili | Varsayılan İngilizce ve kütüphane/editörden seçilebilen kalıcı Türkçe tercihi. Arayüz, el yazısı ve konuşma dili ayrı seçimlerdir. |
 
-<p align="center"><img src="docs/images/continuous-pages-native-canvas.png" alt="Two adjacent notebook pages rendered together on native Android Canvas" width="850"></p>
 
 ## Dil desteği
 
@@ -78,7 +89,7 @@ Bu depo, **3 Kasım 2026** tarihinde güncellenen **0.6.0-alpha** kaynağını i
 | Konuşma tanıma seçenekleri | **Türkçe (`tr`)**, **İngilizce (`en`)** veya **Otomatik (`auto`)**. Arayüz ve yerel köprü yalnız bu açık modları kabul eder. |
 | Alttaki konuşma modeli | **99 dilli sözcük dağarcığına** sahip çok dilli **Whisper base**. Otomatik mod dil tespitini modele bırakır ve daha geniş model dil kümesindeki konuşmaları işlemeyi deneyebilir. Bu 99 dilin her birini elle seçen bir liste yoktur ve tamamı Defter'de doğrulanmamıştır. |
 
-**99**, indirilen modelin kapsamıdır. Uygulamada tek tek seçilebilen veya bağımsız olarak test edilmiş 99 dil anlamına gelmez. Sayı, sabitlenmiş modelin `n_vocab = 51865` değeri ve motorun dil sayısı hesabına dayanır. Motorun tablosunda diğer modeller için Kantonca da bulunur, fakat bu ek giriş base modelinin 99 dilli kümesine dahil değildir. Transkripsiyon konuşmanın özgün dilinde metin üretir. Diller arasında çeviri kapalıdır.
+[Whisper base model kartı](https://huggingface.co/openai/whisper-base) 99 dil belirtir. **99**, indirilen modelin kapsamıdır. Uygulamada tek tek seçilebilen veya bağımsız olarak test edilmiş 99 dil anlamına gelmez. Sayı, sabitlenmiş modelin `n_vocab = 51865` değeri ve motorun dil sayısı hesabına dayanır. Motorun tablosunda diğer modeller için Kantonca da bulunur, fakat bu ek giriş base modelinin 99 dilli kümesine dahil değildir. Transkripsiyon konuşmanın özgün dilinde metin üretir. Diller arasında çeviri kapalıdır.
 
 <details>
 <summary>Base modelinin 99 dil kodu</summary>
@@ -90,6 +101,8 @@ Afrikaans (`af`), Albanian (`sq`), Amharic (`am`), Arabic (`ar`), Armenian (`hy`
 </details>
 
 ## Başlangıç
+
+**Görünüm / Appearance** bölümünden tema, ızgara/liste ve panel ölçülerini seçin. Alt çubuktaki harita sayfa haritasını, tam ekran simgesi odak modunu açar. Geri tuşu odaktan çıkar.
 
 Aşağıdaki adımlarla geliştirme APK'sı derleyip Android 8.0+ telefon veya tablete kurun. Bu kaynak deposu model ağırlıkları veya mağaza imzalı sürüm içermez. Alpha sürümünü değerlendirirken önemli notlarınızın yedeğini koruyun. Aşağıdaki adımlar ilk açılıştaki İngilizce düğme adlarını kullanır.
 
@@ -154,9 +167,9 @@ Android instrumentation kaynakları `app/src/androidTest` altındadır. Çalış
 
 ## Doğrulama
 
-**0.6.0-alpha** doğrulamasında **56 sınıfta 342 test**, **0 Lint hatası / 18 uyarı / 1 bilgi** ve **Android 15 x86_64 üzerinde 7 instrumentation testi** geçti. Yeni sentetik veriler eklenmeden önce yükseltme envanterindeki dokuz dosya birebir korundu. Native Canvas piksel kontrolü iki sayfayı ve aralarındaki boşluğu doğrular.
+**13 Kasım 2026 / 0.8.0-alpha** geliştirme doğrulamasında **393 JVM/Robolectric testi**, **API35 x86_64 üzerinde kurulu optimize release sürümünde 13 Android testi** ve iki salt okunur envanter kontrolü geçti. Debug/release Lint sıfır hata ve 22/20 korunmuş uyarı verdi. Yükseltmeden sonra mevcut 114 dosyanın özeti eşleşti. Sentetik test eklemeleri bitince önceki 113 katalog dışı içerik dosyası aynı kaldı. Ortak katalog yalnızca test defterlerini eklemek için değişti.
 
-[Doğrulama kapsamı ve kanıtlar](docs/VALIDATION.md) düzeltmeleri, APK bütünlüğünü ve emülatör ekran yakalama sınırını açıklar. Sonuçlar tamamlanan geliştirmeden korunur; yayın için tüm regresyon paketi tekrar çalıştırılmadı. Fiziksel Tab S10 FE/S Pen ve tanıma doğruluğu ayrıca test edilmelidir. Tarihsel ses çıkarımı yeni 0.6 testi olarak sunulmaz.
+**14 Kasım yayını** kaynak ve ayarları test edilmiş manifestle bayt düzeyinde karşılaştırır. Referans ve ses için üç İngilizce önizleme kontrolü yeniden çalıştırılır. Diğer yedi İngilizce düzen görüntüsü geçen 0.8 regresyonundan gelir. Tam regresyon, native testler ve APK derlemesi yayın için yeniden yapılmış gibi sunulmaz. [Doğrulama ayrıntıları](docs/VALIDATION.md) kanıt sınırlarını ve fiziksel cihazda kalan işleri açıklar.
 
 ## Proje haritası
 

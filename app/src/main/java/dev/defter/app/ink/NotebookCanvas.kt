@@ -25,10 +25,20 @@ import kotlin.math.max
 
 /** Native document-coordinate editor. Only completed gestures become persistent edits. */
 class NotebookCanvas(context: Context) : View(context) {
+    private val renderPixelBudget = if ((context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager)?.isLowRamDevice == true) 1_000_000.0 else 4_000_000.0
+    private val frameCache = PageFrameCache(renderPixelBudget, onReady = { postInvalidateOnAnimation() },
+        onError = { onEditingError?.invoke(tr("Çizim işlemi tamamlanamadı.")) })
+    private val liveStrokeRaster = LiveStrokeRaster(renderPixelBudget)
+    internal var renderedFrames = 0L; private set
+    internal val pendingPageRenders get() = frameCache.pendingJobs
+    internal val completedPageRenders get() = frameCache.backgroundRenders
     var document: PageDocument? = null
         set(value) {
+            if (field === value) return
             val changedPage = field?.id != value?.id
-            val changedContent = field?.elements != value?.elements
+            // Immutable element snapshots: deep equality can traverse an old notebook's
+            // entire ink history on Main, including duplicated pages with matching IDs.
+            val changedContent = field?.elements !== value?.elements
             field = value
             if (changedPage) {
                 if (!continuous || (pointerId >= 0 && mode != Mode.PAN && !multiTouch)) cancelGesture()
@@ -39,8 +49,10 @@ class NotebookCanvas(context: Context) : View(context) {
                     // An undo or another editor update must not be overwritten by staged input.
                     cancelGesture()
                 }
-                val existingIds = value?.elements?.mapTo(hashSetOf()) { it.id }.orEmpty()
-                selectMany(selection.filterTo(linkedSetOf()) { it in existingIds })
+                if (selection.isNotEmpty()) {
+                    val existingIds = value?.elements?.mapTo(hashSetOf()) { it.id }.orEmpty()
+                    selectMany(selection.filterTo(linkedSetOf()) { it in existingIds })
+                }
             }
             invalidate()
         }
@@ -48,6 +60,7 @@ class NotebookCanvas(context: Context) : View(context) {
     var config: DrawingConfig = DrawingConfig()
         set(value) {
             val changed = field != value
+            if (!changed) return
             if (changed) cancelGesture()
             field = value
             // Equivalent AndroidView updates must not clear a finger long-press selection.
@@ -56,10 +69,11 @@ class NotebookCanvas(context: Context) : View(context) {
         }
 
     var assets: Map<String, Bitmap> = emptyMap()
-        set(value) { field = value; invalidate() }
+        set(value) { if (field === value) return; field = value; invalidate() }
 
     var isReadOnly: Boolean = false
         set(value) {
+            if (field == value) return
             val wasContinuous = continuous
             if (field != value) cancelGesture()
             field = value
@@ -80,10 +94,14 @@ class NotebookCanvas(context: Context) : View(context) {
     var onPageEdgeProgress: ((PageEdgeProgress?) -> Unit)? = null
     /** Called with intersecting page IDs and the page nearest the viewport center. */
     var onVisiblePagesChanged: ((List<String>, String?) -> Unit)? = null
+    var onViewportChanged: ((NotebookViewport) -> Unit)? = null
+        set(value) { if (field === value) return; field = value; if (value != null) notifyViewport() }
     /** Must synchronously activate a cached page in the model before an edit can begin. */
     var onPageActivationRequested: ((String) -> Boolean)? = null
     private var pageOrder: List<String> = emptyList()
     private var suppliedPageOrder: List<String>? = null
+    private var suppliedDocuments: Map<String, PageDocument>? = null
+    private var suppliedAssets: Map<String, Map<String, Bitmap>>? = null
     private var pageIdSet: Set<String> = emptySet()
     // An edit on a partially visible page owns Undo until the user actually scrolls again.
     private var inputPagePinned = false
@@ -105,6 +123,9 @@ class NotebookCanvas(context: Context) : View(context) {
 
     /** Atomic window update. Empty order restores the original single-page editor. */
     fun setPageWindow(pageIds: List<String>, documents: Map<String, PageDocument>, assetsByPage: Map<String, Map<String, Bitmap>>) {
+        if (pageIds === suppliedPageOrder && documents === suppliedDocuments && assetsByPage === suppliedAssets) return
+        suppliedDocuments = documents
+        suppliedAssets = assetsByPage
         val wasContinuous = continuous
         // The caller supplies immutable page-order snapshots. Color, save-status and ink
         // recompositions must not allocate or walk the complete notebook's ID list.
@@ -128,6 +149,7 @@ class NotebookCanvas(context: Context) : View(context) {
             windowDocuments[id]?.takeIf { it.revision > incoming.revision && !changedBook } ?: incoming
         }
         windowAssets = assetsByPage.filterKeys { it in windowDocuments }
+        frameCache.retainPages(windowDocuments.keys)
         if (orderChanged) knownSizes.keys.retainAll(ids)
         windowDocuments.values.forEach { knownSizes[it.id] = PageStripLayout.Size(it.width, it.height) }
         if (geometryChanged) strip.rebuild(order, knownSizes)
@@ -183,8 +205,15 @@ class NotebookCanvas(context: Context) : View(context) {
         val task = Runnable {
             viewportNotification = null
             if (!continuous) return@Runnable
-            val visible = strip.visible(-offsetY / scale, (height - offsetY) / scale).map { it.id }
+            val top = -offsetY / scale
+            val bottom = (height - offsetY) / scale
+            val slots = strip.visible(top, bottom)
+            val visible = slots.map { it.id }
             val center = strip.nearest((height / 2f - offsetY) / scale)?.id
+            onViewportChanged?.invoke(NotebookViewport(center, slots.map {
+                PageViewportSlice(it.id, ((top - it.top) / it.height).coerceIn(0f, 1f), ((bottom - it.top) / it.height).coerceIn(0f, 1f))
+            }, (-offsetX / (scale * PageStripLayout.WIDTH)).coerceIn(0f, 1f),
+                ((width - offsetX) / (scale * PageStripLayout.WIDTH)).coerceIn(0f, 1f)))
             if (visible != lastVisibleIds || center != lastCenterId) {
                 lastVisibleIds = visible
                 lastCenterId = center
@@ -268,6 +297,9 @@ class NotebookCanvas(context: Context) : View(context) {
     private val selectionId: String? get() = selection.firstOrNull()
     private var draggedOriginals: List<PageElement> = emptyList()
     private var draggedPreviews: List<PageElement> = emptyList()
+    private var dragFrameBase: List<PageElement>? = null
+    private var dragFrameInput: List<PageElement>? = null
+    private var dragFrameElements: List<PageElement>? = null
     private val lassoPath = Path()
     private val selectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF6558D9.toInt()
@@ -335,6 +367,7 @@ class NotebookCanvas(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        renderedFrames++
         val page = document ?: return
         val saved = canvas.save()
         // AndroidView may share an unclipped Compose drawing surface with sibling controls.
@@ -368,13 +401,28 @@ class NotebookCanvas(context: Context) : View(context) {
     }
 
     private fun drawPageContents(canvas: Canvas, page: PageDocument, pageAssets: Map<String, Bitmap>, active: Boolean) {
-        if (!active) { PageRenderer.draw(canvas, page, pageAssets); return }
+        // A moving viewport must not allocate a screen-sized bitmap on each scroll frame.
+        val movingViewport = mode == Mode.PAN || multiTouch || !scroller.isFinished
+        if (!active) {
+            frameCache.draw(canvas, page, pageAssets, scale * PageStripLayout.WIDTH / page.width, false)
+            return
+        }
         val previewPage = if (draggedPreviews.isNotEmpty()) {
-            val replacements = draggedPreviews.associateBy { it.id }
-            page.copy(elements = (stagedElements ?: page.elements).map { replacements[it.id] ?: it })
+            val base = stagedElements ?: page.elements
+            if (dragFrameBase !== base || dragFrameInput !== draggedPreviews) {
+                val replacements = draggedPreviews.associateBy { it.id }
+                dragFrameElements = base.map { replacements[it.id] ?: it }
+                dragFrameBase = base
+                dragFrameInput = draggedPreviews
+            }
+            page.copy(elements = requireNotNull(dragFrameElements))
         } else stagedElements?.let { page.copy(elements = it) } ?: page
-        PageRenderer.draw(canvas, previewPage, pageAssets)
-        previewStroke?.let { PageRenderer.drawElement(canvas, it, pageAssets) }
+        frameCache.draw(canvas, previewPage, pageAssets, pageScale, !movingViewport,
+            if (stagedElements != null || draggedPreviews.isNotEmpty()) gestureSequence else null)
+        previewStroke?.let {
+            if (it.kind == InkKind.PEN) liveStrokeRaster.draw(canvas, it, pageScale)
+            else PageRenderer.drawElement(canvas, it, pageAssets)
+        }
         previewShape?.let { PageRenderer.drawElement(canvas, it, pageAssets) }
         val selectedBounds = if (selection.isEmpty()) null else InkEditing.groupBounds(previewPage.elements.filter { it.id in selection })
         if (selectedBounds != null && !isTemporaryEraserActive) {
@@ -425,6 +473,8 @@ class NotebookCanvas(context: Context) : View(context) {
 
         // A pen takes precedence over fingers. Palm pointers cannot change the pen's viewport.
         if (down && newStylus && !stylusActive) {
+            // Limit unbuffered dispatch to stylus contacts; finger pan keeps Android resampling.
+            if (!isReadOnly && config.tool != DrawingTool.HAND) requestUnbufferedDispatch(event)
             cancelGesture()
             beginGesture(event, actionIndex, true)
             invalidate()
@@ -981,9 +1031,11 @@ class NotebookCanvas(context: Context) : View(context) {
         previewShape = null
         draggedOriginals = emptyList()
         draggedPreviews = emptyList()
+        dragFrameBase = null; dragFrameInput = null; dragFrameElements = null
     }
 
     override fun setEnabled(enabled: Boolean) {
+        if (isEnabled == enabled) return
         super.setEnabled(enabled)
         if (!enabled) {
             cancelGesture()
@@ -1058,6 +1110,9 @@ class NotebookCanvas(context: Context) : View(context) {
 
     override fun onDetachedFromWindow() {
         cancelGesture()
+        stopFling()
+        frameCache.clear()
+        liveStrokeRaster.clear()
         viewportNotification?.let(gestureHandler::removeCallbacks)
         viewportNotification = null
         super.onDetachedFromWindow()

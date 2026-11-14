@@ -1,0 +1,14 @@
+{
+  "filesVerifiedImmediatelyAfterUpgrade": 114,
+  "postTest": {
+    "existingFiles": 114,
+    "missingExistingFiles": [],
+    "changedExistingFiles": [
+      "files/defter/library.json"
+    ],
+    "matchingNonCatalogueContentFiles": 113,
+    "catalogueChangeReason": "New synthetic notebooks added by the tests",
+    "addedFixtureFiles": 28
+  },
+  "scope": "Synthetic retained API35 emulator data, not user tablet data"
+}

@@ -33,7 +33,6 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import org.robolectric.annotation.LooperMode
-import org.robolectric.shadows.ShadowDialog
 import org.robolectric.util.ReflectionHelpers
 
 /** Real Compose controls plus the hosted native canvas, on a narrow phone layout. */
@@ -48,7 +47,7 @@ class InputNavigationUiTest {
 
     @Test fun fingerModeControlIsVisibleOnPhoneAndStylusWritesInBothModes() {
         val model = openNotebook()
-        val control = compose.onNodeWithText("Parmak: taşı").assertIsDisplayed().assertIsEnabled()
+        val control = compose.onNodeWithContentDescription("Parmakla taşı, kalemle yaz. Çizim moduna geç.").assertIsDisplayed().assertIsEnabled()
         val bounds = control.fetchSemanticsNode().boundsInRoot
         val rootBounds = compose.onRoot().fetchSemanticsNode().boundsInRoot
         assertTrue("Finger mode must not require scrolling a toolbar", bounds.left >= rootBounds.left && bounds.right <= rootBounds.right)
@@ -67,7 +66,7 @@ class InputNavigationUiTest {
         assertEquals(1, model.page!!.elements.filterIsInstance<StrokeElement>().size)
 
         control.performClick()
-        compose.onNodeWithText("Parmak: çiz").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Parmak ve kalemle yaz. Taşıma moduna geç.").assertIsDisplayed()
         compose.runOnIdle {
             assertTrue(model.config.touchDrawing)
             assertEquals(DrawingTool.PEN, model.config.tool)
@@ -79,8 +78,8 @@ class InputNavigationUiTest {
         awaitIdle(model)
         assertEquals(3, model.page!!.elements.filterIsInstance<StrokeElement>().size)
         assertEquals(1, model.notebook!!.pageIds.size)
-        compose.onNodeWithText("Parmak: çiz").performClick()
-        compose.onNodeWithText("Parmak: taşı").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Parmak ve kalemle yaz. Taşıma moduna geç.").performClick()
+        compose.onNodeWithContentDescription("Parmakla taşı, kalemle yaz. Çizim moduna geç.").assertIsDisplayed()
         compose.runOnIdle { assertFalse(model.config.touchDrawing) }
     }
 
@@ -160,7 +159,7 @@ class InputNavigationUiTest {
         compose.onNodeWithText("Seçimi sil").assertIsEnabled().performClick()
         awaitIdle(model)
         assertTrue(model.page!!.elements.isEmpty())
-        compose.onNodeWithText("Geri al").assertIsEnabled().performClick()
+        compose.onNodeWithContentDescription("Geri al").assertIsEnabled().performClick()
         awaitIdle(model)
         assertEquals(listOf(pasted), model.page!!.elements)
     }
@@ -222,7 +221,7 @@ class InputNavigationUiTest {
         compose.waitForIdle()
         compose.onNodeWithText("Sayfa işlemleri").assertIsDisplayed()
         assertEquals(firstId, model.page!!.id)
-        compose.onNodeWithText("Kapat").performClick()
+        compose.onNodeWithContentDescription("Kapat").performClick()
         compose.runOnIdle { model.selectPage(secondId) }
         awaitIdle(model)
         compose.onNodeWithContentDescription("Önceki sayfa").performClick()
@@ -393,9 +392,9 @@ class InputNavigationUiTest {
         compose.waitForIdle()
         val bitmap = compose.runOnIdle {
             val decor = if (dialog) {
-                val current = requireNotNull(ShadowDialog.getLatestDialog()) { "No native dialog window to capture" }
-                check(current.isShowing)
-                requireNotNull(current.window).decorView
+                requireNotNull(android.view.inspector.WindowInspector.getGlobalWindowViews().lastOrNull {
+                    it !== compose.activity.window.decorView && it.isShown && it.width > 0 && it.height > 0
+                }) { "No native popup window to capture" }
             } else compose.activity.window.decorView
             check(decor.width > 0 && decor.height > 0)
             Bitmap.createBitmap(decor.width, decor.height, Bitmap.Config.ARGB_8888).also { decor.draw(Canvas(it)) }

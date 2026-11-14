@@ -12,7 +12,7 @@ An Android notebook with pressure-sensitive ink, PDF annotation, local backups, 
 
 [Get started](#get-started) · [Language support](#language-support) · [Build from source](#build-from-source) · [Validation](docs/VALIDATION.md) · [Report an issue](https://github.com/ArdaHFO/defter-android/issues)
 
-![Status](https://img.shields.io/badge/status-0.6.0--alpha-orange)
+![Status](https://img.shields.io/badge/status-0.8.0--alpha-orange)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)
 ![Interface](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4)
@@ -23,26 +23,33 @@ An Android notebook with pressure-sensitive ink, PDF annotation, local backups, 
 
 Defter brings handwritten pages, imported documents, and audio into a local library. Organize notebooks into folders, write beside a reference document, and link a recording to the page you were using. Optional handwriting and speech models run on the device after download. No account, transcription API key, or subscription is required.
 
-This repository contains **0.6.0-alpha**, updated on **3 November 2026**. The app starts in **English**, regardless of the device language. **App language → Türkçe → Apply** switches to Turkish and saves the preference. Notebook names, notes, recording titles, and transcripts keep their original content.
+This repository contains **0.8.0-alpha**, updated on **14 November 2026**. The app starts in **English**, regardless of the device language. **App language → Türkçe → Apply** switches to Turkish and saves the preference. Notebook names, notes, recording titles, and transcripts keep their original content.
 
-Version 0.6 adds true continuous vertical scrolling: portions of adjacent pages remain visible together, and the stylus edits the page it touches. Drag or fling with a finger, pinch to zoom, and pull beyond the final page to append once. The refreshed blue/gray interface uses clearer hierarchy, adaptive large-text layouts, separate tab-close targets, and short transitions that respect system animation settings. Existing PDF, audio, recognition, clipboard, folder, and trash features remain available.
+Version 0.8 adds a compact page map for long notebooks and immersive focus mode. The fixed tool row, contextual pen/eraser settings, real notebook covers, light/dark/system themes, anchored clipboard menu, overflow hints, pen-hover tooltips, nonblocking notices, and adjustable page/audio/reference panels share a consistent visual system. Existing notes keep their paper and ink colors. Background rendering and bounded page caches protect the main input path.
 
 ## Preview
 
 <p align="center">
-  <img src="docs/images/editor-split.png" alt="English Defter editor beside a reference page on a tablet" width="850">
-  <img src="docs/images/library-tablet.png" alt="English Defter library with folders and notebook covers" width="850">
+  <img src="docs/images/editor-map-tablet.png" alt="English 0.8 tablet editor with compact page map" width="850">
+  <img src="docs/images/focus-map-tablet.png" alt="Focus mode hides toolbars while retaining the page map and exit control" width="850">
+  <img src="docs/images/library-tablet.png" alt="English library with real first-page notebook previews" width="850">
 </p>
 <p align="center">
-  <img src="docs/images/audio-phone-library.png" alt="English phone audio library with a demonstration recording" width="220">
-  <img src="docs/images/audio-tablet-transcript.png" alt="English tablet transcript with editable text and timestamped playback" width="650">
+  <img src="docs/images/editor-phone.png" alt="English phone editor with fixed tool row" width="220">
+  <img src="docs/images/audio-phone-library.png" alt="English standalone audio archive" width="220">
+  <img src="docs/images/appearance-phone-large-text.png" alt="Appearance settings with enlarged system text" width="220">
+</p>
+<p align="center">
+  <img src="docs/images/editor-split.png" alt="English editable notebook beside an independent reference page" width="850">
+  <img src="docs/images/audio-tablet-transcript.png" alt="English audio transcript with synthetic demonstration text" width="850">
+  <img src="docs/images/eraser-dark-tablet.png" alt="Dark eraser options with mode, filter, and size" width="272">
 </p>
 
-These previews show the English interface with synthetic notebook and audio content. They are native Robolectric renders, not physical-device screenshots or proof of speech-recognition accuracy. [Screenshot provenance](docs/images/README.md) identifies the capture method and scope.
+All previews render the actual English app with synthetic notes, silent audio fixtures, and manually seeded transcript text. They are native Robolectric/View renders, not physical-device screenshots or evidence of speech accuracy. [Screenshot provenance](docs/images/README.md) records the source, capture method, and checks.
 
 ## Implemented features
 
-| Area | What is available in 0.6 |
+| Area | What is available in 0.8 |
 | --- | --- |
 | Library organization | Create and rename folders, including nested folders. Create notebooks with a cover color, rename them, move them between folders, and search notebook titles and indexed page content. |
 | Notebook and audio trash | Trash and restore items. Select multiple visible trash items, select all, clear the selection, and confirm permanent deletion. Deleting a notebook preserves its linked recordings and removes links to deleted pages. Stop affected recordings and pause or stop active transcription before deleting affected items. |
@@ -56,7 +63,7 @@ These previews show the English interface with synthetic notebook and audio cont
 | Touch and pen input | **Finger: pan** is the default. Fingers navigate while the stylus uses the selected tool. **Finger: draw** lets fingers use that tool too. The preference persists. Two-finger zoom and a fit-width reset are available. A passive stylus reported as a finger uses drawing mode. |
 | Quick editing and navigation | Long-press with a finger in panning mode for copy, cut, paste, select all, or delete selection. Scroll continuously across page boundaries; both neighboring pages can be visible and editable. Pull below the final page to add one page, with visible progress and release feedback. |
 | Stylus side button | Hold an Android-reported stylus side button for a temporary eraser, then release to return to the previous tool, color, and width. Uses standard Android events, not a Samsung-only SDK. |
-| History and workspace | Labeled Undo/Redo controls, notebook tabs with a last page per tab, and a separately navigable read-only reference pane. Swap the reference into the editing pane. Tablet panes sit side by side, while narrow screens stack them. Session restoration preserves tab/page/reference state when Android restores the activity. |
+| History and workspace | Undo/Redo controls with accessible labels, notebook tabs with a last page per tab, and a separately navigable read-only reference pane. Swap the reference into the editing pane. Tablet panes sit side by side, while narrow screens stack them. Session restoration preserves tab/page/reference state when Android restores the activity. |
 | PDF workflow | Import a PDF as notebook pages and annotate it. Preserve its original PDF asset locally. Export a notebook, including its ink, shapes, text, images, and rendered backgrounds, as PDF. |
 | Handwriting recognition | Download a Turkish or English handwriting model. Recognize selected strokes or a whole page, review and correct the result, and optionally replace the original ink. Index recognized handwriting and search it alongside text boxes. |
 | Local saving and recovery | Automatic local saves with visible status, revision checks that prevent a stale editor from silently overwriting a newer save, retry support, and recovery of unsaved edits as separate copies. Malformed or unsupported documents produce an error rather than opening as empty notes. |
@@ -65,9 +72,13 @@ These previews show the English interface with synthetic notebook and audio cont
 | Playback | Seek through a recording, jump to bookmarks or transcript timestamps, and choose 0.5–2× playback speed. |
 | Local transcription | Download and verify the multilingual Whisper base model. Transcribe completed recordings on-device with progress, pause/resume checkpoints, and restart confirmation when replacing a transcript. The service pauses for severe thermal conditions or an Android processing timeout. See the exact language scope below. |
 | Transcript tools | Search recording titles and transcript content, edit transcript sections, listen from their timestamps, insert a section into the open note page, and export TXT or SRT. |
+| Page map | Toggle a lazy thumbnail overlay, see the visible area and current page, and jump by thumbnail or a seek slider that commits on release. Short windows omit the slider. Only visible thumbnails are prepared, with at most two concurrent jobs. |
+| Focus mode | Hide document/tool/footer/system bars while keeping the same editable Canvas. Use Back or the floating exit button to restore them. The map remains optional, and an active audio recording keeps its access button. Focus survives activity recreation. |
+| Appearance and cards | Light, dark, or system theme independent of paper/ink. Grid/list library cards with first-page previews and separate actions. Shared typography, touch targets, selected outlines, restrained shadows, and short transitions that respect disabled system animations. |
+| Contextual tools | Pen color/width/stroke preview, or eraser mode/filter/size. Long-press and supported stylus hover show tooltips. Hidden tabs/tools get scroll hints. Supplemental notices remain dismissible without blocking editing and wait behind open dialogs/menus. |
+| Adjustable panels | Apply saved page/audio panel widths and reference proportions from Appearance. Panels adapt to available space. Opening, closing, or resizing the reference preserves the editable native View. |
 | Interface language | English by default, with a persistent Turkish option available from the library and editor. UI language, handwriting language, and speech language are separate choices. |
 
-<p align="center"><img src="docs/images/continuous-pages-native-canvas.png" alt="Two adjacent notebook pages rendered together on native Android Canvas" width="850"></p>
 
 ## Language support
 
@@ -78,7 +89,7 @@ These previews show the English interface with synthetic notebook and audio cont
 | Speech transcription controls | **Turkish (`tr`)**, **English (`en`)**, or **Automatic (`auto`)**. These are the only accepted explicit modes in the UI and native bridge. |
 | Underlying speech model | Multilingual **Whisper base**, with a **99-language vocabulary**. Auto delegates language detection to that model and can attempt speech in its broader language set. There is no picker for manually selecting each of those 99 languages, and they have not all been validated in Defter. |
 
-The **99** figure describes the downloaded model, not 99 manually selectable or independently tested app languages. It is based on the pinned model's `n_vocab = 51865` and the vendored engine's language-count calculation. The engine also lists Cantonese for other models, but that additional entry is outside this base model's 99-language set. Transcription keeps speech in its source language. Translation is disabled.
+The upstream [Whisper base model card](https://huggingface.co/openai/whisper-base) lists 99 languages. The **99** figure describes the downloaded model, not 99 manually selectable or independently tested app languages. It is based on the pinned model's `n_vocab = 51865` and the vendored engine's language-count calculation. The engine also lists Cantonese for other models, but that additional entry is outside this base model's 99-language set. Transcription keeps speech in its source language. Translation is disabled.
 
 <details>
 <summary>The base model's 99 language codes</summary>
@@ -96,7 +107,7 @@ Build a development APK using the instructions below, then install it on an Andr
 1. Choose **New folder** or **New notebook**. Open a folder first to create a notebook inside it, then choose the cover color and first page template.
 2. Leave **Finger: pan** enabled to move around with your finger and write with your stylus. Switch to **Finger: draw** for finger drawing or a passive stylus. Choose a tool, color, and width. **Eraser options** and **Math tools** open their extra controls.
 3. Use **Import PDF** in the library, or add images and text from the editor. The page-number control opens **Pages** for thumbnails, reordering, and page actions. Scroll naturally between pages. Pull beyond the final page to append one, or use the page arrows for direct navigation.
-4. The tab plus opens another notebook. **Open side by side** adds a reference, and **Edit reference** swaps it into the editable side. A long press in finger panning mode opens the clipboard menu.
+4. Use **Appearance** to choose a theme, grid/list cards, panel widths, and the reference split. The bottom map icon opens the page map. The fullscreen icon enters focus mode, and Back exits it. The tab plus opens another notebook. **Open side by side** adds a reference, and **Edit reference** swaps it into the editable side. A long press in finger panning mode opens the clipboard menu.
 5. Open **Audio** from the library or the notebook microphone action. Choose **Start recording** or **Import audio**. Recording requests microphone permission and shows a foreground notification. Add a bookmark while writing to link the time to the current page.
 6. In Audio, open **Speech model → Download model**, or choose **Transcribe** to open the model dialog when needed. The approximately **148 MB** download is resumable and verified against a pinned SHA-256 hash. Once ready, stop recording, select **Turkish**, **English**, or **Automatic**, and choose **Transcribe**. Review and edit the result before using it.
 7. Open **Handwriting and search**, choose Turkish or English, and use **Download language model**. **Prepare handwriting for search** indexes notebook ink. New ink invalidates the old recognition result, so update the index after editing.
@@ -154,9 +165,9 @@ Android instrumentation sources are under `app/src/androidTest`. Running them re
 
 ## Validation
 
-The completed **0.6.0-alpha** validation records **342 passing tests in 56 suites**, **0 Lint errors / 18 warnings / 1 informational finding**, and **7 passing Android instrumentation tests on Android 15 x86_64**. The update preserved all nine inventoried files before new synthetic fixtures were added. The native Canvas pixel check verifies both papers and the gap.
+The retained **13 November 2026 / 0.8.0-alpha** validation records **393 passing JVM/Robolectric tests**, **13 passing installed R8-release Android tests on API35 x86_64**, and two read-only inventory checks. Debug/release Lint reported zero errors with 22/20 retained warnings. All 114 existing file hashes matched immediately after the upgrade. After synthetic test additions, the 113 original non-catalogue content files still matched. Only the shared catalogue changed to register new test notebooks.
 
-[Validation and retained evidence](docs/VALIDATION.md) describe test scope, fixes, APK integrity, and the emulator display-capture limitation. These are retained development results, not a full regression rerun for publication. Physical Tab S10 FE/S Pen behavior and recognition accuracy still require device testing. Historical speech inference is not reclassified as fresh 0.6 inference testing.
+For this **14 November publication**, production code/configuration is byte-checked against the tested source manifest. Three dedicated English reference/audio preview cases are run again. The seven other current English layouts come from the passing 0.8 regression captures. The full regression, native suite, and APK build are retained development evidence rather than newly rerun publication results. [Validation details](docs/VALIDATION.md) separate these scopes and list remaining physical-device work.
 
 ## Project map
 
@@ -172,7 +183,7 @@ The completed **0.6.0-alpha** validation records **342 passing tests in 56 suite
 | `app/src/main/cpp/` | JNI bridge to the pinned native engine. |
 | `app/src/test/`, `app/src/androidTest/` | Local and Android-device test sources. |
 | `third_party/` | Required native source, licenses, and model provenance. |
-| `docs/` | Detailed guide, scoped validation evidence, and UI captures. |
+| `docs/` | Detailed guide, scoped validation evidence, and UI captures, preview fixture source, and publication provenance. |
 
 The app currently uses Kotlin, Compose, a native Android Canvas, atomic JSON files, and Whisper C/C++. Jetpack Ink and Room are not part of this implementation.
 

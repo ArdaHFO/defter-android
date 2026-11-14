@@ -64,7 +64,7 @@ class ProPageManagerTest {
             assertEquals(2, target.pageIds.size)
             assertTrue(target.pageIds.none { it in original })
         }
-        compose.onNodeWithText("Kapat").performClick()
+        compose.onNodeWithContentDescription("Kapat").performClick()
         compose.onNodeWithContentDescription("Sayfaları göster").assertIsDisplayed()
     }
 

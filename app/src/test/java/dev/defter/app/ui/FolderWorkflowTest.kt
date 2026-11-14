@@ -47,13 +47,13 @@ class FolderWorkflowTest {
         compose.onAllNodesWithText("Genel notlar").assertCountEquals(0)
         createNotebookAndReturn(model, "Türev", childId)
         createNotebookAndReturn(model, "İntegral", childId)
-        compose.onAllNodesWithText("Türev").assertCountEquals(2)
-        compose.onAllNodesWithText("İntegral").assertCountEquals(2)
+        compose.onAllNodesWithText("Türev").assertCountEquals(1)
+        compose.onAllNodesWithText("İntegral").assertCountEquals(1)
         compose.onNodeWithText("2 defter · 0 klasör").assertIsDisplayed()
 
         compose.onNodeWithContentDescription("Üst klasör").performClick()
         compose.runOnIdle { assertEquals(parentId, model.folderId) }
-        compose.onAllNodesWithText("Genel notlar").assertCountEquals(2)
+        compose.onAllNodesWithText("Genel notlar").assertCountEquals(1)
         compose.onAllNodesWithText("Türev").assertCountEquals(0)
         compose.onAllNodesWithText("İntegral").assertCountEquals(0)
         compose.onNodeWithText("Matematik").assertIsDisplayed()
@@ -94,7 +94,7 @@ class FolderWorkflowTest {
         compose.onNode(hasSetTextAction() and hasText("Defter adı")).performTextInput(title)
         compose.onNodeWithText("Defteri oluştur").assertIsEnabled().performClick()
         awaitIdle(model)
-        compose.onNodeWithText(title).assertIsDisplayed()
+        compose.onNodeWithContentDescription("Sekme $title").assertIsDisplayed()
         compose.runOnIdle {
             assertEquals(folderId, model.notebook!!.folderId)
             assertEquals(1, model.notebook!!.pageIds.size)

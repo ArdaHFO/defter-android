@@ -75,7 +75,7 @@ class ContinuousNotebookDeviceTest {
                 send(view, MotionEvent.ACTION_CANCEL, MotionEvent.TOOL_TYPE_FINGER, view.width / 2f, start + view.height * .48f)
             }
             await(model)
-            val evidence = File(app.filesDir, "verification/continuous-0.6").apply { mkdirs() }
+            val evidence = File(requireNotNull(app.getExternalFilesDir(null)), "verification/continuous-0.6").apply { mkdirs() }
             // Render the actual laid-out native View independently of the emulator's
             // display compositor. This artifact is a Canvas render, not a device screenshot.
             instrumentation.runOnMainSync {
@@ -171,7 +171,7 @@ class ContinuousNotebookDeviceTest {
             instrumentation.runOnMainSync { model.selectPage(secondId) }
             await(model)
             assertEquals(1, model.page!!.elements.filterIsInstance<StrokeElement>().size)
-            File(evidence, "result.json").writeText("""{"version":"0.6.0-alpha","simultaneousPages":2,"stylusRoutedToBothPages":true,"undoIsolatedToPage":true,"appendOnce":true,"reopenPreservedInk":true,"syntheticInput":true,"physicalDeviceClaim":false}""")
+            File(evidence, "result.json").writeText("""{"version":"0.6.3-alpha","simultaneousPages":2,"stylusRoutedToBothPages":true,"undoIsolatedToPage":true,"appendOnce":true,"reopenPreservedInk":true,"syntheticInput":true,"physicalDeviceClaim":false}""")
         } finally {
             instrumentation.runOnMainSync {
                 model.config = originalConfig

@@ -1,0 +1,8 @@
+{
+  "tests": 13,
+  "failures": 0,
+  "variant": "R8-optimized release",
+  "api": 35,
+  "abi": "x86_64",
+  "physicalDeviceClaim": false
+}

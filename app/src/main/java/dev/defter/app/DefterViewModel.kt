@@ -13,12 +13,14 @@ import android.net.Uri
 import android.os.PersistableBundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import dev.defter.app.data.DocumentRepository
+import dev.defter.app.data.UiPreferencesStore
 import dev.defter.app.model.*
 import dev.defter.app.ink.PageRenderer
 import dev.defter.app.ink.InkEditing
@@ -33,12 +35,20 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import java.util.Locale
 
 data class PageSearchResult(val notebookId: String, val pageId: String, val pageNumber: Int, val title: String, val excerpt: String)
 
 class DefterViewModel @JvmOverloads constructor(application: Application, private val state: SavedStateHandle = SavedStateHandle()) : AndroidViewModel(application) {
     private val repository = DocumentRepository(application)
+    private val uiStore = UiPreferencesStore(application)
+    var uiPreferences by mutableStateOf(UiPreferences()); private set
+    private var uiPreferencesEdited = false
+    private var uiPreferenceSave: Job? = null
+    private val thumbnailSlots = Semaphore(2)
     var library by mutableStateOf(LibraryData()); private set
     var folderId by mutableStateOf<String?>(null); private set
     var notebookId by mutableStateOf<String?>(null); private set
@@ -47,7 +57,7 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     var loadedPages by mutableStateOf<Map<String, PageDocument>>(emptyMap()); private set
     var loadedPageAssets by mutableStateOf<Map<String, Map<String, Bitmap>>>(emptyMap()); private set
     var pageWindowLoading by mutableStateOf(false); private set
-    var explicitNavigationToken by mutableStateOf(0L); private set
+    var explicitNavigationToken by mutableLongStateOf(0L); private set
     private val editorPreferences = application.getSharedPreferences("editor_preferences", Context.MODE_PRIVATE)
     private var drawingConfig by mutableStateOf(DrawingConfig(touchDrawing = editorPreferences.getBoolean("finger_draws", false)))
     var config: DrawingConfig
@@ -109,6 +119,12 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     init {
         startup = viewModelScope.launch {
             try {
+                val appearance = withContext(Dispatchers.IO) {
+                    try { uiStore.load() }
+                    catch (e: CancellationException) { throw e }
+                    catch (_: Exception) { UiPreferences() }
+                }
+                if (!uiPreferencesEdited) uiPreferences = appearance
                 library = repository.loadLibrary()
                 // Tab activation persists the new session, so capture both reference keys first.
                 val restoredReferenceBook = state.get<String>("referenceBook")
@@ -138,6 +154,19 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
     }
 
     private fun message(e: Exception) = e.message?.take(350) ?: tr("İşlem tamamlanamadı. Lütfen yeniden dene.")
+    fun updateUiPreferences(value: UiPreferences) {
+        val next = value.normalized()
+        if (next == uiPreferences) return
+        uiPreferencesEdited = true
+        uiPreferences = next
+        val previous = uiPreferenceSave
+        uiPreferenceSave = viewModelScope.launch {
+            previous?.join()
+            try { withContext(Dispatchers.IO) { uiStore.save(next) } }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { if (uiPreferences == next) notice = tr("Görünüm ayarları kaydedilemedi.") }
+        }
+    }
     fun dismissError() { error = null }
     fun reportEditingError(value: String) { error = value.take(350) }
     fun dismissNotice() { notice = null }
@@ -816,17 +845,19 @@ class DefterViewModel @JvmOverloads constructor(application: Application, privat
 
     suspend fun pageThumbnail(id: String): Bitmap {
         val visibleSnapshot = latestSnapshots[id] ?: failedSaves[id] ?: loadedPages[id] ?: page?.takeIf { it.id == id }
-        return withContext(Dispatchers.IO) {
+        return thumbnailSlots.withPermit { withContext(Dispatchers.IO) {
+        val context = currentCoroutineContext()
         val doc = visibleSnapshot ?: repository.loadPage(id)
         val decoded = decodeAssets(doc, 384)
         try {
             val width = if (doc.width > doc.height) 210 else maxOf(1, (210 * doc.width / doc.height).toInt())
             val height = if (doc.height >= doc.width) 210 else maxOf(1, (210 * doc.height / doc.width).toInt())
             Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { bitmap ->
-                Canvas(bitmap).apply { scale(width / doc.width, height / doc.height); PageRenderer.draw(this, doc, decoded) }
+                try { Canvas(bitmap).apply { scale(width / doc.width, height / doc.height); PageRenderer.drawCancellable(this, doc, decoded) { !context.isActive } } }
+                catch (error: Throwable) { bitmap.recycle(); throw error }
             }
         } finally { decoded.values.forEach(Bitmap::recycle) }
-        }
+        } }
     }
 
     fun recoverUnsavedAsCopies() = operation {

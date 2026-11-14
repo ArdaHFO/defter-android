@@ -40,7 +40,7 @@ try {
     }
     if (-not $GradleExecutable) { $GradleExecutable = Join-Path $projectDirectory 'gradlew.bat' }
     $tasks = @(switch ($Action) {
-        'Build' { @(':app:assembleDebug') }
+        'Build' { @(':app:assembleRelease') }
         'Test' { @(':app:testDebugUnitTest') }
         'Check' { @(':app:testDebugUnitTest', ':app:lintDebug') }
         'Native' { @(':app:externalNativeBuildDebug') }

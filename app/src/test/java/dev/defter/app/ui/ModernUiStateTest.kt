@@ -73,7 +73,8 @@ class ModernUiStateTest {
 
     @Test fun textDraftSurvivesConfigurationRecreationAndCanBeSaved() {
         val model = openNotebook()
-        compose.onNodeWithContentDescription("Metin ekle").performClick()
+        compose.onNodeWithContentDescription("Ekle ve araçlar").performClick()
+        compose.onNodeWithText("Metin ekle").performClick()
         compose.onNode(hasSetTextAction() and hasText("Notun")).performTextInput("Döndürünce korunan not")
         compose.activityRule.scenario.recreate()
         awaitIdle(model())
@@ -88,6 +89,7 @@ class ModernUiStateTest {
 
     @Test fun colorSwatchesExposeSelectionAndFullTouchTargets() {
         val model = openNotebook()
+        compose.onNodeWithContentDescription("Renk ve kalınlık").performClick()
         compose.onNodeWithContentDescription("Lacivert renk").assertIsSelected()
         val swatch = compose.onNodeWithContentDescription("Mavi renk")
         val bounds = swatch.fetchSemanticsNode().boundsInRoot

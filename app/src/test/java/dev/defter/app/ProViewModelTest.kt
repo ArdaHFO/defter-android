@@ -275,7 +275,7 @@ class ProViewModelTest {
         vm.addText("Yeni not")
         vm.retrySave()
         awaitIdle()
-        assertFalse(vm.unsaved)
+        assertFalse("Save failed: ${vm.error}", vm.unsaved)
         assertNull(vm.error)
         assertEquals(listOf("İlk not", "Yeni not"), readPage(vm.page!!.id).elements.filterIsInstance<TextElement>().map(TextElement::text))
     }

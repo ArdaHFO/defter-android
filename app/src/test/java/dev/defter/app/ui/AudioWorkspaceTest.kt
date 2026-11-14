@@ -100,7 +100,8 @@ class AudioWorkspaceTest {
         compose.onNodeWithContentDescription("Seslerden geri dön").performClick()
         compose.runOnIdle { notes().openNotebook(bookId) }
         awaitIdle()
-        compose.onNodeWithContentDescription("Defter sesleri").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Ekle ve araçlar").performClick()
+        compose.onNodeWithText("Defter sesleri").performClick()
         awaitIdle()
         compose.onNodeWithText("Fizik anlatımı").assertIsDisplayed()
         compose.onNodeWithText("Klasör sesi").assertDoesNotExist()
@@ -198,7 +199,7 @@ class AudioWorkspaceTest {
         awaitIdle()
         assertTrue(notes().page!!.elements.any { it is StrokeElement })
         assertEquals(AudioRecorderPhase.RECORDING, audio().recorder.state.value.phase)
-        compose.onNodeWithText("Geri al").performClick()
+        compose.onNodeWithContentDescription("Geri al").performClick()
         awaitIdle()
         assertTrue(notes().page!!.elements.isEmpty())
     }
@@ -218,7 +219,8 @@ class AudioWorkspaceTest {
         runBlocking { repository().addAudioBookmark(recording.id, 1_000, "Önemli açıklama", sourcePage) }
         compose.runOnIdle { notes().openNotebook(sourceBook) }
         awaitIdle()
-        compose.onNodeWithContentDescription("Defter sesleri").performScrollTo().performClick()
+        compose.onNodeWithContentDescription("Ekle ve araçlar").performClick()
+        compose.onNodeWithText("Defter sesleri").performClick()
         awaitIdle()
         compose.onNodeWithText(recording.title).performClick()
         awaitIdle()

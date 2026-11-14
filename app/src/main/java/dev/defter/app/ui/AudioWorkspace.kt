@@ -57,6 +57,7 @@ fun AudioWorkspace(audio: AudioViewModel, notes: DefterViewModel) {
     var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
     var moveId by rememberSaveable { mutableStateOf<String?>(null) }
     var linkId by rememberSaveable { mutableStateOf<String?>(null) }
+    NoticeBlocker(create || modelDialog || pendingPurge != null || renameId != null || deleteId != null || moveId != null || linkId != null)
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         audio.startRecording(pendingTitle)
     }
@@ -345,6 +346,7 @@ private fun AudioDetail(audio: AudioViewModel, notes: DefterViewModel, recording
     }
     if (confirmRestart) AlertDialog(onDismissRequest = { confirmRestart = false }, title = { Text(tr("Transkript yeniden oluşturulsun mu?")) }, text = { Text(tr("Mevcut transkript ve yaptığın metin düzeltmeleri yeni sonuçla değiştirilecek. Ses kaydı korunur.")) },
         confirmButton = { TextButton(onClick = { audio.transcribe(language, true); confirmRestart = false }) { Text(tr("Yeniden oluştur")) } }, dismissButton = { TextButton(onClick = { confirmRestart = false }) { Text(tr("Vazgeç")) } })
+    NoticeBlocker(editId != null)
     if (editId != null) AlertDialog(onDismissRequest = { editId = null }, title = { Text(tr("Transkripti düzenle")) }, text = { OutlinedTextField(editText, { editText = it }, Modifier.fillMaxWidth().heightIn(min = 140.dp, max = 300.dp), label = { Text(tr("Konuşma metni")) }) },
         confirmButton = { TextButton(onClick = { audio.editSegment(editId!!, editText); editId = null }, enabled = editText.isNotBlank() && editText.length <= 10000) { Text(tr("Kaydet")) } }, dismissButton = { TextButton(onClick = { editId = null }) { Text(tr("Vazgeç")) } })
 }

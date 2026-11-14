@@ -638,4 +638,38 @@
     <string name="text_51eff8265248" formatted="false">"Shape snapping"</string>
     <string name="text_9dee3f205dbb" formatted="false">"Snap shapes"</string>
     <string name="text_e000f7a00edb" formatted="false">"You can restore the notebook “%1$s” later."</string>
+    <string name="text_f3ccc4ba7a79">Color and width</string>
+    <string name="text_a8059b7cdfc5">Insert and tools</string>
+    <string name="text_b0f5d2e45481">Page map</string>
+    <string name="text_e4ebd50e416b">Close page map</string>
+    <string name="text_74329d1b863e">Seek to a page</string>
+    <string name="text_283990e00548">Focus mode</string>
+    <string name="text_c840aea408c8">Exit focus mode</string>
+    <string name="text_e1b0af0c144d">Appearance</string>
+    <string name="text_fd14ad37ae68">Appearance settings could not be saved.</string>
+    <string name="text_d5df3708bc68">Theme</string>
+    <string name="text_19bf207aa588">System theme</string>
+    <string name="text_84b4de746711">Light theme</string>
+    <string name="text_a9a9097f6063">Dark theme</string>
+    <string name="text_e4a76fef465e">The interface theme does not change paper or ink colors.</string>
+    <string name="text_1acb0a8d16f5">Library layout</string>
+    <string name="text_f5f4274fb83a">Grid</string>
+    <string name="text_7343841e724e">List</string>
+    <string name="text_abb00167a10f">Panel sizes</string>
+    <string name="text_6a3338180bbf">Pages panel</string>
+    <string name="text_c375061bb45c">Audio panel</string>
+    <string name="text_beff56a690a4">Reference panel · %1$s%%</string>
+    <string name="text_71a1857d2c4e">Reference panel share</string>
+    <string name="text_c4d50cabafab">Panels adapt to the available space. Sizes change when you tap Apply.</string>
+    <string name="text_5b8ed4467941">Reset appearance</string>
+    <string name="text_6fae3b65e2fd">Compact</string>
+    <string name="text_55d67233d4f2">Wide</string>
+    <string name="text_c97b8438394e">Notebook preview</string>
+    <string name="text_5321550f56c9">Workspace</string>
+    <string name="text_c53ea952eee8">Folders</string>
+    <string name="text_34a68bd9b0a8">Notebooks</string>
+    <string name="text_f3fdc77ddc83">Deleted notebooks</string>
+    <string name="text_b621a4357064">Stroke preview</string>
+    <string name="text_c04e89f0139b">Eraser size</string>
+    <string name="text_1a116abb390d">Stroke thickness</string>
 </resources>

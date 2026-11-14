@@ -23,8 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.automirrored.outlined.Redo
-import androidx.compose.material.icons.automirrored.outlined.Undo
 import androidx.compose.material.icons.automirrored.outlined.NoteAdd
 import androidx.compose.material.icons.automirrored.outlined.RotateRight
 import androidx.compose.material.icons.outlined.*
@@ -40,6 +38,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -65,19 +67,30 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private val Accent = DefterDesign.Accent
-private val AccentSoft = DefterDesign.AccentSoft
-private val Paper = DefterDesign.Canvas
-private val Ink = DefterDesign.Ink
-private val Muted = DefterDesign.Muted
-private val Outline = DefterDesign.Outline
-private val Workspace = DefterDesign.Workspace
+private val Accent: Color
+    @Composable get() = MaterialTheme.colorScheme.primary
+private val AccentSoft: Color
+    @Composable get() = MaterialTheme.colorScheme.primaryContainer
+private val Paper: Color
+    @Composable get() = MaterialTheme.colorScheme.background
+private val Ink: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurface
+private val Muted: Color
+    @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
+private val Outline: Color
+    @Composable get() = MaterialTheme.colorScheme.outlineVariant
+private val Workspace: Color
+    @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh
 private val Covers = listOf(0xFF7162C9.toInt(), 0xFF5488AA.toInt(), 0xFF5A978C.toInt(), 0xFFC28071.toInt(), 0xFFC1A16A.toInt(), 0xFF68758D.toInt())
-private val InkColors = listOf(0xFF24344B.toInt(), 0xFF356859.toInt(), 0xFF397AC6.toInt(), 0xFFC34E54.toInt(), 0xFF9566B5.toInt(), 0xFFDF933C.toInt(), 0xFFF4CD4C.toInt(), 0xFFFFFFFF.toInt())
+internal val InkColors = listOf(0xFF24344B.toInt(), 0xFF356859.toInt(), 0xFF397AC6.toInt(), 0xFFC34E54.toInt(), 0xFF9566B5.toInt(), 0xFFDF933C.toInt(), 0xFFF4CD4C.toInt(), 0xFFFFFFFF.toInt())
 
 @Composable
 fun DefterApp(model: DefterViewModel, audioModel: AudioViewModel? = null) {
-    DefterTheme {
+    val noticeGate = remember { NoticeGate() }
+    CompositionLocalProvider(LocalNoticeGate provides noticeGate) {
+    DefterTheme(model.uiPreferences.theme) {
+        val messages = remember { SnackbarHostState() }
+        var appearanceDialog by rememberSaveable { mutableStateOf(false) }
         var handwritingDialog by rememberSaveable { mutableStateOf(false) }
         var languageDialog by rememberSaveable { mutableStateOf(false) }
         val exportBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) {
@@ -108,20 +121,47 @@ fun DefterApp(model: DefterViewModel, audioModel: AudioViewModel? = null) {
         val importPdfAction = { launchPicker { importPdf.launch(arrayOf("application/pdf")) } }
         // Consume back while an editor operation waits for saved data.
         BackHandler(model.notebookId != null && audioModel?.visible != true) { if (!model.busy) model.closeNotebook() }
-        Surface(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing), color = Paper) {
+        val audioMessage = audioModel?.notice
+        val message = audioMessage ?: model.notice
+        val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+        val canAnnounce = lifecycleState == Lifecycle.State.RESUMED && noticeGate.count == 0 && !handwritingDialog && !languageDialog && !appearanceDialog &&
+            model.error == null && audioModel?.error == null && !model.busy && audioModel?.busy != true
+        LaunchedEffect(message, canAnnounce) {
+            if (message != null && canAnnounce) {
+                messages.showSnackbar(message, actionLabel = tr("Tamam"), withDismissAction = true, duration = SnackbarDuration.Indefinite)
+                if (audioMessage != null && audioModel?.notice == message) audioModel.dismissNotice()
+                else if (model.notice == message) model.dismissNotice()
+            }
+        }
+        Surface(Modifier.fillMaxSize().background(Paper).windowInsetsPadding(WindowInsets.safeDrawing), color = Paper) {
             Box(Modifier.fillMaxSize()) {
                 when {
                     model.loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                    audioModel?.visible == true -> AudioWorkspace(audioModel, model)
-                    model.notebookId == null -> LibraryScreen(model, backUpAction, restoreAction, importPdfAction, { handwritingDialog = true }, { languageDialog = true }, audioModel)
-                    else -> EditorScreen(model,
-                        onImage = { launchPicker { importImage.launch(arrayOf("image/*")) } },
-                        onPdf = { launchPicker { exportPdf.launch("${model.notebook?.title ?: "Defter"}.pdf") } },
-                        onBackup = backUpAction, onImportPdf = importPdfAction, onHandwriting = { handwritingDialog = true }, onLanguage = { languageDialog = true }, audioModel = audioModel)
+                    audioModel?.visible == true && model.notebookId == null -> AudioWorkspace(audioModel, model)
+                    model.notebookId == null -> LibraryScreen(model, backUpAction, restoreAction, importPdfAction, { handwritingDialog = true }, { languageDialog = true }, audioModel, { appearanceDialog = true })
+                    else -> BoxWithConstraints(Modifier.fillMaxSize()) {
+                        val wide = maxWidth >= 1000.dp
+                        val audioPanelWidth = model.uiPreferences.audioWidth.dp.coerceAtMost((maxWidth - 600.dp).coerceAtLeast(0.dp))
+                        if (audioModel?.visible == true && !wide) AudioWorkspace(audioModel, model)
+                        else Row(Modifier.fillMaxSize()) {
+                            Box(Modifier.weight(1f).fillMaxHeight()) {
+                                EditorScreen(model,
+                                    onImage = { launchPicker { importImage.launch(arrayOf("image/*")) } },
+                                    onPdf = { launchPicker { exportPdf.launch("${model.notebook?.title ?: "Defter"}.pdf") } },
+                                    onBackup = backUpAction, onImportPdf = importPdfAction, onHandwriting = { handwritingDialog = true }, onLanguage = { languageDialog = true }, audioModel = audioModel, onAppearance = { appearanceDialog = true })
+                            }
+                            if (wide) AnimatedSidePanel(audioModel?.visible == true, audioPanelWidth, Modifier.testTag("audio-side-panel")) {
+                                Row(Modifier.fillMaxSize()) {
+                                    VerticalDivider()
+                                    Box(Modifier.weight(1f).fillMaxHeight()) { audioModel?.let { AudioWorkspace(it, model) } }
+                                }
+                            }
+                        }
+                    }
                 }
                 if (model.busy) {
                     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = .12f)).clickable(enabled = true) {}, contentAlignment = Alignment.Center) {
-                        Surface(shape = RoundedCornerShape(24.dp), shadowElevation = 12.dp, color = Color.White) {
+                        Surface(shape = RoundedCornerShape(24.dp), shadowElevation = 12.dp, color = MaterialTheme.colorScheme.surface) {
                             Row(Modifier.padding(28.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 CircularProgressIndicator(Modifier.size(26.dp), strokeWidth = 3.dp)
                                 Text(model.progress.ifBlank { tr("Hazırlanıyor…") })
@@ -129,18 +169,16 @@ fun DefterApp(model: DefterViewModel, audioModel: AudioViewModel? = null) {
                         }
                     }
                 }
+                SnackbarHost(messages, Modifier.align(Alignment.BottomCenter).imePadding().padding(16.dp))
             }
         }
+        if (appearanceDialog) AppearanceDialog(model) { appearanceDialog = false }
         if (handwritingDialog) HandwritingSettingsDialog(model) { handwritingDialog = false }
         if (languageDialog) LanguageSettingsDialog { languageDialog = false }
         if (model.recognitionCandidates.isNotEmpty()) RecognitionResultDialog(model)
         audioModel?.error?.let { message ->
             AlertDialog(onDismissRequest = audioModel::dismissError, title = { Text(tr("Ses işlemi")) }, text = { Text(message) },
                 confirmButton = { TextButton(onClick = audioModel::dismissError) { Text(tr("Tamam")) } })
-        }
-        audioModel?.notice?.let { message ->
-            AlertDialog(onDismissRequest = audioModel::dismissNotice, title = { Text(tr("Sesler")) }, text = { Text(message) },
-                confirmButton = { TextButton(onClick = audioModel::dismissNotice) { Text(tr("Tamam")) } })
         }
         model.error?.let { error ->
             AlertDialog(onDismissRequest = model::dismissError, icon = { Icon(Icons.Outlined.Info, null) },
@@ -149,15 +187,13 @@ fun DefterApp(model: DefterViewModel, audioModel: AudioViewModel? = null) {
                 confirmButton = { TextButton(onClick = { model.dismissError(); if (model.unsaved) model.retrySave() }) { Text(if (model.unsaved) tr("Yeniden dene") else tr("Tamam")) } },
                 dismissButton = { if (model.unsaved) TextButton(onClick = { model.dismissError(); model.recoverUnsavedAsCopies() }) { Text(tr("Kopya olarak kurtar")) } })
         }
-        model.notice?.let { notice ->
-            AlertDialog(onDismissRequest = model::dismissNotice, title = { Text("Defter") }, text = { Text(notice) },
-                confirmButton = { TextButton(onClick = model::dismissNotice) { Text(tr("Tamam")) } })
-        }
+
     }
+}
 }
 
 @Composable
-private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestore: () -> Unit, onImportPdf: () -> Unit, onHandwriting: () -> Unit, onLanguage: () -> Unit, audioModel: AudioViewModel? = null) {
+private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestore: () -> Unit, onImportPdf: () -> Unit, onHandwriting: () -> Unit, onLanguage: () -> Unit, audioModel: AudioViewModel? = null, onAppearance: () -> Unit = {}) {
     var create by rememberSaveable { mutableStateOf(false) }
     var folderDialog by rememberSaveable { mutableStateOf(false) }
     var rename by remember { mutableStateOf<Notebook?>(null) }
@@ -168,6 +204,7 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
     var query by rememberSaveable { mutableStateOf("") }
     var trashSelection by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var deleteSelection by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    NoticeBlocker(create || folderDialog || rename != null || trashTarget != null || moving != null || renameFolder != null || deleteSelection.isNotEmpty())
     LaunchedEffect(query, model.library) { delay(250); model.searchPages(query) }
     val folder = model.library.folders.firstOrNull { it.id == model.folderId }
     val books = model.library.notebooks.filter {
@@ -184,25 +221,26 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
         val wide = maxWidth >= 840.dp
         Row(Modifier.fillMaxSize()) {
             if (wide) {
-                Column(Modifier.width(if (LocalDensity.current.fontScale > 1.3f) 300.dp else 240.dp).fillMaxHeight().background(Color(0xFFF0F1F4)).verticalScroll(rememberScrollState()).padding(20.dp)) {
+                Column(Modifier.width(if (LocalDensity.current.fontScale > 1.3f) 300.dp else 240.dp).fillMaxHeight().background(MaterialTheme.colorScheme.surfaceContainer).verticalScroll(rememberScrollState()).padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Brand(Modifier.weight(1f))
                         IconButton(onClick = onLanguage) { Icon(Icons.Outlined.Language, tr("Uygulama dili"), Modifier.size(21.dp), tint = Muted) }
                     }
                     Spacer(Modifier.height(28.dp))
-                    Text(tr("ÇALIŞMA ALANIN"), Modifier.padding(start = 14.dp, bottom = 12.dp), fontSize = 11.sp, letterSpacing = .6.sp, color = Muted, fontWeight = FontWeight.SemiBold)
+                    Text(tr("Çalışma alanı"), Modifier.padding(start = 14.dp, bottom = 12.dp), style = MaterialTheme.typography.labelSmall, color = Muted)
                     NavigationRow(Icons.Outlined.AutoStories, tr("Kütüphane"), !showTrash) { showTrash = false; model.navigateFolder(null); query = "" }
                     if (audioModel != null) NavigationRow(Icons.Outlined.GraphicEq, tr("Sesler"), false) { audioModel.open(folderId = model.folderId) }
                     NavigationRow(Icons.Outlined.DeleteOutline, tr("Çöp kutusu"), showTrash) { showTrash = true; query = "" }
                     Spacer(Modifier.height(24.dp))
                     NavigationRow(Icons.Outlined.PictureAsPdf, tr("PDF içe aktar"), false, onImportPdf)
                     NavigationRow(Icons.Outlined.FindInPage, tr("El yazısı ve arama"), false, onHandwriting)
+                    NavigationRow(Icons.Outlined.Palette, tr("Görünüm"), false, onAppearance)
                     NavigationRow(Icons.Outlined.FileUpload, tr("Yedek al"), false, onBackup)
                     NavigationRow(Icons.Outlined.FileDownload, tr("Yedekten yükle"), false, onRestore)
                     Spacer(Modifier.height(18.dp))
                     Surface(color = Paper, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Outline.copy(alpha = .65f))) {
                         Row(Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.OfflinePin, null, tint = Color(0xFF367A6D), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.OfflinePin, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
                             Text(tr("Notların cihazında.\nİnternetsiz çalışır."), color = Muted, fontSize = 12.sp, lineHeight = 18.sp)
                         }
                     }
@@ -223,6 +261,7 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                                 DropdownMenuItem(text = { Text(tr("PDF içe aktar")) }, onClick = { menu = false; onImportPdf() })
                                 DropdownMenuItem(text = { Text(tr("El yazısı ve arama")) }, onClick = { menu = false; onHandwriting() })
                                 DropdownMenuItem(text = { Text(tr("Uygulama dili")) }, onClick = { menu = false; onLanguage() })
+                            DropdownMenuItem(text = { Text(tr("Görünüm")) }, onClick = { menu = false; onAppearance() })
                                 if (audioModel != null) DropdownMenuItem(text = { Text(tr("Sesler")) }, onClick = { menu = false; audioModel.open(folderId = model.folderId) })
                             }
                         }
@@ -232,13 +271,13 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (folder != null && !showTrash) IconButton(onClick = { model.navigateFolder(folder.parentId) }) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Üst klasör")) }
                     Column(Modifier.weight(1f)) {
-                        Text(if (showTrash) tr("Çöp kutusu") else folder?.name ?: tr("Kütüphanen"), fontSize = if (wide) 34.sp else 30.sp, letterSpacing = (-.65).sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Text(if (showTrash) tr("Çöp kutusu") else folder?.name ?: tr("Kütüphanen"), style = if (wide) MaterialTheme.typography.headlineLarge else MaterialTheme.typography.headlineMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Spacer(Modifier.height(7.dp))
-                        Text(if (showTrash) tr("Silinen defterlerini buradan geri getirebilirsin.") else quantity("%1\$s defter", books.size) + " · " + quantity("%1\$s klasör", folders.size), color = Muted, fontSize = 14.sp)
+                        Text(if (showTrash) tr("Silinen defterlerini buradan geri getirebilirsin.") else quantity("%1\$s defter", books.size) + " · " + quantity("%1\$s klasör", folders.size), color = Muted, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
                 if (audioModel != null && !showTrash) {
-                    Surface(Modifier.fillMaxWidth().padding(top = 18.dp).clickable { audioModel.open(folderId = model.folderId) }, color = Color.White, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Outline)) {
+                    Surface(Modifier.fillMaxWidth().padding(top = 18.dp).clickable { audioModel.open(folderId = model.folderId) }, color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Outline)) {
                         Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                             Box(Modifier.size(44.dp).background(AccentSoft, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) { Icon(Icons.Outlined.GraphicEq, null, tint = Accent, modifier = Modifier.size(24.dp)) }
                             Column(Modifier.weight(1f).padding(horizontal = 14.dp)) { Text(tr("Sesler"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp); Text(tr("Bağımsız kayıtlar ve ses dosyaları"), fontSize = 12.sp, color = Muted, modifier = Modifier.padding(top = 3.dp)) }
@@ -251,9 +290,9 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(query, { query = it }, modifier = Modifier.weight(1f), placeholder = { Text(tr("Defter veya içerik ara"), maxLines = 1, overflow = TextOverflow.Ellipsis) }, leadingIcon = { Icon(Icons.Outlined.Search, null, tint = Muted) },
                         trailingIcon = { if (query.isNotEmpty()) IconButton(onClick = { query = "" }) { Icon(Icons.Outlined.Close, tr("Aramayı temizle")) } },
-                        singleLine = true, shape = RoundedCornerShape(18.dp), colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White, unfocusedBorderColor = Outline))
+                        singleLine = true, shape = RoundedCornerShape(18.dp), colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = MaterialTheme.colorScheme.surface, focusedContainerColor = MaterialTheme.colorScheme.surface, unfocusedBorderColor = Outline))
                     if (!showTrash) {
-                        IconButton(onClick = { folderDialog = true }, modifier = Modifier.size(54.dp).background(Color.White, RoundedCornerShape(18.dp)).border(1.dp, Outline, RoundedCornerShape(18.dp))) { Icon(Icons.Outlined.CreateNewFolder, tr("Yeni klasör")) }
+                        IconButton(onClick = { folderDialog = true }, modifier = Modifier.size(54.dp).background(MaterialTheme.colorScheme.surface, DefterDesign.CardShape).border(1.dp, Outline, RoundedCornerShape(18.dp))) { Icon(Icons.Outlined.CreateNewFolder, tr("Yeni klasör")) }
                         if (wide) Button(onClick = { create = true }, modifier = Modifier.height(54.dp), shape = RoundedCornerShape(18.dp)) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text(tr("Yeni defter"), fontWeight = FontWeight.SemiBold) }
                         else FilledIconButton(onClick = { create = true }, modifier = Modifier.size(54.dp), shape = RoundedCornerShape(18.dp)) { Icon(Icons.Outlined.Add, tr("Yeni defter")) }
                     }
@@ -278,7 +317,7 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                         Spacer(Modifier.height(24.dp))
                         Text(if (showTrash) tr("Çöp kutusu boş") else if (query.isNotBlank()) tr("Defter bulunamadı") else tr("Yeni bir sayfa aç."), fontWeight = FontWeight.SemiBold, fontSize = 25.sp, letterSpacing = (-.5).sp)
                         Spacer(Modifier.height(10.dp))
-                        Text(if (showTrash) tr("Defterlerin kütüphanende güvende.") else if (query.isNotBlank()) tr("Başka bir adla aramayı dene.") else tr("Derslerin, çizimlerin, aklına gelenler."), color = Muted, fontSize = 14.sp)
+                        Text(if (showTrash) tr("Defterlerin kütüphanende güvende.") else if (query.isNotBlank()) tr("Başka bir adla aramayı dene.") else tr("Derslerin, çizimlerin, aklına gelenler."), color = Muted, style = MaterialTheme.typography.bodyMedium)
                         if (!showTrash && query.isBlank()) {
                             Spacer(Modifier.height(24.dp))
                             Button(onClick = { create = true }, contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text(tr("İlk defterini oluştur")) }
@@ -286,24 +325,24 @@ private fun LibraryScreen(model: DefterViewModel, onBackup: () -> Unit, onRestor
                     }
                     }
                 } else {
-                    LazyVerticalGrid(columns = GridCells.Adaptive(if (wide) 200.dp else 145.dp), verticalArrangement = Arrangement.spacedBy(20.dp), horizontalArrangement = Arrangement.spacedBy(18.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
+                    LazyVerticalGrid(columns = if (model.uiPreferences.libraryLayout == LibraryLayout.LIST) GridCells.Fixed(1) else GridCells.Adaptive(if (wide) 200.dp else 145.dp), verticalArrangement = Arrangement.spacedBy(20.dp), horizontalArrangement = Arrangement.spacedBy(18.dp), contentPadding = PaddingValues(bottom = 24.dp)) {
                         if (folders.isNotEmpty()) {
-                            item(span = { GridItemSpan(maxLineSpan) }) { LibrarySectionHeading(tr("KLASÖRLER"), folders.size) }
+                            item(span = { GridItemSpan(maxLineSpan) }) { LibrarySectionHeading(tr("Klasörler"), folders.size) }
                             items(folders, key = { "folder-${it.id}" }) { item ->
-                                Surface(Modifier.fillMaxWidth().clickable { model.navigateFolder(item.id) }, color = Color.White, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Outline)) {
+                                Surface(Modifier.fillMaxWidth().clickable { model.navigateFolder(item.id) }, color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Outline)) {
                                     Row(Modifier.padding(start = 14.dp, end = 4.dp, top = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Box(Modifier.size(40.dp).background(Color(0xFFF8F1E3), RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Folder, null, tint = Color(0xFF9A7639), modifier = Modifier.size(23.dp)) }
+                                        Box(Modifier.size(40.dp).background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Icon(Icons.Outlined.Folder, null, tint = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.size(23.dp)) }
                                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                                             Text(item.name, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                                            Text(quantity("%1\$s defter", model.library.notebooks.count { it.folderId == item.id && it.deletedAt == null }), fontSize = 11.sp, color = Muted, modifier = Modifier.padding(top = 3.dp))
+                                            Text(quantity("%1\$s defter", model.library.notebooks.count { it.folderId == item.id && it.deletedAt == null }), style = MaterialTheme.typography.bodySmall, color = Muted, modifier = Modifier.padding(top = 3.dp))
                                         }
                                         IconButton(onClick = { renameFolder = item }) { Icon(Icons.Outlined.MoreHoriz, tr("Klasörü yeniden adlandır"), Modifier.size(20.dp)) }
                                     }
                                 }
                             }
                         }
-                        if (books.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { LibrarySectionHeading(if (showTrash) tr("SİLİNEN DEFTERLER") else tr("DEFTERLER"), books.size) }
-                        items(books, key = { it.id }) { book -> NotebookCard(book, showTrash,
+                        if (books.isNotEmpty()) item(span = { GridItemSpan(maxLineSpan) }) { LibrarySectionHeading(if (showTrash) tr("Silinen defterler") else tr("Defterler"), books.size) }
+                        items(books, key = { it.id }) { book -> NotebookCard(model, book, showTrash,
                             onOpen = { if (!showTrash) model.openNotebook(book.id) },
                             onRename = { rename = book }, onDelete = { trashTarget = book },
                             onRestore = { model.trashNotebook(book.id, false) }, onMove = { moving = book },
@@ -355,7 +394,7 @@ private fun Brand(modifier: Modifier = Modifier) {
 @Composable
 private fun LibrarySectionHeading(title: String, count: Int) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(title, fontSize = 11.sp, letterSpacing = .6.sp, color = Muted, fontWeight = FontWeight.SemiBold)
+        Text(title, style = MaterialTheme.typography.labelSmall, color = Muted)
         Box(Modifier.background(Outline.copy(alpha = .65f), RoundedCornerShape(6.dp)).padding(horizontal = 7.dp, vertical = 3.dp)) {
             Text(count.toString(), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Muted)
         }
@@ -369,64 +408,21 @@ private fun NavigationRow(icon: ImageVector, label: String, selected: Boolean, o
     val tint by animateColorAsState(if (selected) Accent else Muted, defterTween(180), label = "navigation-ink")
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).clip(RoundedCornerShape(15.dp)).background(fill).clickable(onClick = onClick).semantics { this.selected = selected }.padding(horizontal = 14.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Icon(icon, null, Modifier.size(21.dp), tint = tint)
-        Text(label, color = tint, fontSize = 14.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f))
+        Text(label, color = tint, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
         if (selected) Box(Modifier.size(5.dp).background(Accent, CircleShape))
-    }
-}
-
-@Composable
-private fun NotebookCard(book: Notebook, trash: Boolean, onOpen: () -> Unit, onRename: () -> Unit, onDelete: () -> Unit, onRestore: () -> Unit, onMove: () -> Unit, selectedForDeletion: Boolean? = null, onSelectionChange: () -> Unit = {}) {
-    var menu by remember { mutableStateOf(false) }
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (pressed) .985f else 1f, defterTween(150), label = "cover-press")
-    val stroke by animateColorAsState(if (pressed || selectedForDeletion == true) Accent.copy(alpha = .6f) else Outline, defterTween(150), label = "cover-outline")
-    val language = AppLanguage.selectedTag
-    val updated = remember(book.updatedAt, language) { SimpleDateFormat("d MMM", Locale.forLanguageTag(language)).format(Date(book.updatedAt)) }
-    Surface(modifier = Modifier.graphicsLayer { scaleX = scale; scaleY = scale }, shape = RoundedCornerShape(20.dp), color = Color.White, border = BorderStroke(.5.dp, stroke), shadowElevation = 1.dp) {
-        Column(Modifier.padding(9.dp)) {
-        Box(Modifier.fillMaxWidth().aspectRatio(1.06f).clip(RoundedCornerShape(16.dp)).background(Brush.linearGradient(listOf(Color(book.coverColor), androidx.compose.ui.graphics.lerp(Color(book.coverColor), Ink, .18f)))).clickable(interactionSource = interaction, indication = ripple(), enabled = !trash || selectedForDeletion != null, onClick = if (trash) onSelectionChange else onOpen)) {
-            Box(Modifier.width(9.dp).fillMaxHeight().background(Color.Black.copy(alpha = .10f)))
-            Box(Modifier.padding(start = 14.dp).width(1.dp).fillMaxHeight().background(Color.White.copy(alpha = .22f)))
-            Box(Modifier.align(Alignment.TopEnd).padding(end = 18.dp).width(10.dp).height(29.dp).background(Color.White.copy(alpha = .18f), RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp)))
-            Column(Modifier.fillMaxSize().padding(start = 25.dp, end = 20.dp, top = 21.dp, bottom = 18.dp), verticalArrangement = Arrangement.SpaceBetween) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("defter", fontSize = 12.sp, letterSpacing = (-.3).sp, color = Color.White.copy(alpha = .8f), fontWeight = FontWeight.SemiBold)
-                }
-                Text(book.title, fontSize = 21.sp, lineHeight = 27.sp, letterSpacing = (-.4).sp, fontWeight = FontWeight.SemiBold, color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
-                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Box(Modifier.width(38.dp).height(2.dp).background(Color.White.copy(alpha = .65f), CircleShape))
-                    Box(Modifier.width(24.dp).height(2.dp).background(Color.White.copy(alpha = .27f), CircleShape))
-                }
-            }
-        }
-        Row(Modifier.padding(start = 4.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (selectedForDeletion != null) Checkbox(selectedForDeletion, { onSelectionChange() }, Modifier.semantics { contentDescription = tr("Silmek için seç: %1\$s", book.title) })
-            Column(Modifier.weight(1f)) {
-                Text(book.title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(3.dp))
-                Text(quantity("%1\$s sayfa · %2\$s", book.pageIds.size, updated), fontSize = 11.sp, color = Muted)
-            }
-            Box {
-                IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreHoriz, tr("%1\$s seçenekleri", book.title), Modifier.size(20.dp)) }
-                DropdownMenu(menu, onDismissRequest = { menu = false }) {
-                    if (trash) DropdownMenuItem(text = { Text(tr("Geri getir")) }, onClick = { menu = false; onRestore() })
-                    else {
-                        DropdownMenuItem(text = { Text(tr("Yeniden adlandır")) }, onClick = { menu = false; onRename() })
-                        DropdownMenuItem(text = { Text(tr("Klasöre taşı")) }, onClick = { menu = false; onMove() })
-                        DropdownMenuItem(text = { Text(tr("Çöp kutusuna taşı")) }, onClick = { menu = false; onDelete() })
-                    }
-                }
-            }
-        }
-        }
     }
 }
 
 private data class PageContextPoint(val pageId: String, val x: Float, val y: Float)
 
 @Composable
-private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () -> Unit, onBackup: () -> Unit, onImportPdf: () -> Unit, onHandwriting: () -> Unit, onLanguage: () -> Unit, audioModel: AudioViewModel? = null) {
+private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () -> Unit, onBackup: () -> Unit, onImportPdf: () -> Unit, onHandwriting: () -> Unit, onLanguage: () -> Unit, audioModel: AudioViewModel? = null, onAppearance: () -> Unit = {}) {
+    var focusMode by rememberSaveable(model.notebookId) { mutableStateOf(false) }
+    var mapOpen by rememberSaveable(model.notebookId) { mutableStateOf(false) }
+    val viewport = remember { mutableStateOf<NotebookViewport?>(null) }
+    val viewportChanged = remember { { value: NotebookViewport -> viewport.value = value } }
+    FocusSystemBars(focusMode && audioModel?.visible != true)
+    BackHandler(focusMode) { focusMode = false }
     var canvas by remember { mutableStateOf<NotebookCanvas?>(null) }
     var zoom by remember { mutableFloatStateOf(1f) }
     var selected by remember { mutableStateOf<String?>(null) }
@@ -449,6 +445,7 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     var widthDialog by rememberSaveable { mutableStateOf(false) }
     var textDialog by rememberSaveable { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
+    NoticeBlocker(colorDialog || widthDialog || textDialog || templateDialog || eraserDialog || geometryDialog || editTextId != null || cropImageId != null || selectionColorDialog || chooseTab || chooseReference || contextPoint != null)
     val current = model.page
     // AndroidView observes snapshot reads separately from this composition. Capture
     // the page and its navigation token together so a new token cannot target an old page.
@@ -458,6 +455,7 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     val canvasPageAssets = model.loadedPageAssets
     val canvasConfig = model.config
     val canvasAssets = model.assets
+    val workspaceColor = Workspace.toArgb()
     val canvasEnabled = !model.busy && contextPoint == null
     LaunchedEffect(current?.id) {
         if (contextPoint?.pageId != current?.id) contextPoint = null
@@ -474,95 +472,62 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     }
     val effectiveTool = if (temporaryEraser) DrawingTool.ERASER else model.config.tool
     Column(Modifier.fillMaxSize().background(Workspace)) {
-        BoxWithConstraints(Modifier.fillMaxWidth().background(Color.White)) {
-            val separateHistoryRow = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
-            Column {
-                Row(Modifier.fillMaxWidth().background(Color.White).padding(start = 8.dp, end = 10.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = model::closeNotebook) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Kütüphaneye dön"), tint = Ink) }
-                    Column(Modifier.weight(1f).padding(start = 4.dp)) {
-                        Text(model.notebook?.title ?: "Defter", fontWeight = FontWeight.SemiBold, fontSize = 19.sp, letterSpacing = (-.3).sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Spacer(Modifier.height(3.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            val saving = model.pendingSaves > 0
-                            Icon(if (model.unsaved) Icons.Outlined.ErrorOutline else if (saving) Icons.Outlined.Sync else Icons.Outlined.CheckCircle, null, Modifier.size(12.dp), tint = if (model.unsaved) Color(0xFFB64444) else Muted)
-                            Text(if (model.unsaved) tr("Kaydedilemedi · yeniden dene") else if (saving) tr("Kaydediliyor…") else tr("Cihazına kaydedildi"), fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (model.unsaved) Color(0xFFB64444) else Muted, modifier = Modifier.clickable(enabled = model.unsaved) { model.retrySave() })
-                        }
-                    }
-                    if (!separateHistoryRow) HistoryControls(model)
-                    Box {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, tr("Defter menüsü")) }
-                        DropdownMenu(menu, onDismissRequest = { menu = false }) {
-                            DropdownMenuItem(text = { Text(tr("Resim ekle")) }, leadingIcon = { Icon(Icons.Outlined.Image, null) }, onClick = { menu = false; onImage() })
-                            DropdownMenuItem(text = { Text(tr("PDF içe aktar")) }, onClick = { menu = false; onImportPdf() })
-                            DropdownMenuItem(text = { Text(tr("Panodan yapıştır")) }, leadingIcon = { Icon(Icons.Outlined.ContentPaste, null) }, onClick = { menu = false; model.paste() })
-                            DropdownMenuItem(text = { Text(tr("Metin ekle")) }, leadingIcon = { Icon(Icons.Outlined.TextFields, null) }, onClick = { menu = false; textDialog = true })
-                            HorizontalDivider()
-                            DropdownMenuItem(text = { Text(tr("Sayfa şablonu")) }, onClick = { menu = false; templateDialog = true })
-                            DropdownMenuItem(text = { Text(tr("Sayfayı çoğalt")) }, onClick = { menu = false; model.duplicatePage() })
-                            DropdownMenuItem(text = { Text(tr("Silgi seçenekleri")) }, onClick = { menu = false; eraserDialog = true })
-                            DropdownMenuItem(text = { Text(tr("Matematik araçları")) }, onClick = { menu = false; geometryDialog = true })
-                            DropdownMenuItem(text = { Text(tr("El yazısını metne çevir")) }, onClick = { menu = false; model.recognizeHandwriting(selectedIds) })
-                            DropdownMenuItem(text = { Text(tr("El yazısı ve arama")) }, onClick = { menu = false; onHandwriting() })
-                            if (audioModel != null) DropdownMenuItem(text = { Text(tr("Ses kaydı ve transkript")) }, leadingIcon = { Icon(Icons.Outlined.Mic, null) }, onClick = { menu = false; audioModel.open(model.notebookId, model.notebook?.folderId) })
-                            DropdownMenuItem(text = { Text(tr("Yan yana aç")) }, onClick = { menu = false; chooseReference = true })
-                            DropdownMenuItem(text = { Text(tr("PDF olarak kaydet")) }, onClick = { menu = false; onPdf() })
-                            DropdownMenuItem(text = { Text(tr("Tam yedek al")) }, onClick = { menu = false; onBackup() })
-                            DropdownMenuItem(text = { Text(tr("Uygulama dili")) }, onClick = { menu = false; onLanguage() })
-                        }
-                    }
-                }
-                if (separateHistoryRow) {
-                    Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) { HistoryControls(model) }
-                }
+        if (!focusMode) {
+        Row(Modifier.fillMaxWidth().height(64.dp).background(MaterialTheme.colorScheme.surface).testTag("editor-document-header"), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = model::closeNotebook, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Kütüphaneye dön"), tint = Ink) }
+            NotebookTabs(model, Modifier.weight(1f)) { chooseTab = true }
+            val saving = model.pendingSaves > 0
+            val saveLabel = if (model.unsaved) tr("Kaydedilemedi · yeniden dene") else if (saving) tr("Kaydediliyor…") else tr("Cihazına kaydedildi")
+            IconButton(onClick = model::retrySave, enabled = model.unsaved, modifier = Modifier.size(48.dp)) {
+                Icon(if (model.unsaved) Icons.Outlined.ErrorOutline else if (saving) Icons.Outlined.Sync else Icons.Outlined.CheckCircle,
+                    saveLabel, Modifier.size(20.dp), tint = if (model.unsaved) MaterialTheme.colorScheme.error else Muted)
+            }
+        Box {
+            IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, tr("Defter menüsü")) }
+            DropdownMenu(menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text(tr("Resim ekle")) }, leadingIcon = { Icon(Icons.Outlined.Image, null) }, onClick = { menu = false; onImage() })
+                DropdownMenuItem(text = { Text(tr("PDF içe aktar")) }, onClick = { menu = false; onImportPdf() })
+                DropdownMenuItem(text = { Text(tr("Panodan yapıştır")) }, leadingIcon = { Icon(Icons.Outlined.ContentPaste, null) }, onClick = { menu = false; model.paste() })
+                DropdownMenuItem(text = { Text(tr("Metin ekle")) }, leadingIcon = { Icon(Icons.Outlined.TextFields, null) }, onClick = { menu = false; textDialog = true })
+                HorizontalDivider()
+                DropdownMenuItem(text = { Text(tr("Sayfa şablonu")) }, onClick = { menu = false; templateDialog = true })
+                DropdownMenuItem(text = { Text(tr("Sayfayı çoğalt")) }, onClick = { menu = false; model.duplicatePage() })
+                DropdownMenuItem(text = { Text(tr("Silgi seçenekleri")) }, onClick = { menu = false; eraserDialog = true })
+                DropdownMenuItem(text = { Text(tr("Matematik araçları")) }, onClick = { menu = false; geometryDialog = true })
+                DropdownMenuItem(text = { Text(tr("El yazısını metne çevir")) }, onClick = { menu = false; model.recognizeHandwriting(selectedIds) })
+                DropdownMenuItem(text = { Text(tr("El yazısı ve arama")) }, onClick = { menu = false; onHandwriting() })
+                if (audioModel != null) DropdownMenuItem(text = { Text(tr("Ses kaydı ve transkript")) }, leadingIcon = { Icon(Icons.Outlined.Mic, null) }, onClick = { menu = false; audioModel.open(model.notebookId, model.notebook?.folderId) })
+                DropdownMenuItem(text = { Text(tr("Yan yana aç")) }, onClick = { menu = false; chooseReference = true })
+                DropdownMenuItem(text = { Text(tr("PDF olarak kaydet")) }, onClick = { menu = false; onPdf() })
+                DropdownMenuItem(text = { Text(tr("Tam yedek al")) }, onClick = { menu = false; onBackup() })
+                DropdownMenuItem(text = { Text(tr("Uygulama dili")) }, onClick = { menu = false; onLanguage() })
+                            DropdownMenuItem(text = { Text(tr("Görünüm")) }, onClick = { menu = false; onAppearance() })
             }
         }
+        }
         HorizontalDivider(color = Outline)
-        NotebookTabs(model) { chooseTab = true }
+        FixedEditorToolbar(model, effectiveTool, ::selectTool,
+            onTouchMode = {
+                contextPoint = null
+                if (model.config.tool == DrawingTool.HAND) selectTool(DrawingTool.PEN)
+                model.config = model.config.copy(touchDrawing = !model.config.touchDrawing)
+            },
+            onColor = { colorDialog = true }, onWidth = { widthDialog = true },
+            onEraser = { eraserDialog = true }, onGeometry = { geometryDialog = true },
+            onImage = onImage, onText = { textDialog = true },
+            onAudio = audioModel?.let { { it.open(model.notebookId, model.notebook?.folderId) } })
+        HorizontalDivider(color = Outline)
         if (audioModel != null) AudioRecorderStrip(audioModel, model.page?.id?.takeIf { audioModel.library.audioItems.any { item -> item.id == audioModel.recorder.state.value.recordingId && item.notebookId == model.notebookId } }, audioModel::showActiveRecording)
-        Surface(Modifier.widthIn(max = 860.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 12.dp, vertical = 10.dp), color = Color.White, shape = RoundedCornerShape(20.dp), border = BorderStroke(.5.dp, Outline), shadowElevation = 2.dp) {
-            Column {
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                DrawingTool.entries.forEach { tool ->
-                    ToolButton(toolIcon(tool), if (tool == DrawingTool.ERASER && model.config.eraserMode == EraserMode.PARTIAL) tr("Kısmi silgi") else tool.label, effectiveTool == tool) { selectTool(tool) }
-                    if (tool == DrawingTool.ERASER || tool == DrawingTool.ELLIPSE || tool == DrawingTool.HAND) {
-                        Box(Modifier.padding(horizontal = 7.dp).width(1.dp).height(24.dp).background(Outline))
-                    }
-                }
-                ToolButton(Icons.Outlined.Image, tr("Resim ekle"), false, onImage)
-                if (audioModel != null) ToolButton(Icons.Outlined.Mic, tr("Defter sesleri"), false) { audioModel.open(model.notebookId, model.notebook?.folderId) }
-                ToolButton(Icons.Outlined.TextFields, tr("Metin ekle"), false) { textDialog = true }
-                ToolButton(Icons.Outlined.Tune, tr("Silgi seçenekleri"), configIsEraserCustom(model.config)) { eraserDialog = true }
-                ToolButton(Icons.Outlined.SquareFoot, tr("Matematik araçları"), model.config.shapeSnap) { geometryDialog = true }
-            }
-            HorizontalDivider(Modifier.padding(horizontal = 16.dp), color = Outline)
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                FilterChip(selected = model.config.touchDrawing, enabled = !model.busy, onClick = {
-                    contextPoint = null
-                    if (model.config.tool == DrawingTool.HAND) selectTool(DrawingTool.PEN)
-                    model.config = model.config.copy(touchDrawing = !model.config.touchDrawing)
-                }, label = { Text(if (model.config.touchDrawing) tr("Parmak: çiz") else tr("Parmak: taşı"), fontSize = 12.sp) },
-                    modifier = Modifier.heightIn(min = 48.dp).semantics { contentDescription = if (model.config.touchDrawing) tr("Parmak ve kalemle yaz. Taşıma moduna geç.") else tr("Parmakla taşı, kalemle yaz. Çizim moduna geç.") },
-                    leadingIcon = { Icon(if (model.config.touchDrawing) Icons.Outlined.TouchApp else Icons.Outlined.PanTool, null, Modifier.size(17.dp)) })
-                VerticalDivider(Modifier.height(26.dp), color = Outline)
-                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                InkColors.forEach { color -> ColorDot(color, model.config.color == color, 24) { model.config = model.config.copy(color = color) } }
-                IconButton(onClick = { colorDialog = true }) { Icon(Icons.Outlined.Palette, tr("Özel renk"), Modifier.size(21.dp), tint = Muted) }
-                OutlinedButton(onClick = { widthDialog = true }, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp), modifier = Modifier.height(48.dp).semantics { contentDescription = tr("Kalınlık ayarı") }, border = BorderStroke(1.dp, Outline), shape = RoundedCornerShape(14.dp)) {
-                    Box(Modifier.size(model.config.width.coerceIn(3f, 12f).dp).background(Ink, CircleShape))
-                    Spacer(Modifier.width(8.dp))
-                    Text(String.format(Locale.ROOT, "%.1f", model.config.width), fontSize = 12.sp, color = Ink)
-                }
-                }
-            }
-            }
         }
         if (model.pendingSharedImage != null || model.pendingSharedText != null) {
             TextButton(onClick = model::insertSharedContent, modifier = Modifier.fillMaxWidth().background(AccentSoft)) { Icon(Icons.Outlined.ContentPaste, null); Spacer(Modifier.width(8.dp)); Text(tr("Paylaşılan içeriği bu sayfaya ekle")) }
         }
-        WorkspacePanes(model, Modifier.weight(1f).fillMaxWidth()) {
+        EditorPageWorkspace(model, pageDialog, { pageDialog = false }, Modifier.weight(1f).fillMaxWidth()) {
+        WorkspacePanes(model, Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize().background(Workspace)) {
             if (current != null) {
                 AndroidView(factory = { context -> NotebookCanvas(context).also { view ->
+                    view.setBackgroundColor(workspaceColor)
                     canvas = view
                     view.onDocumentChanged = model::changePage
                     view.onEditingError = model::reportEditingError
@@ -589,11 +554,12 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
                     }
                     temporaryEraser = view.isTemporaryEraserActive
                 } }, update = { view ->
+                    if ((view.background as? android.graphics.drawable.ColorDrawable)?.color != workspaceColor) view.setBackgroundColor(workspaceColor)
+                    view.onViewportChanged = if (mapOpen) viewportChanged else null
                     view.setPageWindow(canvasPageIds, canvasPages, canvasPageAssets)
                     view.document = current
                     view.config = canvasConfig
                     view.assets = canvasAssets
-                    view.setBackgroundColor(Workspace.toArgb())
                     view.edgeNavigationEnabled = true
                     view.canNavigatePrevious = false
                     view.canNavigateNext = false
@@ -619,12 +585,12 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
                 if (temporaryEraser) {
                     // A visual-only Row lets pen input reach the page behind this status badge.
                     Row(Modifier.align(Alignment.TopCenter).padding(12.dp).shadow(4.dp, RoundedCornerShape(16.dp)).background(Ink, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(toolIcon(DrawingTool.ERASER), null, tint = Color.White, modifier = Modifier.size(17.dp))
-                        Text(tr("Yan düğme · Silgi"), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        Icon(toolIcon(DrawingTool.ERASER), null, tint = MaterialTheme.colorScheme.surface, modifier = Modifier.size(17.dp))
+                        Text(tr("Yan düğme · Silgi"), color = MaterialTheme.colorScheme.surface, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                     }
                 }
                 if (selectedIds.isNotEmpty() || selected != null) {
-                    Surface(Modifier.align(Alignment.BottomCenter).padding(16.dp), shape = RoundedCornerShape(18.dp), shadowElevation = 8.dp, color = Color.White) {
+                    Surface(Modifier.align(Alignment.BottomCenter).padding(16.dp), shape = RoundedCornerShape(18.dp), shadowElevation = 8.dp, color = MaterialTheme.colorScheme.surface) {
                         Row(Modifier.horizontalScroll(rememberScrollState()).padding(5.dp), verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { canvas?.scaleSelection(.9f) }) { Icon(Icons.Outlined.Remove, tr("Seçileni küçült")) }
                             Text(quantity("%1\$s nesne", selectedIds.size.coerceAtLeast(1)), fontSize = 12.sp, color = Muted)
@@ -636,16 +602,29 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
                             if (canvas?.selectedElements?.any { it is ImageElement } == true) IconButton(onClick = { canvas?.rotateSelection(90f) }) { Icon(Icons.AutoMirrored.Outlined.RotateRight, tr("Seçili görseli döndür")) }
                             (canvas?.selectedElements?.singleOrNull() as? ImageElement)?.let { image -> IconButton(onClick = { cropImageId = image.id }) { Icon(Icons.Outlined.Crop, tr("Seçili görseli kırp")) } }
                             (canvas?.selectedElements?.singleOrNull() as? TextElement)?.let { text -> IconButton(onClick = { editTextId = text.id }) { Icon(Icons.Outlined.EditNote, tr("Seçili metni düzenle")) } }
-                            IconButton(onClick = { canvas?.deleteSelection() }) { Icon(Icons.Outlined.DeleteOutline, tr("Seçileni sil"), tint = Color(0xFFB64444)) }
+                            IconButton(onClick = { canvas?.deleteSelection() }) { Icon(Icons.Outlined.DeleteOutline, tr("Seçileni sil"), tint = MaterialTheme.colorScheme.error) }
                         }
+                    }
+                }
+            }
+            if (mapOpen && current != null) NotebookPageMap(model, viewport, { mapOpen = false }, Modifier.align(Alignment.CenterEnd).padding(8.dp))
+            if (focusMode) {
+                Surface(Modifier.align(Alignment.TopEnd).padding(12.dp).testTag("focus-controls"), shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface, shadowElevation = 3.dp, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                    Row {
+                        if (audioModel != null) FocusRecordingButton(audioModel)
+                        IconButton(onClick = { mapOpen = !mapOpen }) { Icon(Icons.Outlined.Map, tr("Sayfa haritası")) }
+                        IconButton(onClick = { focusMode = false }) { Icon(Icons.Outlined.FullscreenExit, tr("Odak modundan çık")) }
                     }
                 }
             }
         }
         }
+        }
+        if (!focusMode) {
         HorizontalDivider(color = Outline)
-        BoxWithConstraints(Modifier.fillMaxWidth().background(Color.White).padding(horizontal = 8.dp)) {
-            val stacked = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
+        BoxWithConstraints(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(horizontal = 8.dp)) {
+            val stacked = maxWidth < 600.dp || LocalDensity.current.fontScale > 1.3f
             val pageNavigation: @Composable () -> Unit = {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     IconButton(onClick = { model.notebook?.pageIds?.getOrNull(model.pageIndex - 1)?.let(model::selectPage) }, enabled = model.pageIndex > 0, modifier = Modifier.size(48.dp)) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, tr("Önceki sayfa"), Modifier.size(19.dp)) }
@@ -656,26 +635,30 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(Modifier.fillMaxWidth().heightIn(min = 60.dp), verticalAlignment = Alignment.CenterVertically) {
                     TextButton(onClick = { canvas?.resetViewport() }, modifier = Modifier.heightIn(min = 48.dp)) { Text("${(zoom * 100).toInt()}%", fontSize = 12.sp) }
+                    IconButton(onClick = { mapOpen = !mapOpen }, modifier = Modifier.size(48.dp).semantics { this.selected = mapOpen }) { Icon(Icons.Outlined.Map, tr("Sayfa haritası"), Modifier.size(21.dp)) }
+                    IconButton(onClick = { focusMode = true; contextPoint = null; pageDialog = false }, modifier = Modifier.size(48.dp)) { Icon(Icons.Outlined.Fullscreen, tr("Odak modu"), Modifier.size(23.dp)) }
                     Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { if (!stacked) pageNavigation() }
                     FilledIconButton(onClick = { model.addPage(current?.template ?: PaperTemplate.DOTS) }, modifier = Modifier.size(48.dp), shape = RoundedCornerShape(16.dp)) { Icon(Icons.AutoMirrored.Outlined.NoteAdd, tr("Yeni sayfa"), Modifier.size(21.dp)) }
                 }
                 if (stacked) pageNavigation()
             }
         }
+        }
     }
     contextPoint?.takeIf { it.pageId == current?.id }?.let { point ->
         val hasSelection = selectedIds.isNotEmpty()
-        AlertDialog(onDismissRequest = { contextPoint = null }, title = { Text(tr("Sayfa işlemleri")) },
-            text = {
-                Column(Modifier.fillMaxWidth()) {
-                    Text(tr("Parmağın sayfayı taşır, kalemin seçili araçla çalışır."), style = MaterialTheme.typography.bodySmall, color = Muted)
-                    TextButton(onClick = { if (model.copySelection(selectedIds)) contextPoint = null }, enabled = hasSelection, modifier = Modifier.fillMaxWidth()) { Text(tr("Kopyala")) }
-                    TextButton(onClick = { if (model.copySelection(selectedIds)) { model.page?.let { model.changePage(it.copy(elements = it.elements.filterNot { element -> element.id in selectedIds })) }; contextPoint = null } }, enabled = hasSelection, modifier = Modifier.fillMaxWidth()) { Text(tr("Kes")) }
-                    TextButton(onClick = { contextPoint = null; model.paste(point.x, point.y) }, modifier = Modifier.fillMaxWidth()) { Text(tr("Yapıştır")) }
-                    TextButton(onClick = { canvas?.selectElements(current?.elements?.mapTo(linkedSetOf()) { it.id }.orEmpty()) }, enabled = current?.elements?.isNotEmpty() == true, modifier = Modifier.fillMaxWidth()) { Text(tr("Tümünü seç")) }
-                    TextButton(onClick = { model.page?.let { model.changePage(it.copy(elements = it.elements.filterNot { element -> element.id in selectedIds })) }; contextPoint = null }, enabled = hasSelection, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) { Text(tr("Seçimi sil")) }
-                }
-            }, confirmButton = { TextButton(onClick = { contextPoint = null }) { Text(tr("Kapat")) } })
+        val location = IntArray(2)
+        canvas?.getLocationInWindow(location)
+        val bounds = canvas?.pageBoundsInView(point.pageId)
+        val menuPoint = IntOffset(location[0] + ((bounds?.left ?: 0f) + point.x * (bounds?.width() ?: 1f) / (current?.width ?: 1f)).toInt(),
+            location[1] + ((bounds?.top ?: 0f) + point.y * (bounds?.height() ?: 1f) / (current?.height ?: 1f)).toInt())
+        PageContextMenu(menuPoint, hasSelection, current?.elements?.isNotEmpty() == true,
+            onCopy = { if (model.copySelection(selectedIds)) contextPoint = null },
+            onCut = { if (model.copySelection(selectedIds)) { model.page?.let { model.changePage(it.copy(elements = it.elements.filterNot { element -> element.id in selectedIds })) }; contextPoint = null } },
+            onPaste = { contextPoint = null; model.paste(point.x, point.y) },
+            onSelectAll = { canvas?.selectElements(current?.elements?.mapTo(linkedSetOf()) { it.id }.orEmpty()) },
+            onDelete = { model.page?.let { model.changePage(it.copy(elements = it.elements.filterNot { element -> element.id in selectedIds })) }; contextPoint = null },
+            onDismiss = { contextPoint = null })
     }
     if (colorDialog) ColorDialog(model.config.color, onDismiss = { colorDialog = false }) { colorDialog = false; model.config = model.config.copy(color = it) }
     if (widthDialog) {
@@ -701,7 +684,6 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
                 }
             } }, confirmButton = { TextButton(onClick = { templateDialog = false }) { Text(tr("Kapat")) } })
     }
-    if (pageDialog) PageManagerDialog(model) { pageDialog = false }
     if (eraserDialog) EraserSettingsDialog(model.config, { model.config = it }, { eraserDialog = false })
     if (geometryDialog) GeometrySettingsDialog(model.config, { model.config = it }, { geometryDialog = false })
     if (chooseTab) NotebookPickerDialog(model, tr("Sekmede aç"), { model.openNotebook(it); chooseTab = false }, { chooseTab = false })
@@ -711,39 +693,7 @@ private fun EditorScreen(model: DefterViewModel, onImage: () -> Unit, onPdf: () 
     current?.elements?.filterIsInstance<ImageElement>()?.firstOrNull { it.id == cropImageId }?.let { image -> ImageCropDialog(image, { left, top, right, bottom -> canvas?.selectElements(setOf(image.id)); canvas?.cropSelectedImage(left, top, right, bottom); cropImageId = null }, { cropImageId = null }) }
 }
 
-private fun configIsEraserCustom(config: DrawingConfig) = config.eraserMode == EraserMode.PARTIAL || config.eraserFilter != EraserFilter.ALL
-
-@Composable
-private fun HistoryControls(model: DefterViewModel) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        HistoryButton(Icons.AutoMirrored.Outlined.Undo, tr("Geri al"), model.canUndo && !model.busy, model::undo)
-        HistoryButton(Icons.AutoMirrored.Outlined.Redo, tr("Yinele"), model.canRedo && !model.busy, model::redo)
-    }
-}
-
-@Composable
-private fun HistoryButton(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit) {
-    val fill by animateColorAsState(if (enabled) AccentSoft else Paper, defterTween(180), label = "history-fill")
-    val tint by animateColorAsState(if (enabled) Accent else Muted.copy(alpha = .65f), defterTween(180), label = "history-ink")
-    FilledTonalButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier.widthIn(min = 64.dp).heightIn(min = 54.dp),
-        shape = RoundedCornerShape(14.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-        colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = fill, contentColor = tint,
-            disabledContainerColor = fill, disabledContentColor = tint
-        )
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Icon(icon, null, Modifier.size(20.dp))
-            Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 1)
-        }
-    }
-}
-
-private fun toolIcon(tool: DrawingTool): ImageVector = when (tool) {
+internal fun toolIcon(tool: DrawingTool): ImageVector = when (tool) {
     DrawingTool.PEN -> Icons.Outlined.Edit
     DrawingTool.HIGHLIGHTER -> Icons.Outlined.BorderColor
     DrawingTool.ERASER -> Icons.Outlined.AutoFixNormal
@@ -757,19 +707,22 @@ private fun toolIcon(tool: DrawingTool): ImageVector = when (tool) {
 }
 
 @Composable
-private fun ToolButton(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
+internal fun ToolButton(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val fill by animateColorAsState(if (selected) AccentSoft else Color.Transparent, defterTween(160), label = "tool-fill")
     val tint by animateColorAsState(if (selected) Accent else Muted, defterTween(160), label = "tool-ink")
     val scale by animateFloatAsState(if (pressed) .95f else 1f, defterTween(130), label = "tool-press")
-    IconButton(onClick = onClick, interactionSource = interaction, modifier = Modifier.size(48.dp).background(fill, RoundedCornerShape(12.dp)).semantics { this.selected = selected }) {
+    DefterTooltip(label) {
+    IconButton(onClick = onClick, interactionSource = interaction, modifier = Modifier.size(48.dp).background(fill, DefterDesign.ControlShape)
+        .border(2.dp, if (selected) Accent else Color.Transparent, DefterDesign.ControlShape).semantics { this.selected = selected }) {
         Icon(icon, label, Modifier.size(21.dp).graphicsLayer { scaleX = scale; scaleY = scale }, tint = tint)
+    }
     }
 }
 
 @Composable
-private fun ColorDot(color: Int, selected: Boolean, size: Int, onClick: () -> Unit) {
+internal fun ColorDot(color: Int, selected: Boolean, size: Int, onClick: () -> Unit) {
     val ring by animateColorAsState(if (selected) Accent else Color.Transparent, defterTween(180), label = "ink-color-ring")
     val label = when (color) {
         0xFF24344B.toInt() -> tr("Lacivert")

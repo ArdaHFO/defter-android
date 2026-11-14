@@ -1,0 +1,12 @@
+{
+  "freshPublicationCaptureTests": 3,
+  "retainedRegressionPreviewLayouts": 9,
+  "nativeCanvasImage": 1,
+  "checks": [
+    "English app language asserted",
+    "actual app Views rendered",
+    "nonempty pixel content asserted",
+    "manual visual review"
+  ],
+  "recognitionAccuracyClaim": false
+}

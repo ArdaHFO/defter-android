@@ -12,8 +12,8 @@ android {
         applicationId = "dev.defter.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "0.6.0-alpha"
+        versionCode = 11
+        versionName = "0.8.0-alpha"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") }
         externalNativeBuild {
@@ -32,8 +32,15 @@ android {
         }
     }
     buildTypes {
-        release { isMinifyEnabled = false }
+        release {
+            isDebuggable = false
+            isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro", "instrumentation-api-rules.pro")
+            testProguardFiles("test-proguard-rules.pro")
+        }
     }
+    testBuildType = providers.gradleProperty("deviceTestBuildType").orElse("debug").get()
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -71,9 +78,11 @@ dependencies {
     testImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.04.01"))
     androidTestImplementation("androidx.test:rules:1.6.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 }
 
 tasks.withType<Test>().configureEach {

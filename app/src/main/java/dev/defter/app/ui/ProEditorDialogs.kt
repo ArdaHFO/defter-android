@@ -3,6 +3,7 @@ package dev.defter.app.ui
 import dev.defter.app.localization.tr
 
 import android.graphics.Bitmap
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -155,7 +156,7 @@ fun EditTextDialog(element: TextElement, onApply: (String, Float, Int) -> Unit, 
 }
 
 @Composable
-fun PageManagerDialog(model: DefterViewModel, onDismiss: () -> Unit) {
+fun PageManagerDialog(model: DefterViewModel, embedded: Boolean = false, onDismiss: () -> Unit) {
     val book = model.notebook ?: return
     val persistedOrder = book.pageIds
     var order by remember(book.id) { mutableStateOf(persistedOrder) }
@@ -165,6 +166,7 @@ fun PageManagerDialog(model: DefterViewModel, onDismiss: () -> Unit) {
     var transferId by rememberSaveable { mutableStateOf<String?>(null) }
     var transferCopy by rememberSaveable { mutableStateOf(false) }
     var showDeleted by rememberSaveable { mutableStateOf(false) }
+    NoticeBlocker(!embedded || deleteId != null || transferId != null)
     val grid = rememberLazyGridState()
     val scope = rememberCoroutineScope()
     var scrollJob by remember { mutableStateOf<Job?>(null) }
@@ -174,13 +176,9 @@ fun PageManagerDialog(model: DefterViewModel, onDismiss: () -> Unit) {
         order = persistedOrder
     }
     fun cancelDrag() { dragging = null; order = persistedOrder; scrollJob?.cancel() }
-    AlertDialog(
-        onDismissRequest = { cancelDrag(); onDismiss() },
-        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth(.94f),
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        title = { Text(tr("Sayfalar · %1\$s", book.pageIds.size)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    BackHandler(enabled = embedded) { cancelDrag(); onDismiss() }
+    val content: @Composable () -> Unit = {
+            Column(if (embedded) Modifier.fillMaxSize() else Modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(tr("Sıralamak için sayfaya basılı tutup sürükle. Oklarla da taşıyabilirsin."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
                     FilterChip(selected = !showDeleted, onClick = { cancelDrag(); showDeleted = false }, label = { Text(tr("Sayfalar")) })
@@ -197,7 +195,7 @@ fun PageManagerDialog(model: DefterViewModel, onDismiss: () -> Unit) {
                     }
                 } else LazyVerticalGrid(
                     columns = GridCells.Adaptive(128.dp), state = grid,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 120.dp, max = 430.dp),
+                    modifier = Modifier.fillMaxWidth().then(if (embedded) Modifier.weight(1f) else Modifier.heightIn(min = 120.dp, max = 430.dp)),
                     horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     itemsIndexed(displayed, key = { _, id -> id }) { index, id ->
@@ -289,9 +287,23 @@ fun PageManagerDialog(model: DefterViewModel, onDismiss: () -> Unit) {
                         }
                     }
                 }
+                if (embedded) OutlinedButton(onClick = { model.addPage(model.page?.template ?: PaperTemplate.DOTS) }, enabled = !model.busy, modifier = Modifier.fillMaxWidth()) { Text(tr("Sayfa ekle")) }
                 if (book.pageIds.size == 1) Text(tr("Defterde en az bir sayfa kalır."), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-        },
+    }
+    if (embedded) {
+        Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(12.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(tr("Sayfalar · %1\$s", book.pageIds.size), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                IconButton(onClick = { cancelDrag(); onDismiss() }) { Icon(Icons.Outlined.Close, tr("Kapat")) }
+            }
+            Box(Modifier.weight(1f)) { content() }
+        }
+    } else AlertDialog(
+        onDismissRequest = { cancelDrag(); onDismiss() },
+        modifier = Modifier.widthIn(max = 720.dp).fillMaxWidth(.94f),
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        title = { Text(tr("Sayfalar · %1\$s", book.pageIds.size)) }, text = content,
         confirmButton = { TextButton(onClick = { model.addPage(model.page?.template ?: PaperTemplate.DOTS); onDismiss() }, enabled = !model.busy) { Text(tr("Sayfa ekle")) } },
         dismissButton = { TextButton(onClick = { cancelDrag(); onDismiss() }) { Text(tr("Kapat")) } }
     )

@@ -1,47 +1,117 @@
 {
-  "version": "0.6.0-alpha",
-  "capture_date": "2026-11-03",
-  "locale": "en-US",
-  "renderer": "Actual MainActivity/Compose UI, Robolectric SDK33 NATIVE graphics, decorView.draw(Canvas(bitmap))",
-  "synthetic_data": "English demonstration notebooks and silent WAV with manually seeded transcript",
-  "tests": {
-    "executed": 4,
-    "failures": 0
-  },
-  "apk_built_or_installed": false,
-  "production_source_unchanged": true,
-  "capture_test_sha256": "e5b960b7c3014999380aacc07622b98b2b15f553ffb07c5b61c88526fab5ef0e",
-  "limitations": [
-    "Not physical-device screenshots or speech/handwriting accuracy evidence"
-  ],
+  "version": "0.8.0-alpha",
+  "sourceManifest": "../verification/0.8.0-alpha/tested-source-sha256.json",
   "images": [
     {
-      "file": "audio-phone-library.png",
-      "width": 393,
-      "height": 851,
-      "bytes": 37628,
-      "sha256": "1c58460637578cd1dc9932c932aea5a860ad404d21d88a49a93b3e17fa10dca3"
+      "file": "library-tablet.png",
+      "sha256": "e03d2cfd2caec6b36d6edeba2066f3d2cd69f45227d7994faa2a7e4a8ff8c263",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
     },
     {
-      "file": "audio-tablet-transcript.png",
-      "width": 1280,
-      "height": 900,
-      "bytes": 66742,
-      "sha256": "287f87a74042a818ac9e1e6d471c978689ca5fe5d1981778c7452250d37fd809"
+      "file": "editor-map-tablet.png",
+      "sha256": "f73b3ffb42f5520b788c2e2589979ebb230a42a96caf5813a2900d6ab7cb0646",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
+    },
+    {
+      "file": "focus-map-tablet.png",
+      "sha256": "c98e701595e02ef2cc00967b8d25196ffdd657168a5ca3e3611625ad92775279",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
+    },
+    {
+      "file": "eraser-dark-tablet.png",
+      "sha256": "965f68350130bea7c5a05797e79da81471472a5f6009f61390a041ac04bfa488",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
+    },
+    {
+      "file": "editor-phone.png",
+      "sha256": "1da12c41c691a58e72833c3314a0ca77194152e2c6e34818050288b758005b70",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
+    },
+    {
+      "file": "focus-phone.png",
+      "sha256": "a0e850c413884d8b19376494590815ee0b101f3e2b3723ca749c9758feb8eaac",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
+    },
+    {
+      "file": "appearance-phone-large-text.png",
+      "sha256": "dcb703bf760544adcbd4725364869f2faac9d4cf615b726b4fa320916a26fedc",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "EnglishWorkspacePreviewTest",
+      "content": "synthetic study notes"
     },
     {
       "file": "editor-split.png",
-      "width": 1280,
-      "height": 800,
-      "bytes": 100391,
-      "sha256": "c2c8af037677a0eb91f159063701f729696f97e79a49ff25e447a92f51f5a8db"
+      "sha256": "0b8e99fbb1f298cc303f4de25ed4303a15ae6a8f0bfdd28bccf579cf6ad8765d",
+      "captured": "2026-11-14",
+      "method": "Robolectric native software render",
+      "fixture": "docs/preview-fixtures/GithubEnglishPreviewTest.kt",
+      "content": "synthetic notes, silent WAV fixture and manually seeded English transcript"
     },
     {
-      "file": "library-tablet.png",
-      "width": 1280,
-      "height": 800,
-      "bytes": 178678,
-      "sha256": "0d046b497a6109bafaa0cd08f2b203c3b8b200970a21b211b781f69c18de9dd9"
+      "file": "audio-phone-library.png",
+      "sha256": "1c58460637578cd1dc9932c932aea5a860ad404d21d88a49a93b3e17fa10dca3",
+      "captured": "2026-11-14",
+      "method": "Robolectric native software render",
+      "fixture": "docs/preview-fixtures/GithubEnglishPreviewTest.kt",
+      "content": "synthetic notes, silent WAV fixture and manually seeded English transcript"
+    },
+    {
+      "file": "audio-tablet-transcript.png",
+      "sha256": "287f87a74042a818ac9e1e6d471c978689ca5fe5d1981778c7452250d37fd809",
+      "captured": "2026-11-14",
+      "method": "Robolectric native software render",
+      "fixture": "docs/preview-fixtures/GithubEnglishPreviewTest.kt",
+      "content": "synthetic notes, silent WAV fixture and manually seeded English transcript"
+    },
+    {
+      "file": "responsive-phone-2x.png",
+      "sha256": "823d652d41b7b1153e9cf86ec0e32b67bf367eca0477c50a6a231c94dbf95618",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "ResponsiveWorkspaceTest",
+      "fontScale": 2,
+      "content": "synthetic notes"
+    },
+    {
+      "file": "responsive-tablet-2x.png",
+      "sha256": "fec7f2878436e90ef9cd9b81c52267596114e50b054fba3f4512dc3e45e9571e",
+      "captured": "2026-11-13",
+      "method": "Robolectric native software render",
+      "fixture": "ResponsiveWorkspaceTest",
+      "fontScale": 2,
+      "content": "synthetic notes"
+    },
+    {
+      "file": "continuous-pages-native-canvas.png",
+      "sha256": "89330217e51aba603c3fa2df6aab609f900fa743a25b4338d7f473b4618ed0aa",
+      "captured": "2026-11-13",
+      "method": "Installed R8 release Android View bitmap render",
+      "fixture": "ContinuousNotebookDeviceTest",
+      "content": "synthetic page/pixel fixture",
+      "physicalDevice": false
     }
-  ]
+  ],
+  "microphoneUsed": false,
+  "speechInferencePerformedForPreviews": false,
+  "freshPublicationCaptureTests": 3,
+  "physicalDeviceScreenshots": false
 }

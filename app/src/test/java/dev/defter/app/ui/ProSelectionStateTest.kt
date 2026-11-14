@@ -54,7 +54,7 @@ class ProSelectionStateTest {
             assertEquals(original.id, saved.id)
             assertEquals("Döndürülmüş düzenleme", saved.text)
         }
-        compose.onNodeWithText("Geri al").performClick()
+        compose.onNodeWithContentDescription("Geri al").performClick()
         awaitIdle(model)
         compose.runOnIdle { assertEquals(original, model.page!!.elements.single()) }
     }
@@ -88,7 +88,7 @@ class ProSelectionStateTest {
             assertEquals(original.width / 2f, saved.width, .001f)
             assertEquals(original.height, saved.height, .001f)
         }
-        compose.onNodeWithText("Geri al").performClick()
+        compose.onNodeWithContentDescription("Geri al").performClick()
         awaitIdle(model)
         compose.runOnIdle { assertEquals(original, model.page!!.elements.single()) }
     }

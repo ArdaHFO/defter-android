@@ -19,11 +19,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import dev.defter.app.localization.tr
 
 /** Selection and closing have separate, nonoverlapping touch targets and accessible names. */
 @Composable
-internal fun DefterNotebookTab(title: String, isSelected: Boolean, enabled: Boolean, onSelect: () -> Unit, onClose: () -> Unit) {
+internal fun DefterNotebookTab(title: String, isSelected: Boolean, enabled: Boolean, onSelect: () -> Unit, onClose: () -> Unit, maxTitleWidth: Dp = 200.dp) {
     val fill by animateColorAsState(
         if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         defterTween(), label = "Notebook tab selection"
@@ -37,13 +38,13 @@ internal fun DefterNotebookTab(title: String, isSelected: Boolean, enabled: Bool
                 onClick = onSelect, enabled = enabled,
                 colors = ButtonDefaults.textButtonColors(contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(start = 14.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-                modifier = Modifier.widthIn(min = DefterDesign.MinTouchTarget, max = 200.dp).heightIn(min = DefterDesign.MinTouchTarget)
+                modifier = Modifier.widthIn(min = DefterDesign.MinTouchTarget, max = maxTitleWidth).heightIn(min = DefterDesign.MinTouchTarget)
                     .semantics { contentDescription = tr("Sekme %1\$s", title); this.selected = isSelected }
             ) {
                 Icon(if (isSelected) Icons.Outlined.CheckCircle else Icons.Outlined.AutoStories, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelLarge,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium, modifier = Modifier.clearAndSetSemantics {})
+                    fontWeight = FontWeight.Medium, modifier = Modifier.clearAndSetSemantics {})
             }
             VerticalDivider(Modifier.height(18.dp), color = MaterialTheme.colorScheme.outlineVariant)
             IconButton(onClick = onClose, enabled = enabled, modifier = Modifier.size(DefterDesign.MinTouchTarget)) {

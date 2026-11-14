@@ -1,0 +1,18 @@
+{
+  "debuggable": false,
+  "verifiedUpgradeContentFiles": 114,
+  "buttonTouchToTestIdleNs": [
+    1847880564,
+    935801835,
+    943744543,
+    937056880,
+    925953367,
+    937518061
+  ],
+  "frameMetricsCount": 0,
+  "frameP95Ns": null,
+  "unchangedBindingRedraws": 0,
+  "mainThreadDiskViolations": [],
+  "physicalTabletTimingClaim": false,
+  "scope": "Synthetic emulator touch-to-test-idle; not physical pen latency or FPS"
+}

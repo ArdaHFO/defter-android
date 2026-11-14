@@ -1,0 +1,476 @@
+{
+  "debug": {
+    "errors": 0,
+    "warnings": 22,
+    "issues": [
+      {
+        "id": "OldTargetApi",
+        "severity": "Warning",
+        "message": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details.",
+        "locations": [
+          {
+            "file": "app/build.gradle.kts",
+            "line": "14"
+          }
+        ]
+      },
+      {
+        "id": "AppBundleLocaleChanges",
+        "severity": "Warning",
+        "message": "Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the `bundle` configuration",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "42"
+          }
+        ]
+      },
+      {
+        "id": "ObsoleteSdkInt",
+        "severity": "Warning",
+        "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.",
+        "locations": [
+          {
+            "file": "app/src/main/res/mipmap-anydpi-v26",
+            "line": null
+          }
+        ]
+      },
+      {
+        "id": "StaticFieldLeak",
+        "severity": "Warning",
+        "message": "Do not place Android context classes in static fields (static reference to `AppLanguage` which has field `localized` pointing to `Context`); this is a memory leak",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "11"
+          }
+        ]
+      },
+      {
+        "id": "StaticFieldLeak",
+        "severity": "Warning",
+        "message": "Do not place Android context classes in static fields; this is a memory leak",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "16"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "166"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "272"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "308"
+          }
+        ]
+      },
+      {
+        "id": "MonochromeLauncherIcon",
+        "severity": "Warning",
+        "message": "The application adaptive icon is missing a monochrome tag",
+        "locations": [
+          {
+            "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+            "line": "2"
+          }
+        ]
+      },
+      {
+        "id": "MonochromeLauncherIcon",
+        "severity": "Warning",
+        "message": "The application adaptive roundIcon is missing a monochrome tag",
+        "locations": [
+          {
+            "file": "app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+            "line": "2"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "32"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/DefterViewModel.kt",
+            "line": "68"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/DefterViewModel.kt",
+            "line": "855"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+            "line": "603"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Bitmap.scale` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+            "line": "642"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/LiveStrokeRaster.kt",
+            "line": "26"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Canvas.withTranslation` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+            "line": "378"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageFrameCache.kt",
+            "line": "206"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageRasterCache.kt",
+            "line": "56"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Canvas.withClip` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageRenderer.kt",
+            "line": "49"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/UiPreferencesStore.kt",
+            "line": "21"
+          }
+        ]
+      },
+      {
+        "id": "ClickableViewAccessibility",
+        "severity": "Warning",
+        "message": "`NotebookCanvas#onTouchEvent` should call `NotebookCanvas#performClick` when a click is detected",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+            "line": "444"
+          }
+        ]
+      }
+    ]
+  },
+  "release": {
+    "errors": 0,
+    "warnings": 20,
+    "issues": [
+      {
+        "id": "OldTargetApi",
+        "severity": "Warning",
+        "message": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details.",
+        "locations": [
+          {
+            "file": "app/build.gradle.kts",
+            "line": "14"
+          }
+        ]
+      },
+      {
+        "id": "AppBundleLocaleChanges",
+        "severity": "Warning",
+        "message": "Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the `bundle` configuration",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "42"
+          }
+        ]
+      },
+      {
+        "id": "ObsoleteSdkInt",
+        "severity": "Warning",
+        "message": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`.",
+        "locations": [
+          {
+            "file": "app/src/main/res/mipmap-anydpi-v26",
+            "line": null
+          }
+        ]
+      },
+      {
+        "id": "StaticFieldLeak",
+        "severity": "Warning",
+        "message": "Do not place Android context classes in static fields (static reference to `AppLanguage` which has field `localized` pointing to `Context`); this is a memory leak",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "11"
+          }
+        ]
+      },
+      {
+        "id": "StaticFieldLeak",
+        "severity": "Warning",
+        "message": "Do not place Android context classes in static fields; this is a memory leak",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "16"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "166"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "272"
+          }
+        ]
+      },
+      {
+        "id": "UsableSpace",
+        "severity": "Warning",
+        "message": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/audio/AudioRecorderService.kt",
+            "line": "308"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/localization/AppLanguage.kt",
+            "line": "32"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/DefterViewModel.kt",
+            "line": "68"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/DefterViewModel.kt",
+            "line": "855"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+            "line": "603"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Bitmap.scale` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/DocumentRepository.kt",
+            "line": "642"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/LiveStrokeRaster.kt",
+            "line": "26"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Canvas.withTranslation` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+            "line": "378"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageFrameCache.kt",
+            "line": "206"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX function `createBitmap` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageRasterCache.kt",
+            "line": "56"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `Canvas.withClip` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/PageRenderer.kt",
+            "line": "49"
+          }
+        ]
+      },
+      {
+        "id": "UseKtx",
+        "severity": "Warning",
+        "message": "Use the KTX extension function `SharedPreferences.edit` instead?",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/data/UiPreferencesStore.kt",
+            "line": "21"
+          }
+        ]
+      },
+      {
+        "id": "ClickableViewAccessibility",
+        "severity": "Warning",
+        "message": "`NotebookCanvas#onTouchEvent` should call `NotebookCanvas#performClick` when a click is detected",
+        "locations": [
+          {
+            "file": "app/src/main/java/dev/defter/app/ink/NotebookCanvas.kt",
+            "line": "444"
+          }
+        ]
+      }
+    ]
+  }
+}

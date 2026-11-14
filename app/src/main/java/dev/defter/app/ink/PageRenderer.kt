@@ -34,10 +34,21 @@ object PageRenderer {
         assets: Map<String, Bitmap>,
         excludedIds: Set<String> = emptySet(),
         replacement: PageElement? = null
-    ) {
+    ) = drawInternal(canvas, page, assets, excludedIds, replacement, null)
+
+    internal fun drawCancellable(canvas: Canvas, page: PageDocument, assets: Map<String, Bitmap>, cancelled: () -> Boolean) =
+        drawInternal(canvas, page, assets, emptySet(), null, cancelled)
+
+    private fun checkpoint(cancelled: (() -> Boolean)?) {
+        if (cancelled?.invoke() == true) throw java.util.concurrent.CancellationException("Obsolete page render")
+    }
+
+    private fun drawInternal(canvas: Canvas, page: PageDocument, assets: Map<String, Bitmap>, excludedIds: Set<String>,
+                             replacement: PageElement?, cancelled: (() -> Boolean)?) {
+        checkpoint(cancelled)
         val save = canvas.save()
         canvas.clipRect(0f, 0f, page.width, page.height)
-        drawPaper(canvas, page)
+        drawPaperInternal(canvas, page, cancelled)
         page.pdfBackground?.let { background ->
             assets["pdf:${background.assetId}:${background.pageIndex}"]?.takeUnless { it.isRecycled }?.let { bitmap ->
                 val paint = states.get()!!.paint
@@ -47,14 +58,17 @@ object PageRenderer {
             }
         }
         for (element in page.elements) {
+            checkpoint(cancelled)
             if (element.id !in excludedIds) {
-                drawElement(canvas, if (replacement?.id == element.id) replacement else element, assets)
+                drawElementInternal(canvas, if (replacement?.id == element.id) replacement else element, assets, cancelled)
             }
         }
         canvas.restoreToCount(save)
     }
 
-    fun drawPaper(canvas: Canvas, page: PageDocument) {
+    fun drawPaper(canvas: Canvas, page: PageDocument) = drawPaperInternal(canvas, page, null)
+
+    private fun drawPaperInternal(canvas: Canvas, page: PageDocument, cancelled: (() -> Boolean)?) {
         val paint = states.get()!!.paint
         paint.reset()
         paint.isAntiAlias = true
@@ -70,6 +84,7 @@ object PageRenderer {
             PaperTemplate.LINED -> {
                 var y = margin + spacing
                 while (y < page.height - margin) {
+                    checkpoint(cancelled)
                     canvas.drawLine(margin, y, page.width - margin, y, paint)
                     y += spacing
                 }
@@ -77,11 +92,13 @@ object PageRenderer {
             PaperTemplate.GRID -> {
                 var x = margin
                 while (x < page.width - margin) {
+                    checkpoint(cancelled)
                     canvas.drawLine(x, margin, x, page.height - margin, paint)
                     x += spacing
                 }
                 var y = margin
                 while (y < page.height - margin) {
+                    checkpoint(cancelled)
                     canvas.drawLine(margin, y, page.width - margin, y, paint)
                     y += spacing
                 }
@@ -90,6 +107,7 @@ object PageRenderer {
                 paint.color = if (darkPaper) 0xFF73897B.toInt() else 0xFFB8C6BE.toInt()
                 var y = margin
                 while (y < page.height - margin) {
+                    checkpoint(cancelled)
                     var x = margin
                     while (x < page.width - margin) {
                         canvas.drawCircle(x, y, 1.7f, paint)
@@ -109,6 +127,7 @@ object PageRenderer {
                 paint.strokeWidth = 1f
                 var y = top + spacing
                 while (y < bottom) {
+                    checkpoint(cancelled)
                     canvas.drawLine(divider + 24f, y, page.width - margin, y, paint)
                     y += spacing
                 }
@@ -121,7 +140,10 @@ object PageRenderer {
         }
     }
 
-    fun drawElement(canvas: Canvas, element: PageElement, assets: Map<String, Bitmap>) {
+    fun drawElement(canvas: Canvas, element: PageElement, assets: Map<String, Bitmap>) =
+        drawElementInternal(canvas, element, assets, null)
+
+    private fun drawElementInternal(canvas: Canvas, element: PageElement, assets: Map<String, Bitmap>, cancelled: (() -> Boolean)?) {
         val state = states.get()!!
         val paint = state.paint
         paint.reset()
@@ -130,7 +152,7 @@ object PageRenderer {
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeJoin = Paint.Join.ROUND
         when (element) {
-            is StrokeElement -> drawStroke(canvas, element, state)
+            is StrokeElement -> drawStroke(canvas, element, state, cancelled)
             is ShapeElement -> {
                 paint.color = element.color
                 paint.strokeWidth = element.width
@@ -181,6 +203,7 @@ object PageRenderer {
                 paint.textSize = element.size
                 var baseline = element.y + element.size
                 for (line in element.text.split('\n')) {
+                    checkpoint(cancelled)
                     canvas.drawText(line, element.x, baseline, paint)
                     baseline += element.size * 1.25f
                 }
@@ -188,7 +211,31 @@ object PageRenderer {
         }
     }
 
-    private fun drawStroke(canvas: Canvas, stroke: StrokeElement, state: State) {
+    /** Stable pen quadratics can be accumulated without revisiting earlier input samples. */
+    internal fun drawPenRange(canvas: Canvas, stroke: StrokeElement, from: Int, until: Int, tail: Boolean) {
+        val state = states.get()!!
+        val paint = state.paint
+        paint.reset(); paint.isAntiAlias = true; paint.isDither = true
+        paint.color = stroke.color; paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND; paint.strokeJoin = Paint.Join.ROUND
+        val pts = stroke.points
+        for (index in max(1, from) until min(until, pts.size)) {
+            val a = pts[index - 1]; val b = pts[index]
+            val startX = if (index == 1) a.x else (pts[index - 2].x + a.x) / 2f
+            val startY = if (index == 1) a.y else (pts[index - 2].y + a.y) / 2f
+            paint.strokeWidth = ElementGeometry.strokeWidth(stroke, (a.pressure + b.pressure) / 2f)
+            state.path.rewind(); state.path.moveTo(startX, startY)
+            state.path.quadTo(a.x, a.y, (a.x + b.x) / 2f, (a.y + b.y) / 2f)
+            canvas.drawPath(state.path, paint)
+        }
+        if (tail && pts.size >= 2) {
+            val a = pts[pts.lastIndex - 1]; val b = pts.last()
+            paint.strokeWidth = ElementGeometry.strokeWidth(stroke, b.pressure)
+            canvas.drawLine((a.x + b.x) / 2f, (a.y + b.y) / 2f, b.x, b.y, paint)
+        }
+    }
+
+    private fun drawStroke(canvas: Canvas, stroke: StrokeElement, state: State, cancelled: (() -> Boolean)?) {
         if (stroke.points.isEmpty()) return
         val paint = state.paint
         paint.color = stroke.color
@@ -205,7 +252,9 @@ object PageRenderer {
             val path = state.path
             path.reset()
             path.moveTo(stroke.points[0].x, stroke.points[0].y)
+            var visited = 0
             ElementGeometry.visitStrokeSegments(stroke) { _, _, controlX, controlY, endX, endY, _, line ->
+                if (cancelled != null && ++visited % 256 == 0) checkpoint(cancelled)
                 if (line) path.lineTo(endX, endY) else path.quadTo(controlX, controlY, endX, endY)
                 false
             }
@@ -219,7 +268,9 @@ object PageRenderer {
             return
         }
         val path = state.path
+        var visited = 0
         ElementGeometry.visitStrokeSegments(stroke) { startX, startY, controlX, controlY, endX, endY, width, line ->
+            if (cancelled != null && ++visited % 256 == 0) checkpoint(cancelled)
             paint.strokeWidth = width
             if (line) canvas.drawLine(startX, startY, endX, endY, paint)
             else {

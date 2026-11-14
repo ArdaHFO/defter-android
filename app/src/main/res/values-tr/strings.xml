@@ -638,4 +638,38 @@
     <string name="text_51eff8265248" formatted="false">"Şekil hizalama"</string>
     <string name="text_9dee3f205dbb" formatted="false">"Şekilleri hizala"</string>
     <string name="text_e000f7a00edb" formatted="false">"“%1$s” defterini daha sonra geri getirebilirsin."</string>
+    <string name="text_f3ccc4ba7a79">Renk ve kalınlık</string>
+    <string name="text_a8059b7cdfc5">Ekle ve araçlar</string>
+    <string name="text_b0f5d2e45481">Sayfa haritası</string>
+    <string name="text_e4ebd50e416b">Haritayı kapat</string>
+    <string name="text_74329d1b863e">Haritada sayfaya git</string>
+    <string name="text_283990e00548">Odak modu</string>
+    <string name="text_c840aea408c8">Odak modundan çık</string>
+    <string name="text_e1b0af0c144d">Görünüm</string>
+    <string name="text_fd14ad37ae68">Görünüm ayarları kaydedilemedi.</string>
+    <string name="text_d5df3708bc68">Tema</string>
+    <string name="text_19bf207aa588">Sistem teması</string>
+    <string name="text_84b4de746711">Açık tema</string>
+    <string name="text_a9a9097f6063">Koyu tema</string>
+    <string name="text_e4a76fef465e">Arayüz teması kâğıt ve mürekkep renklerini değiştirmez.</string>
+    <string name="text_1acb0a8d16f5">Kütüphane düzeni</string>
+    <string name="text_f5f4274fb83a">Izgara</string>
+    <string name="text_7343841e724e">Liste</string>
+    <string name="text_abb00167a10f">Panel boyutları</string>
+    <string name="text_6a3338180bbf">Sayfa paneli</string>
+    <string name="text_c375061bb45c">Ses paneli</string>
+    <string name="text_beff56a690a4">Referans alanı · %1$s%%</string>
+    <string name="text_71a1857d2c4e">Referans alanı</string>
+    <string name="text_c4d50cabafab">Paneller kullanılabilir alana uyarlanır. Boyutlar Uygula ile değişir.</string>
+    <string name="text_5b8ed4467941">Görünümü sıfırla</string>
+    <string name="text_6fae3b65e2fd">Dar</string>
+    <string name="text_55d67233d4f2">Geniş</string>
+    <string name="text_c97b8438394e">Defter önizlemesi</string>
+    <string name="text_5321550f56c9">Çalışma alanı</string>
+    <string name="text_c53ea952eee8">Klasörler</string>
+    <string name="text_34a68bd9b0a8">Defterler</string>
+    <string name="text_f3fdc77ddc83">Silinen defterler</string>
+    <string name="text_b621a4357064">Çizgi önizlemesi</string>
+    <string name="text_c04e89f0139b">Silgi boyutu</string>
+    <string name="text_1a116abb390d">Çizgi kalınlığı</string>
 </resources>
